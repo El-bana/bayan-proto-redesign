@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, FolderPlus, List as ListIcon } from 'lucide-react';
 import { useAppStore } from '@/lib/store';
+import { useRouter } from 'next/navigation';
 
 interface Props {
   isOpen: boolean;
@@ -17,16 +18,19 @@ export function SaveToListModal({ isOpen, onClose, selectedIds, onSuccess }: Pro
   const [selectedListId, setSelectedListId] = useState('');
   
   const { lists, addList, addToList } = useAppStore();
+  const router = useRouter();
 
   const handleSave = () => {
     if (tab === 'new' && newListName) {
       addList(newListName, selectedIds);
       onSuccess();
       onClose();
+      router.push('/lists');
     } else if (tab === 'existing' && selectedListId) {
       addToList(selectedListId, selectedIds);
       onSuccess();
       onClose();
+      router.push('/lists');
     }
   };
 

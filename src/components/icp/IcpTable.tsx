@@ -3,11 +3,17 @@ import { useAppStore } from '@/lib/store';
 import { Search, Plus, Archive, Filter, Edit, Play } from 'lucide-react';
 import { useState } from 'react';
 import { IcpCreationModal } from './IcpCreationModal';
+import { useRouter } from 'next/navigation';
 
 export function IcpTable() {
   const { icps } = useAppStore();
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const router = useRouter();
+
+  const handleRunClick = () => {
+    router.push('/lead-locator?run=true');
+  };
 
   const toggleAll = () => {
     if (selectedIds.size === icps.length) setSelectedIds(new Set());
@@ -113,7 +119,10 @@ export function IcpTable() {
                     <button className="p-1.5 hover:bg-black/10 rounded-md text-[#445751]">
                       <Edit className="w-5 h-5" />
                     </button>
-                    <button className="flex items-center gap-1.5 px-3 py-1.5 bg-[#0D8C7C] text-white rounded shadow-sm hover:bg-[#14B39F] transition-colors font-medium text-sm">
+                    <button 
+                      onClick={handleRunClick}
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-[#0D8C7C] text-white rounded shadow-sm hover:bg-[#14B39F] transition-colors font-medium text-sm"
+                    >
                       <Play className="w-4 h-4" /> Run
                     </button>
                   </div>

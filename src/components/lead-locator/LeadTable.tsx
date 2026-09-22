@@ -1,16 +1,18 @@
 'use client';
-import { useAppStore } from '@/lib/store';
+import { useAppStore, Lead } from '@/lib/store';
 import { useState } from 'react';
 import { SaveToListModal } from './SaveToListModal';
 import { Plus, Check } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import { LeadDetailModal } from './LeadDetailModal';
 
 export function LeadTable() {
   const { leads } = useAppStore();
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
   const [showToast, setShowToast] = useState(false);
+  const [detailModalLead, setDetailModalLead] = useState<Lead | null>(null);
 
   const toggleAll = () => {
     if (selectedIds.size === leads.length) setSelectedIds(new Set());
@@ -47,7 +49,7 @@ export function LeadTable() {
         </div>
         
         <button 
-          onClick={() => setIsModalOpen(true)}
+          onClick={() => setIsSaveModalOpen(true)}
           disabled={selectedIds.size === 0}
           className={cn(
             "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm",
@@ -91,7 +93,12 @@ export function LeadTable() {
                     onChange={() => toggleOne(lead.id)}
                   />
                 </td>
-                <td className="py-3 px-4 text-[14px] font-medium text-[#10201C]">{lead.name}</td>
+                <td 
+                  className="py-3 px-4 text-[14px] font-bold text-[#10201C] cursor-pointer hover:underline hover:text-[#0D8C7C] transition-colors"
+                  onClick={() => setDetailModalLead(lead)}
+                >
+                  {lead.name}
+                </td>
                 <td className="py-3 px-4 text-[14px] text-[#445751]">{lead.jobTitle}</td>
                 <td className="py-3 px-4 text-[14px] text-[#445751]">{lead.company}</td>
                 <td className="py-3 px-4 text-[14px] text-[#0D8C7C]">{lead.email}</td>
@@ -113,10 +120,16 @@ export function LeadTable() {
       </div>
 
       <SaveToListModal 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
+        isOpen={isSaveModalOpen} 
+        onClose={() => setIsSaveModalOpen(false)} 
         selectedIds={Array.from(selectedIds)}
         onSuccess={handleSaveSuccess}
+      />
+
+      <LeadDetailModal
+        isOpen={!!detailModalLead}
+        onClose={() => setDetailModalLead(null)}
+        lead={detailModalLead}
       />
 
       {/* Toast */}

@@ -1,5 +1,5 @@
 'use client';
-import { LayoutDashboard, Users, BookOpen, Briefcase, Send, Mail, Settings, PieChart, ChevronsRight } from 'lucide-react';
+import { LayoutDashboard, BookOpen, Briefcase, Send, Mail, Settings, PieChart, ChevronsRight, UserSearch, GraduationCap, Book } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
@@ -9,11 +9,13 @@ export function Sidebar() {
 
   const navItems = [
     { icon: LayoutDashboard, href: '/dashboard' },
-    { icon: Users, href: '/lead-locator' }, // Actually people search in figma
-    { icon: BookOpen, href: '/courses' },
+    { icon: UserSearch, href: '/lead-locator' },
+    { icon: GraduationCap, href: '/courses' },
     { icon: Briefcase, href: '/icp-library' },
-    { icon: Send, href: '/campaigns' },
-    { icon: Mail, href: '/inbox' },
+    { icon: Send, href: '/lists' },
+    { icon: Mail, href: '/mail' },
+    { icon: Settings, href: '/settings', isBottom: true },
+    { icon: Book, href: '/book' },
     { icon: PieChart, href: '/analytics' },
   ];
 

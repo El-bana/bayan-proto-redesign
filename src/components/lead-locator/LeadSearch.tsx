@@ -1,23 +1,34 @@
 'use client';
 import { useAppStore, Lead } from '@/lib/store';
 import { ChevronDown, Briefcase, Users, User, Building, MapPin, Inbox, Search } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { LeadTable } from './LeadTable';
 import { motion } from 'framer-motion';
+import { useSearchParams } from 'next/navigation';
 
 export function LeadSearch() {
   const { leads, setLeads, icps } = useAppStore();
   const [hasSearched, setHasSearched] = useState(false);
   const [searchPrompt, setSearchPrompt] = useState('');
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    if (searchParams.get('run') === 'true') {
+      handleAiSearch();
+    }
+  }, [searchParams]);
 
   const handleAiSearch = () => {
-    // Generate mock leads
+    // Generate mock leads matching Figma design
     const mockLeads: Lead[] = [
-      { id: '1', name: 'Eleanor Pena', jobTitle: 'VP of Sales', company: 'TechCorp', email: 'eleanor@techcorp.com', location: 'USA', fitScore: 99 },
-      { id: '2', name: 'Albert Flores', jobTitle: 'Sales Director', company: 'SaaS Inc', email: 'albert@saasinc.com', location: 'UK', fitScore: 85 },
-      { id: '3', name: 'Jane Cooper', jobTitle: 'Head of Sales', company: 'GlobalData', email: 'jane@globaldata.com', location: 'Canada', fitScore: 78 },
-      { id: '4', name: 'Wade Warren', jobTitle: 'Founder & CEO', company: 'StartupX', email: 'wade@startupx.com', location: 'Germany', fitScore: 35 },
-      { id: '5', name: 'Esther Howard', jobTitle: 'VP Sales & Marketing', company: 'RetailPro', email: 'esther@retailpro.com', location: 'USA', fitScore: 92 },
+      { id: '1', name: 'Hager Torky', jobTitle: 'UI Designer', company: 'BayanTech', email: 'hagertorky@gmail.com', location: 'Cairo,Egypt', fitScore: 91 },
+      { id: '2', name: 'Salma Abdelmageed', jobTitle: 'UI/UX Designer', company: 'AsgaTech', email: 'salmaali@gmail.com', location: 'Cairo,Egypt', fitScore: 65 },
+      { id: '3', name: 'Toka Ali', jobTitle: 'UX Designer', company: 'PWC Etic', email: 'tokaali@gmail.com', location: 'Cairo,Egypt', fitScore: 50 },
+      { id: '4', name: 'Sara Samy', jobTitle: 'Senior UI designer', company: '700 Apps', email: 'sarsamy@gmail.com', location: 'Cairo,Egypt', fitScore: 35 },
+      { id: '5', name: 'Farah Elsayed', jobTitle: 'Product Designer', company: 'Synapse', email: 'farahsayed@gmail.com', location: 'Cairo,Egypt', fitScore: 85 },
+      { id: '6', name: 'Amany Shafik', jobTitle: 'Junior UX Designer', company: 'AsgaTech', email: 'amany@gmail.com', location: 'Cairo,Egypt', fitScore: 99 },
+      { id: '7', name: 'Abeer Helmy', jobTitle: 'Head of Design', company: 'SI-Vision', email: 'abeer56@gmail.com', location: 'Cairo,Egypt', fitScore: 99 },
+      { id: '8', name: 'Samy Sultan', jobTitle: 'Head of Design', company: 'BayanTech', email: 's.sultan@gmail.com', location: 'Cairo,Egypt', fitScore: 99 },
     ];
     setLeads(mockLeads);
     setHasSearched(true);
@@ -37,13 +48,32 @@ export function LeadSearch() {
         <div>
           <label className="text-[13px] text-[#7C8C87] mb-1 block px-2">Choose ICP</label>
           <div className="relative">
-            <select className="w-full bg-white border border-[#D6D7D7] rounded-[4px] h-12 px-4 appearance-none outline-none text-sm text-[#10201C]">
-              <option value="">Select an ICP</option>
+            <select 
+              className="w-full bg-white border border-[#D6D7D7] rounded-[4px] h-12 px-4 appearance-none outline-none text-sm text-[#10201C] font-mono truncate pr-10"
+              value={hasSearched ? "custom" : ""}
+              onChange={() => {}}
+            >
+              <option value="" disabled>Select an ICP</option>
               {icps.map(icp => <option key={icp.id} value={icp.id}>{icp.name}</option>)}
+              <option value="custom">Localization Managers at SaaS and E-commerce</option>
             </select>
             <ChevronDown className="absolute right-4 top-4 w-4 h-4 text-[#7C8C87] pointer-events-none" />
           </div>
         </div>
+
+        {hasSearched && (
+          <div className="flex flex-col gap-3 mt-2 px-2">
+            <div className="bg-[#00C11A]/10 border-l-4 border-[#00B218] p-2.5 rounded-lg">
+              <p className="text-[10px] font-mono text-black">Result size looks workable for one run. (1,200)</p>
+            </div>
+            <div className="bg-[#00C11A]/10 border-l-4 border-[#00B218] p-2.5 rounded-lg">
+              <p className="text-[10px] font-mono text-black">Decision-maker coverage looks good (3 titles).</p>
+            </div>
+            <div className="bg-[#8000FF]/10 border-l-4 border-[#8000FF] p-2.5 rounded-lg">
+              <p className="text-[10px] font-mono text-black">Estimated cost for this run: 180 credits (sourcing + enrichment).</p>
+            </div>
+          </div>
+        )}
 
         <div className="h-[1px] bg-[#D3DEDB] my-2" />
 
@@ -52,22 +82,25 @@ export function LeadSearch() {
           <h3 className="font-medium text-[20px] text-[#10201C]">Customer Profile</h3>
         </div>
 
-        <FilterDropdown icon={Briefcase} label="Job Titles" />
-        <FilterDropdown icon={Users} label="People Lookalikes" />
+        <FilterDropdown icon={Briefcase} label="Job Titles" hasValue={hasSearched} value="3 Selected" />
+        <FilterDropdown icon={Users} label="People Lookalikes" hasValue={hasSearched} value="2 Lookalikes" />
         <FilterDropdown icon={Building} label="Company" />
-        <FilterDropdown icon={MapPin} label="Location" />
-        <FilterDropdown icon={Briefcase} label="Industry" />
+        <FilterDropdown icon={MapPin} label="Location" hasValue={hasSearched} value="USA, EMEA" />
+        <FilterDropdown icon={Briefcase} label="Industry" hasValue={hasSearched} value="SaaS, E-commerce" />
         <FilterDropdown icon={Inbox} label="Email Status" />
 
         <div className="h-[1px] bg-[#D3DEDB] mt-auto" />
 
-        <div className="flex gap-2 pt-2">
-          <button onClick={handleClear} className="flex-1 py-2 text-[#0D8C7C] font-medium text-sm hover:bg-black/5 rounded-lg transition-colors">
-            Clear All
-          </button>
-          <button className="flex-1 py-2 bg-[#0D8C7C] text-white font-medium text-sm rounded-lg hover:bg-[#14B39F] shadow-sm transition-colors">
-            Save
-          </button>
+        <div className="flex items-center gap-2 pt-2">
+          {hasSearched && <span className="text-[13px] text-[#7C8C87] flex-1">25 Filters</span>}
+          <div className="flex gap-2 ml-auto w-full justify-end">
+            <button onClick={handleClear} className="px-4 py-1.5 text-[#0D8C7C] font-medium text-sm hover:bg-black/5 rounded-lg transition-colors">
+              Clear All
+            </button>
+            <button className="px-6 py-1.5 bg-[#0D8C7C] text-white font-medium text-sm rounded-lg hover:bg-[#14B39F] shadow-sm transition-colors">
+              Save
+            </button>
+          </div>
         </div>
       </div>
 
@@ -131,14 +164,21 @@ export function LeadSearch() {
   );
 }
 
-function FilterDropdown({ icon: Icon, label }: { icon: any, label: string }) {
+function FilterDropdown({ icon: Icon, label, hasValue, value }: { icon: any, label: string, hasValue?: boolean, value?: string }) {
   return (
-    <button className="flex items-center justify-between w-full px-2 py-2 text-left hover:bg-black/5 rounded-md transition-colors group">
-      <div className="flex items-center gap-3">
-        <Icon className="w-5 h-5 text-[#445751] opacity-70 group-hover:opacity-100" />
-        <span className="font-medium text-[16px] text-[#10201C]">{label}</span>
+    <button className="flex flex-col w-full px-2 py-2 text-left hover:bg-black/5 rounded-md transition-colors group">
+      <div className="flex items-center justify-between w-full">
+        <div className="flex items-center gap-3">
+          <Icon className="w-5 h-5 text-[#445751] opacity-70 group-hover:opacity-100" />
+          <span className="font-medium text-[16px] text-[#10201C]">{label}</span>
+        </div>
+        <ChevronDown className="w-4 h-4 text-[#445751]" />
       </div>
-      <ChevronDown className="w-4 h-4 text-[#445751]" />
+      {hasValue && value && (
+        <span className="text-[12px] text-[#0D8C7C] font-mono mt-1 ml-8 bg-[#0D8C7C]/10 px-2 py-0.5 rounded-md inline-block w-fit">
+          {value}
+        </span>
+      )}
     </button>
   );
 }
