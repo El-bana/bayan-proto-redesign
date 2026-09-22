@@ -1,0 +1,42 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: var(--font-inter);
+  --font-mono: var(--font-space-mono);
+  
+  --color-brand-primary: #0D8C7C;
+  --color-brand-secondary: #14B39F;
+  --color-brand-purple: #6D5BD0;
+  
+  --color-bg-light: #F6F8F7;
+  --color-bg-mint: #ECF6F5;
+  
+  --color-border-gray: #D3DEDB;
+  
+  --color-text-dark: #10201C;
+  --color-text-gray: #445751;
+  --color-text-light: #7C8C87;
+  
+  --color-badge-purple: rgba(111, 63, 255, 0.5);
+  --color-badge-purple-text: #8000FF;
+}
+
+body {
+  font-family: var(--font-sans);
+}
+
+/* Custom Scrollbar for a cleaner look */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #D3DEDB;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #445751;
+}
