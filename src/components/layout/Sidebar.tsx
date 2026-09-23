@@ -13,9 +13,9 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { icon: LayoutDashboard, href: '/dashboard', label: 'Dashboard' },
+  { icon: GraduationCap, href: '/icp-library', label: 'ICP Library' },
   { icon: UserSearch, href: '/lead-locator', label: 'Lead Locator' },
-  { icon: GraduationCap, href: '/courses', label: 'Courses' },
-  { icon: Briefcase, href: '/icp-library', label: 'ICP Library' },
+  { icon: Briefcase, href: '/lists', label: 'Leads List' },
   { icon: Send, href: '/campaigns', label: 'Campaigns' },
   { icon: Mail, href: '/mail', label: 'Mail' },
   { icon: Book, href: '/book', label: 'Book' },
@@ -54,17 +54,17 @@ export function Sidebar() {
       <nav
         aria-label="Main navigation"
         className={cn(
-          "h-full flex flex-col items-center py-4 bg-bg-mint border-r border-border-gray rounded-bl-lg rounded-br-none md:rounded-br-lg overflow-hidden transition-[width] duration-300 ease-in-out",
-          collapsed ? "w-0 border-r-0 invisible" : "w-[88px]"
+          "h-full flex flex-col items-center bg-bg-mint border-r border-border-gray rounded-bl-lg rounded-br-lg md:rounded-br-lg overflow-hidden transition-[width] duration-300 ease-in-out",
+          collapsed ? "w-0 border-r-0 invisible" : "w-[72px]"
         )}
       >
-        <div className="flex flex-col gap-6 mt-8 w-full items-center flex-1">
+        <div className="flex flex-col gap-2 mt-6 w-full items-center flex-1">
           {navItems.map((item) => (
             <ItemLink key={item.href} item={item} pathname={pathname} collapsed={collapsed} />
           ))}
         </div>
 
-        <div className="mt-auto pb-4">
+        <div className="mt-auto pb-[53px]">
           <ItemLink item={{ icon: Settings, href: '/settings', label: 'Settings' }} pathname={pathname} collapsed={collapsed} />
         </div>
       </nav>
@@ -77,11 +77,11 @@ export function Sidebar() {
         aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         className={cn(
-          "absolute top-4 w-8 h-8 flex items-center justify-center bg-brand-primary text-white rounded-lg hover:bg-brand-secondary transition-colors border border-border-gray z-20",
-          collapsed ? "left-0" : "left-[72px]"
+          "absolute top-4 w-8 h-8 flex items-center justify-center bg-white text-brand-primary rounded-[9px] hover:bg-bg-mint transition-colors border border-brand-primary z-20",
+          collapsed ? "left-0" : "left-[56px]"
         )}
       >
-        <ChevronsRight className={cn("w-5 h-5 transition-transform duration-300", collapsed && "rotate-180")} aria-hidden="true" />
+        <ChevronsRight className={cn("w-5 h-5 transition-transform duration-300", !collapsed && "rotate-180")} aria-hidden="true" />
       </button>
     </div>
   );
