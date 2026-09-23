@@ -1,9 +1,8 @@
 'use client';
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, MapPin, Building, Mail, Briefcase, User } from 'lucide-react';
-import type { Lead } from '@/lib/store';
-import { cn } from '@/lib/utils';
+import { X, Building, Globe, Briefcase, Clock, ChevronDown, Send, Edit, Trash } from 'lucide-react';
+import { Lead } from '@/lib/store';
 
 interface Props {
   isOpen: boolean;
@@ -11,21 +10,9 @@ interface Props {
   lead: Lead | null;
 }
 
-function DetailRow({ icon: Icon, label, value }: { icon: typeof Building; label: string; value: string }) {
-  return (
-    <div className="flex items-start gap-3">
-      <div className="w-8 h-8 bg-[#ECF6F5] rounded-lg flex items-center justify-center shrink-0 mt-0.5">
-        <Icon className="w-4 h-4 text-[#0D8C7C]" aria-hidden="true" />
-      </div>
-      <div className="min-w-0">
-        <p className="text-xs font-medium text-[#7C8C87] uppercase tracking-wide">{label}</p>
-        <p className="text-sm font-medium text-[#10201C] break-words">{value}</p>
-      </div>
-    </div>
-  );
-}
-
 export function LeadDetailModal({ isOpen, onClose, lead }: Props) {
+  const [activeTab, setActiveTab] = useState<'Sequence' | 'Activity' | 'Validation'>('Sequence');
+
   useEffect(() => {
     if (!isOpen) return;
     const onKey = (e: KeyboardEvent) => {
@@ -35,66 +22,231 @@ export function LeadDetailModal({ isOpen, onClose, lead }: Props) {
     return () => window.removeEventListener('keydown', onKey);
   }, [isOpen, onClose]);
 
+  if (!lead) return null;
+
   return (
     <AnimatePresence>
-      {isOpen && lead && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      {isOpen && (
+        <>
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            className="fixed inset-0 bg-black/20 backdrop-blur-sm z-50"
             onClick={onClose}
           />
           <motion.div
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="lead-detail-title"
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="bg-white rounded-xl shadow-xl w-full max-w-md relative overflow-hidden z-10 flex flex-col"
+            initial={{ x: '100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '100%' }}
+            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+            className="fixed top-0 right-0 bottom-0 w-full max-w-2xl bg-[#ECF6F5] shadow-2xl z-50 flex flex-col rounded-l-2xl overflow-hidden"
           >
-            <div className="flex items-start justify-between p-6 border-b border-gray-100">
-              <div>
-                <p className="text-xs font-medium text-[#0D8C7C] mb-1 flex items-center gap-1.5">
-                  <User className="w-3.5 h-3.5" aria-hidden="true" /> Lead details
-                </p>
-                <h2 id="lead-detail-title" className="text-xl font-bold text-[#10201C]">
-                  {lead.name}
-                </h2>
-              </div>
-              <button
+            {/* Header */}
+            <div className="p-8 pb-4 relative">
+              <button 
                 onClick={onClose}
-                aria-label="Close lead details"
-                className="p-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100"
+                className="absolute top-6 right-6 p-2 text-gray-400 hover:text-gray-700 hover:bg-black/5 rounded-full transition-colors"
               >
-                <X className="w-5 h-5" aria-hidden="true" />
+                <X className="w-6 h-6" />
               </button>
+              
+              <div className="flex items-start justify-between pr-12">
+                <div className="flex gap-4">
+                  <div className="w-12 h-12 rounded-full bg-[#00C11A] flex items-center justify-center text-white font-bold text-xl shrink-0">
+                    {lead.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()}
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold text-[#10201C]">{lead.name}</h2>
+                    <p className="text-[#10201C] font-medium mt-1">{lead.email}</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-x-8 gap-y-2 mt-2">
+                  <div className="flex items-center gap-2">
+                    <Building className="w-4 h-4 text-[#10201C]" />
+                    <span className="font-semibold text-sm text-[#10201C] underline">{lead.company}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Globe className="w-4 h-4 text-[#10201C]" />
+                    <span className="font-semibold text-sm text-[#10201C]">GCC</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Briefcase className="w-4 h-4 text-[#10201C]" />
+                    <span className="font-semibold text-sm text-[#10201C]">{lead.jobTitle}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Building className="w-4 h-4 text-[#10201C]" />
+                    <span className="font-semibold text-sm text-[#10201C]">Games</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Tabs */}
+              <div className="flex border-b border-[#D9D9D9] mt-8 gap-8">
+                {(['Sequence', 'Activity', 'Validation'] as const).map(tab => (
+                  <button
+                    key={tab}
+                    onClick={() => setActiveTab(tab)}
+                    className={`pb-3 px-2 text-base font-medium relative transition-colors ${activeTab === tab ? 'text-[#10201C]' : 'text-[#D9D9D9] hover:text-gray-500'}`}
+                  >
+                    {tab}
+                    {activeTab === tab && (
+                      <motion.div layoutId="tab-indicator" className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#10201C]" />
+                    )}
+                  </button>
+                ))}
+              </div>
             </div>
 
-            <div className="p-6 flex flex-col gap-5">
-              <DetailRow icon={Briefcase} label="Job Title" value={lead.jobTitle} />
-              <DetailRow icon={Building} label="Company" value={lead.company} />
-              <DetailRow icon={Mail} label="Email" value={lead.email} />
-              <DetailRow icon={MapPin} label="Location" value={lead.location} />
+            {/* Content Area */}
+            <div className="flex-1 overflow-y-auto bg-white mx-8 mb-8 rounded-xl border border-[#D3DEDB] p-6 shadow-sm relative">
+              {activeTab === 'Sequence' && (
+                <div className="flex flex-col">
+                  {/* Campaign Header */}
+                  <div className="flex justify-between items-center mb-8 px-2">
+                    <div className="w-72">
+                      <label className="text-sm font-bold text-[#10201C] mb-2 block">Campaign</label>
+                      <div className="relative">
+                        <select className="w-full appearance-none bg-white border border-[#D6D7D7] text-gray-400 text-base rounded-lg p-3 outline-none focus:border-[#0D8C7C]">
+                          <option>choose campaign</option>
+                        </select>
+                        <ChevronDown className="absolute right-4 top-4 w-5 h-5 text-gray-400 pointer-events-none" />
+                      </div>
+                    </div>
+                    <div className="flex flex-col items-center gap-2 mt-4">
+                      <div className="flex items-center gap-2">
+                        <Send className="w-5 h-5 text-[#10201C]" />
+                        <span className="text-base font-semibold text-[#10201C]">3 Campaigns</span>
+                      </div>
+                      <span className="bg-[#00C11A]/50 text-[#00B218] text-xs font-semibold px-8 py-1.5 rounded w-full text-center">Active</span>
+                    </div>
+                  </div>
 
-              <div className="flex items-center justify-between bg-[#ECF6F5] rounded-xl px-4 py-3">
-                <span className="text-sm font-medium text-[#445751]">Fit Score</span>
-                <span
-                  className={cn(
-                    "inline-flex items-center justify-center px-3 py-1 rounded-full text-sm font-bold",
-                    lead.fitScore >= 80 ? "bg-[#0D8C7C]/10 text-[#0D8C7C]" :
-                    lead.fitScore >= 50 ? "bg-yellow-50 text-yellow-600" :
-                    "bg-red-50 text-red-600"
-                  )}
-                >
-                  {lead.fitScore}%
-                </span>
-              </div>
+                  {/* Email Box 1 */}
+                  <div className="bg-[#F6F8F7] border border-[#D3DEDB] rounded-lg p-6 relative">
+                    <div className="flex justify-between items-center mb-4">
+                      <span className="text-[#7C8C87] text-base font-medium">Opener Email</span>
+                      <div className="flex items-center gap-4">
+                        <span className="bg-[#00C11A]/50 text-[#00B218] text-sm font-medium px-4 py-1.5 rounded">Delivered</span>
+                        <Edit className="w-5 h-5 text-gray-400 cursor-pointer hover:text-gray-600" />
+                        <Trash className="w-5 h-5 text-red-400 cursor-pointer hover:text-red-600" />
+                      </div>
+                    </div>
+                    <hr className="border-[#D3DEDB] mb-4" />
+                    <h4 className="text-[#0E0E0E] text-base font-medium mb-3">Laoret-elevate your global</h4>
+                    <p className="text-[#445751] text-sm font-mono leading-relaxed">
+                      Dear Mohamed, I hope this message finds you well. This is Omar from the Laoret team, and I am excited to introduce our company, a trusted provider of ISO-certified translation and localization services.
+                    </p>
+                  </div>
+
+                  {/* Dashed Arrow Down */}
+                  <div className="flex flex-col items-center justify-center h-8">
+                    <div className="w-px h-full border-l-2 border-dashed border-[#10201C] relative">
+                       <div className="absolute -bottom-1 -left-1.5 w-3 h-3 border-b-2 border-r-2 border-[#10201C] transform rotate-45" />
+                    </div>
+                  </div>
+
+                  {/* Delay Node */}
+                  <div className="flex justify-center z-10 relative">
+                    <div className="bg-[#F6F8F7] border border-dashed border-[#10201C] rounded-2xl px-6 py-3 flex items-center gap-4">
+                      <Clock className="w-6 h-6 text-[#10201C]" />
+                      <span className="font-bold text-[#10201C] text-lg">Wait for</span>
+                      <div className="bg-white border border-[#D6D7D7] rounded-md w-12 h-8 flex items-center justify-center font-bold text-[#10201C]">2</div>
+                      <span className="font-bold text-[#10201C] text-lg">Days</span>
+                    </div>
+                  </div>
+
+                  {/* Dashed Arrow Down */}
+                  <div className="flex flex-col items-center justify-center h-8">
+                    <div className="w-px h-full border-l-2 border-dashed border-[#10201C] relative">
+                       <div className="absolute -bottom-1 -left-1.5 w-3 h-3 border-b-2 border-r-2 border-[#10201C] transform rotate-45" />
+                    </div>
+                  </div>
+
+                  {/* Email Box 2 */}
+                  <div className="bg-[#F6F8F7] border border-[#D3DEDB] rounded-lg p-6 relative">
+                    <div className="flex justify-between items-center mb-4">
+                      <span className="text-[#7C8C87] text-base font-medium">Social proof</span>
+                      <div className="flex items-center gap-4">
+                        <span className="bg-[#8000FF]/50 text-[#1814F3] text-sm font-medium px-4 py-1.5 rounded">Pending</span>
+                        <Edit className="w-5 h-5 text-gray-400 cursor-pointer hover:text-gray-600" />
+                        <Trash className="w-5 h-5 text-red-400 cursor-pointer hover:text-red-600" />
+                      </div>
+                    </div>
+                    <hr className="border-[#D3DEDB] mb-4" />
+                    <h4 className="text-[#0E0E0E] text-base font-medium mb-3">Laoret-elevate your global</h4>
+                    <p className="text-[#445751] text-sm font-mono leading-relaxed">
+                      Dear Mohamed, I hope this message finds you well. This is Omar from the Laoret team, and I am excited to introduce our company, a trusted provider of ISO-certified translation and localization services.
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'Activity' && (
+                <div className="flex flex-col gap-0 py-4 px-4">
+                  
+                  {/* Activity 1 */}
+                  <div className="flex items-start gap-8">
+                    <div className="w-24 shrink-0 flex flex-col items-center">
+                      <div className="text-sm font-mono text-[#10201C] text-left w-full">
+                        30-05-2026<br/>3:00 PM
+                      </div>
+                      <div className="flex flex-col items-center mt-3 h-16">
+                        <div className="w-1.5 h-1.5 rounded-full bg-[#10201C]" />
+                        <div className="w-px h-full bg-[#10201C]" />
+                        <div className="w-1.5 h-1.5 rounded-full bg-[#10201C]" />
+                      </div>
+                    </div>
+                    <div className="pt-0 pb-16">
+                      <p className="text-[#10201C] text-base font-medium">Lead Replied: "Not interested right now"</p>
+                      <p className="text-[#10201C] text-base font-medium">From Campaign: "Q1 Mass Outreach" (Step 3)</p>
+                    </div>
+                  </div>
+
+                  {/* Activity 2 */}
+                  <div className="flex items-start gap-8">
+                    <div className="w-24 shrink-0 flex flex-col items-center">
+                      <div className="text-sm font-mono text-[#10201C] text-left w-full">
+                        25-01-2026<br/>11:00 AM
+                      </div>
+                      <div className="flex flex-col items-center mt-3 h-16">
+                        <div className="w-1.5 h-1.5 rounded-full bg-[#10201C]" />
+                        <div className="w-px h-full bg-[#10201C]" />
+                        <div className="w-1.5 h-1.5 rounded-full bg-[#10201C]" />
+                      </div>
+                    </div>
+                    <div className="pt-0 pb-16">
+                      <p className="text-[#10201C] text-base font-medium">Email Sent via sender_1@company.com</p>
+                      <p className="text-[#10201C] text-base font-medium">From Campaign: "AI Personalization Pitch" (Step 1)</p>
+                    </div>
+                  </div>
+
+                  {/* Activity 3 */}
+                  <div className="flex items-start gap-8">
+                    <div className="w-24 shrink-0 flex flex-col items-center">
+                      <div className="text-sm font-mono text-[#10201C] text-left w-full">
+                        20-01-2026<br/>2:30 PM
+                      </div>
+                    </div>
+                    <div className="pt-0">
+                      <p className="text-[#10201C] text-base font-medium">Email Opened (Open #2)</p>
+                      <p className="text-[#10201C] text-base font-medium">From Campaign: "AI Personalization Pitch" (Step 1)</p>
+                    </div>
+                  </div>
+
+                </div>
+              )}
+
+              {activeTab === 'Validation' && (
+                <div className="flex flex-col gap-4 py-8 items-center justify-center h-full text-gray-500">
+                  <p>Validation data verified on 25-01-2026</p>
+                  <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full font-medium text-sm">Status: Valid (Catch-all: False)</span>
+                </div>
+              )}
             </div>
           </motion.div>
-        </div>
+        </>
       )}
     </AnimatePresence>
   );

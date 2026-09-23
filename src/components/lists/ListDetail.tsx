@@ -6,6 +6,8 @@ import { useState, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 import { LeadDetailModal } from '@/components/lead-locator/LeadDetailModal';
+import { ReassignModal } from './ReassignModal';
+import { PushCampaignModal } from './PushCampaignModal';
 
 export function ListDetail() {
   const params = useParams();
@@ -13,6 +15,9 @@ export function ListDetail() {
   const { lists, leads } = useAppStore();
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [detailModalLead, setDetailModalLead] = useState<Lead | null>(null);
+  
+  const [isReassignOpen, setIsReassignOpen] = useState(false);
+  const [isPushOpen, setIsPushOpen] = useState(false);
 
   const list = lists.find(l => l.id === params.id);
 
@@ -121,10 +126,16 @@ export function ListDetail() {
           {selectedIds.size > 0 && (
             <>
               <span className="text-[#10201C] font-medium mr-2">{selectedIds.size} selected</span>
-              <button className="flex items-center gap-2 px-4 py-2 text-[#10201C] bg-white border border-[#10201C] rounded-lg shadow-sm hover:bg-gray-50 transition-colors">
+              <button 
+                onClick={() => setIsReassignOpen(true)}
+                className="flex items-center gap-2 px-4 py-2 text-[#10201C] bg-white border border-[#10201C] rounded-lg shadow-sm hover:bg-gray-50 transition-colors"
+              >
                 <Edit className="w-4 h-4" /> Re-assign Owner
               </button>
-              <button className="flex items-center gap-2 px-4 py-2 bg-[#0D8C7C] text-white rounded-lg shadow-sm hover:bg-[#14B39F] transition-colors">
+              <button 
+                onClick={() => setIsPushOpen(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-[#0D8C7C] text-white rounded-lg shadow-sm hover:bg-[#14B39F] transition-colors"
+              >
                 <Send className="w-4 h-4" /> Push to new campaign
               </button>
             </>
@@ -216,6 +227,18 @@ export function ListDetail() {
         isOpen={!!detailModalLead}
         onClose={() => setDetailModalLead(null)}
         lead={detailModalLead}
+      />
+
+      <ReassignModal
+        isOpen={isReassignOpen}
+        onClose={() => setIsReassignOpen(false)}
+        leads={listLeads.filter(l => selectedIds.has(l.id))}
+      />
+
+      <PushCampaignModal
+        isOpen={isPushOpen}
+        onClose={() => setIsPushOpen(false)}
+        leads={listLeads.filter(l => selectedIds.has(l.id))}
       />
     </div>
   );
