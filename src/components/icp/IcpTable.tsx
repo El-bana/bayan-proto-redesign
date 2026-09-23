@@ -52,7 +52,7 @@ export function IcpTable() {
   };
 
   return (
-    <div className="p-8 max-w-[1200px] mx-auto w-full flex flex-col gap-6">
+    <div className="flex-1 p-8 bg-[#F6F8F7] flex flex-col min-h-0 overflow-y-auto w-full">
       <div className="flex items-center gap-4 text-[#10201C]">
         <h1 className="text-[25px] font-bold">ICP Library</h1>
       </div>

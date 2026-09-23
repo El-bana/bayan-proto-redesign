@@ -114,15 +114,16 @@ export default function CampaignsPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#F6F8F7] p-8">
-      <div className="mx-auto max-w-[1200px] rounded-xl bg-white p-6 border border-[#D3DEDB] shadow-sm">
-        {/* Header */}
-        <div className="mb-8 flex items-center gap-3">
+    <main className="min-h-screen bg-[#F6F8F7] p-8 flex flex-col">
+      {/* Header */}
+        <div className="mb-6 flex items-center gap-4">
           <span className="text-[#0D8C7C]">
             <Send className="w-8 h-8" />
           </span>
           <h1 className="text-[28px] font-bold text-[#10201C]">Campaigns</h1>
         </div>
+        <div className="flex-1 w-full rounded-xl bg-white p-6 border border-[#D3DEDB] shadow-sm">
+
 
         {/* Toolbar */}
         <div className="mb-6 flex flex-wrap items-center gap-4">

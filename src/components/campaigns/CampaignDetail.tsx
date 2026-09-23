@@ -12,10 +12,9 @@ export function CampaignDetail() {
   const { leads } = useAppStore();
 
   return (
-    <main className="min-h-screen bg-[#F6F8F7] p-8">
-      <div className="mx-auto max-w-[1200px]">
-        {/* Header */}
-        <div className="mb-6 flex items-center gap-3">
+    <main className="min-h-screen bg-[#F6F8F7] p-8 flex flex-col">
+      {/* Header */}
+        <div className="mb-6 flex items-center gap-4">
           <button onClick={() => router.push('/campaigns')} className="text-[#0D8C7C] hover:text-[#14B39F] transition-colors">
             <Send className="w-8 h-8" />
           </button>
@@ -23,6 +22,8 @@ export function CampaignDetail() {
             Campaigns <span className="font-normal text-[#10201C]">/ Europe campaign 2026</span>
           </h1>
         </div>
+        <div className="flex-1 w-full bg-[#F6F8F7] flex flex-col">
+
 
         {/* Campaign Info Card */}
         <div className="bg-[#E9F3F0] rounded-xl p-8 mb-8 relative border border-[#D3DEDB]">
