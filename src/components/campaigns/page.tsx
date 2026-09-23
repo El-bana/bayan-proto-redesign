@@ -29,10 +29,10 @@ const initialCampaigns: Campaign[] = [
 ];
 
 const statusStyles: Record<Status, string> = {
-  Done: "bg-emerald-100 text-emerald-600",
-  Paused: "bg-orange-100 text-orange-500",
-  Active: "bg-indigo-100 text-indigo-500",
-  Draft: "bg-gray-100 text-gray-400",
+  Done: "bg-[#79D488] text-white",
+  Paused: "bg-[#FFC099] text-white",
+  Active: "bg-[#8B88FF] text-white",
+  Draft: "bg-[#C4C4C4] text-white",
 };
 
 function SearchIcon() {
@@ -114,55 +114,61 @@ export default function CampaignsPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#f6f7f9] p-6">
-      <div className="mx-auto max-w-6xl rounded-2xl bg-white p-6 shadow-sm ring-1 ring-black/5">
+    <main className="min-h-screen bg-[#F6F8F7] p-8">
+      <div className="mx-auto max-w-[1200px] rounded-xl bg-white p-6 border border-[#D3DEDB] shadow-sm">
         {/* Header */}
-        <div className="mb-6 flex items-center gap-3">
-          <span className="text-teal-600">
-            <Send className="w-7 h-7" />
+        <div className="mb-8 flex items-center gap-3">
+          <span className="text-[#0D8C7C]">
+            <Send className="w-8 h-8" />
           </span>
-          <h1 className="text-[25px] font-bold text-slate-800">Campaigns</h1>
+          <h1 className="text-[28px] font-bold text-[#10201C]">Campaigns</h1>
         </div>
 
         {/* Toolbar */}
-        <div className="mb-4 flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-400">
+        <div className="mb-6 flex flex-wrap items-center gap-4">
+          <div className="flex items-center gap-2 rounded-lg border border-[#D3DEDB] px-3 py-2 text-sm text-[#7C8C87] bg-white h-[42px]">
             <SearchIcon />
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search for campaign..."
-              className="w-40 bg-transparent text-gray-600 placeholder:text-gray-400 focus:outline-none sm:w-56"
+              placeholder="Search for campaign...."
+              className="w-48 bg-transparent text-[#10201C] placeholder:text-[#7C8C87] focus:outline-none"
             />
           </div>
 
+          <button className="flex items-center justify-center rounded-lg border border-[#0D8C7C] w-[42px] h-[42px] text-[#0D8C7C] hover:bg-teal-50 shrink-0">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+              <line x1="9" y1="3" x2="9" y2="21" />
+            </svg>
+          </button>
+
           {selectedCount > 0 && (
-            <>
-              <span className="flex items-center gap-1.5 text-sm text-gray-400">
-                <Image src="/Icon Left.png" alt="" width={20} height={20} className="w-5 h-5" />
+            <div className="flex items-center gap-3 ml-2">
+              <span className="text-base font-medium text-[#10201C] mr-2">
                 {selectedCount} selected
               </span>
 
-              <button onClick={() => applyStatus("Paused")} className="flex items-center gap-1.5 rounded-full bg-orange-400 px-3.5 py-1.5 text-xs font-medium text-white hover:bg-orange-500">
-                <Image src="/pause-icon.png" alt="" width={14} height={14} className="w-3.5 h-3.5" /> Pause
+              <button onClick={() => applyStatus("Paused")} className="flex items-center gap-2 rounded-lg bg-[#FF9559] px-4 py-2 text-sm font-medium text-white hover:bg-orange-500 h-[42px]">
+                <Image src="/pause-icon.png" alt="" width={16} height={16} className="w-4 h-4" /> Pause
               </button>
-              <button onClick={() => applyStatus("Active")} className="flex items-center gap-1.5 rounded-full bg-emerald-500 px-3.5 py-1.5 text-xs font-medium text-white hover:bg-emerald-600">
-                <Image src="/resume-icon.png" alt="" width={14} height={14} className="w-3.5 h-3.5" /> Resume
+              <button onClick={() => applyStatus("Active")} className="flex items-center gap-2 rounded-lg bg-[#00C11A] px-4 py-2 text-sm font-medium text-white hover:bg-green-600 h-[42px]">
+                <Image src="/resume-icon.png" alt="" width={16} height={16} className="w-4 h-4" /> Resume
               </button>
-              <button onClick={removeSelected} className="flex items-center gap-1.5 rounded-full bg-slate-700 px-3.5 py-1.5 text-xs font-medium text-white hover:bg-slate-800">
-                <Image src="/archive-icon.png" alt="" width={14} height={14} className="w-3.5 h-3.5" /> Archive
+              <button onClick={removeSelected} className="flex items-center gap-2 rounded-lg bg-[#2D2D2D] px-4 py-2 text-sm font-medium text-white hover:bg-black h-[42px]">
+                <Image src="/archive-icon.png" alt="" width={16} height={16} className="w-4 h-4" /> Archive
               </button>
-              <button onClick={removeSelected} className="flex items-center gap-1.5 rounded-full bg-red-500 px-3.5 py-1.5 text-xs font-medium text-white hover:bg-red-600">
-                <Image src="/delete-icon.png" alt="" width={14} height={14} className="w-3.5 h-3.5" /> Delete
+              <button onClick={removeSelected} className="flex items-center gap-2 rounded-lg bg-[#E20000] px-4 py-2 text-sm font-medium text-white hover:bg-red-700 h-[42px]">
+                <Image src="/delete-icon.png" alt="" width={16} height={16} className="w-4 h-4" /> Delete
               </button>
-            </>
+            </div>
           )}
 
           <div className="ml-auto flex items-center gap-3">
-            <button className="flex items-center justify-center rounded-lg border border-[#0D8C7C] p-2 text-[#0D8C7C] hover:bg-[#0D8C7C]/5">
+            <button className="flex items-center justify-center rounded-lg border border-[#0D8C7C] w-[42px] h-[42px] text-[#0D8C7C] hover:bg-teal-50">
               <FilterIcon />
             </button>
-            <button className="flex items-center gap-2 rounded-lg bg-teal-700 px-4 py-2 text-sm font-medium text-white hover:bg-teal-800">
+            <button className="flex items-center gap-2 rounded-lg bg-[#0D8C7C] px-5 py-2 text-sm font-medium text-white hover:bg-[#14B39F] h-[42px]">
               <PlusIcon />
               New Campaign
             </button>
@@ -170,54 +176,54 @@ export default function CampaignsPage() {
         </div>
 
         {/* Table */}
-        <div className="max-h-[500px] overflow-x-auto overflow-y-auto rounded-xl border border-gray-100">
-          <table className="w-full min-w-[720px] border-collapse text-sm">
-            <thead>
-              <tr className="sticky top-0 z-10 border-b border-gray-100 bg-white text-left text-xs font-medium text-gray-400">
-                <th className="w-10 px-4 py-3">
+        <div className="rounded-xl border border-[#D3DEDB] overflow-hidden bg-[#F6F8F7]">
+          <table className="w-full text-sm text-left">
+            <thead className="border-b border-[#D3DEDB] text-[#10201C] font-bold">
+              <tr>
+                <th className="w-12 px-6 py-4">
                   <button onClick={toggleAll} aria-label="Select all campaigns">
                     <Checkbox checked={allChecked} />
                   </button>
                 </th>
-                <th className="px-3 py-3 font-medium text-slate-500">Campaign Name</th>
-                <th className="px-3 py-3 font-medium text-slate-500">Total Leads</th>
-                <th className="px-3 py-3 font-medium text-slate-500">Sent</th>
-                <th className="px-3 py-3 font-medium text-slate-500">Open Rate</th>
-                <th className="px-3 py-3 font-medium text-slate-500">Reply Rate</th>
-                <th className="px-3 py-3 font-medium text-slate-500">Delivery Rate</th>
-                <th className="px-3 py-3 font-medium text-slate-500">Status</th>
+                <th className="px-4 py-4">Campaign Name</th>
+                <th className="px-4 py-4">Total Leads</th>
+                <th className="px-4 py-4">Sent</th>
+                <th className="px-4 py-4">Open Rate</th>
+                <th className="px-4 py-4">Reply Rate</th>
+                <th className="px-4 py-4">Delivery Rate</th>
+                <th className="px-4 py-4">Status</th>
               </tr>
             </thead>
-            <tbody>
-              {visible.map((c) => {
+            <tbody className="bg-white">
+              {visible.map((c, idx) => {
                 const isChecked = selected.has(c.id);
                 return (
                   <tr
                     key={c.id}
-                    className={`${
-                      c.id !== visible[visible.length - 1].id ? "border-b border-gray-50" : ""
-                    } hover:bg-gray-50/60`}
+                    className={`border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors`}
                   >
-                    <td className="px-4 py-3.5">
+                    <td className="px-6 py-4">
                       <button onClick={() => toggleRow(c.id)} aria-label={`Select ${c.name}`} className="flex">
                         <Checkbox checked={isChecked} />
                       </button>
                     </td>
-                    <td className="px-3 py-3.5 font-medium text-slate-700">{c.name}</td>
-                    <td className="px-3 py-3.5 text-slate-600">{c.totalLeads ?? ""}</td>
-                    <td className="px-3 py-3.5 text-slate-600">{c.sent ?? ""}</td>
-                    <td className="px-3 py-3.5 font-medium text-blue-500">
+                    <td className="px-4 py-4 font-medium text-slate-700 hover:text-[#0D8C7C] cursor-pointer" onClick={() => window.location.href = `/campaigns/${c.id}`}>
+                      {c.name}
+                    </td>
+                    <td className="px-4 py-4 text-[#10201C]">{c.totalLeads ?? ""}</td>
+                    <td className="px-4 py-4 text-[#10201C]">{c.sent ?? ""}</td>
+                    <td className="px-4 py-4 font-medium text-[#1814F3]">
                       {c.openRate !== null ? `${c.openRate}%` : ""}
                     </td>
-                    <td className="px-3 py-3.5 font-medium text-emerald-500">
+                    <td className="px-4 py-4 font-medium text-[#00B218]">
                       {c.replyRate !== null ? `${c.replyRate}%` : ""}
                     </td>
-                    <td className="px-3 py-3.5 font-medium text-red-400">
+                    <td className="px-4 py-4 font-medium text-[#E20000]">
                       {c.deliveryRate !== null ? `${c.deliveryRate}%` : ""}
                     </td>
-                    <td className="px-3 py-3.5">
+                    <td className="px-4 py-4">
                       <span
-                        className={`inline-flex min-w-[76px] items-center justify-center rounded-full px-3 py-1 text-xs font-medium ${statusStyles[c.status]}`}
+                        className={`inline-flex min-w-[76px] items-center justify-center rounded px-3 py-1 text-xs font-medium ${statusStyles[c.status]}`}
                       >
                         {c.status}
                       </span>
