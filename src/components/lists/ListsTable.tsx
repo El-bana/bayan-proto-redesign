@@ -160,7 +160,6 @@ export function ListsTable() {
                     <td className="p-4">
                       <div className="flex gap-4 items-center">
                         <Play className="w-5 h-5 text-[#10201C] cursor-pointer hover:opacity-70" />
-                        <Paperclip className="w-5 h-5 text-[#10201C] cursor-pointer hover:opacity-70" />
                         <MoreVertical className="w-5 h-5 text-[#10201C] cursor-pointer hover:opacity-70" />
                       </div>
                     </td>

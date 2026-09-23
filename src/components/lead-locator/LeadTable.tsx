@@ -1,19 +1,26 @@
+
 'use client';
 import { useAppStore, Lead } from '@/lib/store';
 import { useEffect, useRef, useState } from 'react';
 import { SaveToListModal } from './SaveToListModal';
-import { Plus, Check } from 'lucide-react';
+import { Plus, Check, Search, Sparkles, SlidersHorizontal, LayoutTemplate } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { LeadDetailModal } from './LeadDetailModal';
 
-export function LeadTable() {
+interface LeadTableProps {
+  showIcpScores: boolean;
+}
+
+export function LeadTable({ showIcpScores }: LeadTableProps) {
   const { leads } = useAppStore();
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [enrichedIds, setEnrichedIds] = useState<Set<string>>(new Set());
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [detailModalLead, setDetailModalLead] = useState<Lead | null>(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     return () => {
@@ -33,12 +40,28 @@ export function LeadTable() {
     setSelectedIds(newSet);
   };
 
+  const handleEnrichAll = () => {
+    setEnrichedIds(new Set(leads.map(l => l.id)));
+  };
+
+  const handleEnrichOne = (id: string) => {
+    const newSet = new Set(enrichedIds);
+    newSet.add(id);
+    setEnrichedIds(newSet);
+  };
+
   const handleSaveSuccess = () => {
     setSelectedIds(new Set());
     setShowToast(true);
     if (toastTimer.current) clearTimeout(toastTimer.current);
     toastTimer.current = setTimeout(() => setShowToast(false), 3000);
   };
+
+  // Only selected leads that are enriched can be added to list. Wait, "the user can't add to list without either enrich or access email"
+  // So if enrichedIds is empty, button is disabled. Or if no selected lead is enriched?
+  // Let's say: if selectedIds.size > 0 AND at least one selected is enriched. 
+  // Actually simpler: Can only add to list if selectedIds.size > 0 && enrichedIds.size > 0
+  const canAddToList = selectedIds.size > 0 && enrichedIds.size > 0;
 
   return (
     <motion.div 
@@ -47,27 +70,41 @@ export function LeadTable() {
       className="flex flex-col h-full bg-white rounded-xl shadow-sm border border-[#D3DEDB] overflow-hidden"
     >
       <div className="p-4 border-b border-[#D3DEDB] flex items-center justify-between bg-white">
-        <div className="flex items-center gap-4">
-          <span className="text-[14px] font-medium text-[#10201C]">{leads.length} Results</span>
-          {selectedIds.size > 0 && (
-            <span className="text-[14px] font-medium text-[#0D8C7C] bg-[#ECF6F5] px-3 py-1 rounded-md">
-              {selectedIds.size} selected
-            </span>
-          )}
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 rounded-lg border border-[#D3DEDB] px-3 h-[42px] bg-white">
+            <Search className="w-4 h-4 text-[#7C8C87]" />
+            <input 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search for people...." 
+              className="outline-none text-sm text-[#10201C] placeholder:text-[#7C8C87] w-[200px]" 
+            />
+          </div>
+          <button className="flex items-center justify-center rounded-lg border border-[#0D8C7C] w-[42px] h-[42px] text-[#0D8C7C] bg-white hover:bg-[#0D8C7C]/5">
+            <LayoutTemplate className="w-5 h-5 rotate-90" />
+          </button>
+          <button onClick={handleEnrichAll} className="flex items-center gap-2 px-4 h-[42px] rounded-lg border border-[#0D8C7C] text-[#0D8C7C] font-medium bg-white hover:bg-[#0D8C7C]/5">
+            <Sparkles className="w-4 h-4" /> Enrich
+          </button>
         </div>
         
-        <button 
-          onClick={() => setIsSaveModalOpen(true)}
-          disabled={selectedIds.size === 0}
-          className={cn(
-            "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm",
-            selectedIds.size > 0 
-              ? "bg-[#0D8C7C] text-white hover:bg-[#14B39F]" 
-              : "bg-gray-100 text-gray-400 cursor-not-allowed"
-          )}
-        >
-          <Plus className="w-4 h-4" /> Add to list
-        </button>
+        <div className="flex items-center gap-3">
+          <button className="flex items-center justify-center rounded-lg border border-[#0D8C7C] w-[42px] h-[42px] text-[#0D8C7C] bg-white hover:bg-[#0D8C7C]/5">
+            <SlidersHorizontal className="w-5 h-5" />
+          </button>
+          <button 
+            onClick={() => setIsSaveModalOpen(true)}
+            disabled={!canAddToList}
+            className={cn(
+              "flex items-center gap-2 px-4 h-[42px] rounded-lg text-sm font-medium transition-colors shadow-sm",
+              canAddToList
+                ? "bg-[#0D8C7C] text-white hover:bg-[#14B39F]" 
+                : "bg-[#0D8C7C]/50 text-white/80 cursor-not-allowed"
+            )}
+          >
+            <Plus className="w-4 h-4" /> Add to list
+          </button>
+        </div>
       </div>
 
       <div className="overflow-y-auto flex-1">
@@ -83,57 +120,66 @@ export function LeadTable() {
               <th className="py-3 px-6 w-12">
                 <input 
                   type="checkbox" 
-                  className="w-4 h-4 rounded border-gray-300 text-[#0D8C7C] focus:ring-[#0D8C7C]"
+                  className="w-4 h-4 rounded border-[#D3DEDB] text-[#3476E3] bg-[#3476E3] focus:ring-[#3476E3] cursor-pointer"
                   aria-label="Select all leads"
                   checked={selectedIds.size === leads.length && leads.length > 0}
                   onChange={toggleAll}
+                  style={{ accentColor: "#3476E3" }}
                 />
               </th>
-              <th className="py-3 px-4 text-[14px] font-bold text-[#0E0E0E]">Name</th>
-              <th className="py-3 px-4 text-[14px] font-bold text-[#0E0E0E]">Job Title</th>
-              <th className="py-3 px-4 text-[14px] font-bold text-[#0E0E0E]">Company</th>
-              <th className="py-3 px-4 text-[14px] font-bold text-[#0E0E0E]">Email</th>
-              <th className="py-3 px-4 text-[14px] font-bold text-[#0E0E0E]">Location</th>
-              <th className="py-3 px-6 text-[14px] font-bold text-[#0E0E0E] text-right">Score Fit</th>
+              <th className="py-4 px-4 text-[14px] font-bold text-[#0E0E0E]">full name</th>
+              <th className="py-4 px-4 text-[14px] font-bold text-[#0E0E0E]">Job Title</th>
+              <th className="py-4 px-4 text-[14px] font-bold text-[#0E0E0E]">Company</th>
+              <th className="py-4 px-4 text-[14px] font-bold text-[#0E0E0E]">Email</th>
+              <th className="py-4 px-4 text-[14px] font-bold text-[#0E0E0E]">Location</th>
+              <th className="py-4 px-6 text-[14px] font-bold text-[#0E0E0E] text-center">Score Fit</th>
             </tr>
           </thead>
           <tbody>
-            {leads.map((lead) => (
-              <tr key={lead.id} className="border-b border-gray-100 last:border-none hover:bg-black/5 transition-colors">
-                <td className="py-3 px-6">
-                  <input 
-                    type="checkbox" 
-                    className="w-4 h-4 rounded border-gray-300 text-[#0D8C7C] focus:ring-[#0D8C7C]"
-                    aria-label={`Select ${lead.name}`}
-                    checked={selectedIds.has(lead.id)}
-                    onChange={() => toggleOne(lead.id)}
-                  />
-                </td>
-                <td className="py-3 px-4 text-[14px] font-bold text-[#10201C]">
-                  <button 
-                    type="button"
-                    onClick={() => setDetailModalLead(lead)}
-                    className="hover:underline hover:text-[#0D8C7C] transition-colors"
-                  >
+            {leads.map((lead) => {
+              const isEnriched = enrichedIds.has(lead.id);
+              return (
+                <tr key={lead.id} className="border-b border-gray-100 last:border-none hover:bg-black/5 transition-colors">
+                  <td className="py-4 px-6">
+                    <input 
+                      type="checkbox" 
+                      className="w-4 h-4 rounded border-[#D3DEDB] text-[#3476E3] bg-[#3476E3] focus:ring-[#3476E3] cursor-pointer"
+                      aria-label={`Select ${lead.name}`}
+                      checked={selectedIds.has(lead.id)}
+                      onChange={() => toggleOne(lead.id)}
+                      style={{ accentColor: "#3476E3" }}
+                    />
+                  </td>
+                  <td className="py-4 px-4 text-[14px] font-medium text-[#10201C]">
                     {lead.name}
-                  </button>
-                </td>
-                <td className="py-3 px-4 text-[14px] text-[#445751]">{lead.jobTitle}</td>
-                <td className="py-3 px-4 text-[14px] text-[#445751]">{lead.company}</td>
-                <td className="py-3 px-4 text-[14px] text-[#0D8C7C]">{lead.email}</td>
-                <td className="py-3 px-4 text-[14px] text-[#445751]">{lead.location}</td>
-                <td className="py-3 px-6 text-right">
-                  <span className={cn(
-                    "inline-flex items-center justify-center px-2.5 py-1 rounded-full text-xs font-bold",
-                    lead.fitScore >= 80 ? "bg-[#ECF6F5] text-[#0D8C7C]" : 
-                    lead.fitScore >= 50 ? "bg-yellow-50 text-yellow-600" : 
-                    "bg-red-50 text-red-600"
-                  )}>
-                    {lead.fitScore}%
-                  </span>
-                </td>
-              </tr>
-            ))}
+                  </td>
+                  <td className="py-4 px-4 text-[14px] text-[#10201C]">{lead.jobTitle}</td>
+                  <td className="py-4 px-4 text-[14px] text-[#10201C]">{lead.company}</td>
+                  <td className="py-4 px-4 text-[14px]">
+                    {isEnriched ? (
+                      <span className="text-[#0D8C7C] font-medium">{lead.email}</span>
+                    ) : (
+                      <button 
+                        onClick={() => handleEnrichOne(lead.id)}
+                        className="px-3 py-1.5 text-xs font-medium text-[#0D8C7C] border border-[#0D8C7C] rounded-md hover:bg-[#0D8C7C]/5 transition-colors"
+                      >
+                        Access Email
+                      </button>
+                    )}
+                  </td>
+                  <td className="py-4 px-4 text-[14px] text-[#10201C]">{lead.location}</td>
+                  <td className="py-4 px-6 text-center">
+                    {showIcpScores ? (
+                      <span className="text-[#0D8C7C] font-bold">
+                        {lead.fitScore}%
+                      </span>
+                    ) : (
+                      <span className="text-[#0D8C7C] font-bold text-center">N/A</span>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
         )}
