@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Send } from "lucide-react";
+import { SendHorizontal } from "lucide-react";
 import Image from "next/image";
+import ProgressBar from "../lists/ProgressBar";
 
 type Status = "Done" | "Paused" | "Active" | "Draft";
 
@@ -18,14 +19,86 @@ type Campaign = {
 };
 
 const initialCampaigns: Campaign[] = [
-  { id: 1, name: "Euro campaign", totalLeads: 300, sent: 241, openRate: 31, replyRate: 14, deliveryRate: 2.1, status: "Done" },
-  { id: 2, name: "KSA Campaign", totalLeads: 150, sent: 98, openRate: 27, replyRate: 9, deliveryRate: 1.0, status: "Paused" },
-  { id: 3, name: "UK Campaign", totalLeads: 80, sent: 45, openRate: 22, replyRate: 6, deliveryRate: 3.5, status: "Active" },
-  { id: 4, name: "UK Campaign", totalLeads: null, sent: null, openRate: null, replyRate: null, deliveryRate: null, status: "Draft" },
-  { id: 5, name: "Euro campaign", totalLeads: 300, sent: 241, openRate: 31, replyRate: 14, deliveryRate: 2.1, status: "Done" },
-  { id: 6, name: "KSA Campaign", totalLeads: 150, sent: 98, openRate: 27, replyRate: 9, deliveryRate: 1.0, status: "Paused" },
-  { id: 7, name: "UK Campaign", totalLeads: 80, sent: 45, openRate: 22, replyRate: 6, deliveryRate: 3.5, status: "Active" },
-  { id: 8, name: "UK Campaign", totalLeads: null, sent: null, openRate: null, replyRate: null, deliveryRate: null, status: "Draft" },
+  {
+    id: 1,
+    name: "Euro campaign",
+    totalLeads: 300,
+    sent: 241,
+    openRate: 31,
+    replyRate: 14,
+    deliveryRate: 2.1,
+    status: "Done",
+  },
+  {
+    id: 2,
+    name: "KSA Campaign",
+    totalLeads: 150,
+    sent: 98,
+    openRate: 27,
+    replyRate: 9,
+    deliveryRate: 1.0,
+    status: "Paused",
+  },
+  {
+    id: 3,
+    name: "UK Campaign",
+    totalLeads: 80,
+    sent: 45,
+    openRate: 22,
+    replyRate: 6,
+    deliveryRate: 3.5,
+    status: "Active",
+  },
+  {
+    id: 4,
+    name: "UK Campaign",
+    totalLeads: null,
+    sent: null,
+    openRate: null,
+    replyRate: null,
+    deliveryRate: null,
+    status: "Draft",
+  },
+  {
+    id: 5,
+    name: "Euro campaign",
+    totalLeads: 300,
+    sent: 241,
+    openRate: 31,
+    replyRate: 14,
+    deliveryRate: 2.1,
+    status: "Done",
+  },
+  {
+    id: 6,
+    name: "KSA Campaign",
+    totalLeads: 150,
+    sent: 98,
+    openRate: 27,
+    replyRate: 9,
+    deliveryRate: 1.0,
+    status: "Paused",
+  },
+  {
+    id: 7,
+    name: "UK Campaign",
+    totalLeads: 80,
+    sent: 45,
+    openRate: 22,
+    replyRate: 6,
+    deliveryRate: 3.5,
+    status: "Active",
+  },
+  {
+    id: 8,
+    name: "UK Campaign",
+    totalLeads: null,
+    sent: null,
+    openRate: null,
+    replyRate: null,
+    deliveryRate: null,
+    status: "Draft",
+  },
 ];
 
 const statusStyles: Record<Status, string> = {
@@ -37,7 +110,16 @@ const statusStyles: Record<Status, string> = {
 
 function SearchIcon() {
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <circle cx="11" cy="11" r="7" />
       <line x1="21" y1="21" x2="16.65" y2="16.65" />
     </svg>
@@ -46,7 +128,16 @@ function SearchIcon() {
 
 function PlusIcon() {
   return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <line x1="12" y1="5" x2="12" y2="19" />
       <line x1="5" y1="12" x2="19" y2="12" />
     </svg>
@@ -55,7 +146,16 @@ function PlusIcon() {
 
 function FilterIcon() {
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
     </svg>
   );
@@ -69,7 +169,16 @@ function Checkbox({ checked }: { checked: boolean }) {
       }`}
     >
       {checked && (
-        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+        <svg
+          width="10"
+          height="10"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="white"
+          strokeWidth="3"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
           <polyline points="20 6 9 17 4 12" />
         </svg>
       )}
@@ -104,7 +213,9 @@ export default function CampaignsPage() {
   const selectedCount = selected.size;
 
   const applyStatus = (status: Status) => {
-    setRows((prev) => prev.map((c) => (selected.has(c.id) ? { ...c, status } : c)));
+    setRows((prev) =>
+      prev.map((c) => (selected.has(c.id) ? { ...c, status } : c)),
+    );
     setSelected(new Set());
   };
 
@@ -114,17 +225,15 @@ export default function CampaignsPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#F6F8F7] p-8 flex flex-col">
+    <main className="min-h-screen relative bg-[#F6F8F7] p-8 flex flex-col">
       {/* Header */}
-        <div className="mb-6 flex items-center gap-4">
-          <span className="text-[#0D8C7C]">
-            <Send className="w-8 h-8" />
-          </span>
-          <h1 className="text-[28px] font-bold text-[#10201C]">Campaigns</h1>
-        </div>
-        <div className="flex-1 w-full rounded-xl bg-white p-6 border border-[#D3DEDB] shadow-sm">
-
-
+      <div className="mb-6 flex items-center gap-4">
+        <span className="text-[#0D8C7C]">
+          <SendHorizontal className="w-8 h-8" />
+        </span>
+        <h1 className="text-[28px] font-bold text-[#10201C]">Campaigns</h1>
+      </div>
+      <div className="flex-1 w-full rounded-xl bg-white p-6 border border-[#D3DEDB] shadow-sm">
         {/* Toolbar */}
         <div className="mb-6 flex flex-wrap items-center gap-4">
           <div className="flex items-center gap-2 rounded-lg border border-[#D3DEDB] px-3 py-2 text-sm text-[#7C8C87] bg-white h-[42px]">
@@ -138,7 +247,16 @@ export default function CampaignsPage() {
           </div>
 
           <button className="flex items-center justify-center rounded-lg border border-[#0D8C7C] w-[42px] h-[42px] text-[#0D8C7C] hover:bg-teal-50 shrink-0">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
               <line x1="9" y1="3" x2="9" y2="21" />
             </svg>
@@ -150,17 +268,57 @@ export default function CampaignsPage() {
                 {selectedCount} selected
               </span>
 
-              <button onClick={() => applyStatus("Paused")} className="flex items-center gap-2 rounded-lg bg-[#FF9559] px-4 py-2 text-sm font-medium text-white hover:bg-orange-500 h-[42px]">
-                <Image src="/pause-icon.png" alt="" width={16} height={16} className="w-4 h-4" /> Pause
+              <button
+                onClick={() => applyStatus("Paused")}
+                className="flex items-center gap-2 rounded-lg bg-[#FF9559] px-4 py-2 text-sm font-medium text-white hover:bg-orange-500 h-[42px]"
+              >
+                <Image
+                  src="/pause-icon.png"
+                  alt=""
+                  width={16}
+                  height={16}
+                  className="w-4 h-4"
+                />{" "}
+                Pause
               </button>
-              <button onClick={() => applyStatus("Active")} className="flex items-center gap-2 rounded-lg bg-[#00C11A] px-4 py-2 text-sm font-medium text-white hover:bg-green-600 h-[42px]">
-                <Image src="/resume-icon.png" alt="" width={16} height={16} className="w-4 h-4" /> Resume
+              <button
+                onClick={() => applyStatus("Active")}
+                className="flex items-center gap-2 rounded-lg bg-[#00C11A] px-4 py-2 text-sm font-medium text-white hover:bg-green-600 h-[42px]"
+              >
+                <Image
+                  src="/resume-icon.png"
+                  alt=""
+                  width={16}
+                  height={16}
+                  className="w-4 h-4"
+                />{" "}
+                Resume
               </button>
-              <button onClick={removeSelected} className="flex items-center gap-2 rounded-lg bg-[#2D2D2D] px-4 py-2 text-sm font-medium text-white hover:bg-black h-[42px]">
-                <Image src="/archive-icon.png" alt="" width={16} height={16} className="w-4 h-4" /> Archive
+              <button
+                onClick={removeSelected}
+                className="flex items-center gap-2 rounded-lg bg-[#2D2D2D] px-4 py-2 text-sm font-medium text-white hover:bg-black h-[42px]"
+              >
+                <Image
+                  src="/archive-icon.png"
+                  alt=""
+                  width={16}
+                  height={16}
+                  className="w-4 h-4"
+                />{" "}
+                Archive
               </button>
-              <button onClick={removeSelected} className="flex items-center gap-2 rounded-lg bg-[#E20000] px-4 py-2 text-sm font-medium text-white hover:bg-red-700 h-[42px]">
-                <Image src="/delete-icon.png" alt="" width={16} height={16} className="w-4 h-4" /> Delete
+              <button
+                onClick={removeSelected}
+                className="flex items-center gap-2 rounded-lg bg-[#E20000] px-4 py-2 text-sm font-medium text-white hover:bg-red-700 h-[42px]"
+              >
+                <Image
+                  src="/delete-icon.png"
+                  alt=""
+                  width={16}
+                  height={16}
+                  className="w-4 h-4"
+                />{" "}
+                Delete
               </button>
             </div>
           )}
@@ -204,14 +362,25 @@ export default function CampaignsPage() {
                     className={`border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors`}
                   >
                     <td className="px-6 py-4">
-                      <button onClick={() => toggleRow(c.id)} aria-label={`Select ${c.name}`} className="flex">
+                      <button
+                        onClick={() => toggleRow(c.id)}
+                        aria-label={`Select ${c.name}`}
+                        className="flex"
+                      >
                         <Checkbox checked={isChecked} />
                       </button>
                     </td>
-                    <td className="px-4 py-4 font-medium text-slate-700 hover:text-[#0D8C7C] cursor-pointer" onClick={() => window.location.href = `/campaigns/${c.id}`}>
+                    <td
+                      className="px-4 py-4 font-medium text-slate-700 hover:text-[#0D8C7C] cursor-pointer"
+                      onClick={() =>
+                        (window.location.href = `/campaigns/${c.id}`)
+                      }
+                    >
                       {c.name}
                     </td>
-                    <td className="px-4 py-4 text-[#10201C]">{c.totalLeads ?? ""}</td>
+                    <td className="px-4 py-4 text-[#10201C]">
+                      {c.totalLeads ?? ""}
+                    </td>
                     <td className="px-4 py-4 text-[#10201C]">{c.sent ?? ""}</td>
                     <td className="px-4 py-4 font-medium text-[#1814F3]">
                       {c.openRate !== null ? `${c.openRate}%` : ""}
@@ -235,12 +404,14 @@ export default function CampaignsPage() {
             </tbody>
           </table>
           {visible.length === 0 && (
-            <div className="p-6 text-center text-sm text-gray-400">No campaigns match your search.</div>
+            <div className="p-6 text-center text-sm text-gray-400">
+              No campaigns match your search.
+            </div>
           )}
         </div>
 
         {/* Legend */}
-        <div className="mt-5 flex flex-wrap items-center gap-6 border-t border-gray-100 pt-4 text-xs text-slate-500">
+        {/* <div className="mt-5 flex flex-wrap items-center gap-6 border-t border-gray-100 pt-4 text-xs text-slate-500">
           <div className="flex items-center gap-2">
             <Send className="w-3 h-3 text-blue-500" />
             <span>Euro Campaign</span>
@@ -256,7 +427,10 @@ export default function CampaignsPage() {
             <span>USA Campaign</span>
             <span className="h-px w-8 bg-emerald-500" />
           </div>
-        </div>
+        </div> */}
+      </div>
+      <div className="sticky bottom-0 z-20 w-full">
+        <ProgressBar />
       </div>
     </main>
   );
