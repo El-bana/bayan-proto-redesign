@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Sparkles, Pencil, ArrowRight } from 'lucide-react';
 import { useAppStore } from '@/lib/store';
@@ -12,17 +12,28 @@ interface Props {
 
 export function IcpCreationModal({ isOpen, onClose }: Props) {
   const [step, setStep] = useState<'select' | 'ai' | 'manual'>('select');
+  const [aiPrompt, setAiPrompt] = useState('');
   const router = useRouter();
   const { addIcp } = useAppStore();
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     setStep('select');
+    setAiPrompt('');
     onClose();
-  };
+  }, [onClose]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') handleClose();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [isOpen, handleClose]);
 
   const handleAiSearch = () => {
     // Mock save/redirect
-    addIcp({ name: 'AI Generated ICP', industry: 'SaaS', size: '10-50', region: 'Global', titles: ['VP Sales'] });
+    addIcp({ name: aiPrompt.trim() || 'AI Generated ICP', industry: 'SaaS', size: '10-50', region: 'Global', titles: ['VP Sales'] });
     handleClose();
     router.push('/lead-locator');
   };
@@ -53,6 +64,9 @@ export function IcpCreationModal({ isOpen, onClose }: Props) {
             onClick={handleClose}
           >
             <motion.div
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="icp-modal-title"
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -60,13 +74,13 @@ export function IcpCreationModal({ isOpen, onClose }: Props) {
               className="bg-white rounded-xl shadow-xl w-full max-w-2xl overflow-hidden flex flex-col"
             >
               <div className="flex items-center justify-between p-6 border-b border-gray-100">
-                <h2 className="text-xl font-bold text-[#10201C]">
+                <h2 id="icp-modal-title" className="text-xl font-bold text-[#10201C]">
                   {step === 'select' && 'Create New ICP'}
                   {step === 'ai' && 'AI ICP Creator'}
                   {step === 'manual' && 'Manual ICP Setup'}
                 </h2>
-                <button onClick={handleClose} className="p-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100">
-                  <X className="w-5 h-5" />
+                <button onClick={handleClose} aria-label="Close" className="p-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100">
+                  <X className="w-5 h-5" aria-hidden="true" />
                 </button>
               </div>
 
@@ -105,14 +119,20 @@ export function IcpCreationModal({ isOpen, onClose }: Props) {
 
                 {step === 'ai' && (
                   <div className="flex flex-col gap-4">
-                    <textarea 
-                      placeholder="e.g. I am looking for VP of Sales in SaaS companies with 50-200 employees in Europe..."
-                      className="w-full h-32 p-4 border border-gray-200 rounded-lg outline-none focus:border-[#0D8C7C] focus:ring-1 focus:ring-[#0D8C7C] resize-none"
-                    ></textarea>
+                    <div>
+                      <label htmlFor="icp-ai-prompt" className="block text-sm font-medium text-[#10201C] mb-2">Describe your ideal customer</label>
+                      <textarea 
+                        id="icp-ai-prompt"
+                        value={aiPrompt}
+                        onChange={(e) => setAiPrompt(e.target.value)}
+                        placeholder="e.g. I am looking for VP of Sales in SaaS companies with 50-200 employees in Europe..."
+                        className="w-full h-32 p-4 border border-gray-200 rounded-lg outline-none focus:border-[#0D8C7C] focus:ring-1 focus:ring-[#0D8C7C] resize-none"
+                      ></textarea>
+                    </div>
                     <div className="flex justify-end gap-3 mt-4">
                       <button onClick={() => setStep('select')} className="px-4 py-2 text-[#445751] hover:bg-gray-100 rounded-lg font-medium">Back</button>
                       <button onClick={handleAiSearch} className="flex items-center gap-2 px-6 py-2 bg-[#0D8C7C] text-white rounded-lg font-medium hover:bg-[#14B39F] shadow-sm">
-                        <Sparkles className="w-4 h-4" /> AI Search
+                        <Sparkles className="w-4 h-4" aria-hidden="true" /> AI Search
                       </button>
                     </div>
                   </div>
@@ -122,20 +142,20 @@ export function IcpCreationModal({ isOpen, onClose }: Props) {
                   <form onSubmit={handleManualSave} className="flex flex-col gap-4 max-h-[60vh] overflow-y-auto pr-2">
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium text-[#10201C] mb-1">ICP Name</label>
-                        <input name="name" required className="w-full p-2.5 border border-gray-200 rounded-lg outline-none focus:border-[#0D8C7C]" placeholder="e.g. Enterprise Q4" />
+                        <label htmlFor="icp-name" className="block text-sm font-medium text-[#10201C] mb-1">ICP Name</label>
+                        <input id="icp-name" name="name" required className="w-full p-2.5 border border-gray-200 rounded-lg outline-none focus:border-[#0D8C7C]" placeholder="e.g. Enterprise Q4" />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-[#10201C] mb-1">Industry</label>
-                        <select name="industry" className="w-full p-2.5 border border-gray-200 rounded-lg outline-none focus:border-[#0D8C7C] bg-white">
+                        <label htmlFor="icp-industry" className="block text-sm font-medium text-[#10201C] mb-1">Industry</label>
+                        <select id="icp-industry" name="industry" className="w-full p-2.5 border border-gray-200 rounded-lg outline-none focus:border-[#0D8C7C] bg-white">
                           <option>Software / SaaS</option>
                           <option>Fintech</option>
                           <option>Healthcare</option>
                         </select>
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-[#10201C] mb-1">Company Size</label>
-                        <select name="size" className="w-full p-2.5 border border-gray-200 rounded-lg outline-none focus:border-[#0D8C7C] bg-white">
+                        <label htmlFor="icp-size" className="block text-sm font-medium text-[#10201C] mb-1">Company Size</label>
+                        <select id="icp-size" name="size" className="w-full p-2.5 border border-gray-200 rounded-lg outline-none focus:border-[#0D8C7C] bg-white">
                           <option>1-10</option>
                           <option>11-50</option>
                           <option>51-200</option>
@@ -143,8 +163,8 @@ export function IcpCreationModal({ isOpen, onClose }: Props) {
                         </select>
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-[#10201C] mb-1">Region</label>
-                        <select name="region" className="w-full p-2.5 border border-gray-200 rounded-lg outline-none focus:border-[#0D8C7C] bg-white">
+                        <label htmlFor="icp-region" className="block text-sm font-medium text-[#10201C] mb-1">Region</label>
+                        <select id="icp-region" name="region" className="w-full p-2.5 border border-gray-200 rounded-lg outline-none focus:border-[#0D8C7C] bg-white">
                           <option>North America</option>
                           <option>EMEA</option>
                           <option>APAC</option>
@@ -153,13 +173,13 @@ export function IcpCreationModal({ isOpen, onClose }: Props) {
                     </div>
                     
                     <div>
-                      <label className="block text-sm font-medium text-[#10201C] mb-1">Job Titles (comma separated)</label>
-                      <input name="titles" required className="w-full p-2.5 border border-gray-200 rounded-lg outline-none focus:border-[#0D8C7C]" placeholder="e.g. CEO, Founder, VP Sales" />
+                      <label htmlFor="icp-titles" className="block text-sm font-medium text-[#10201C] mb-1">Job Titles (comma separated)</label>
+                      <input id="icp-titles" name="titles" required className="w-full p-2.5 border border-gray-200 rounded-lg outline-none focus:border-[#0D8C7C]" placeholder="e.g. CEO, Founder, VP Sales" />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-[#10201C] mb-1">Pains & Value Prop</label>
-                      <textarea className="w-full h-20 p-2.5 border border-gray-200 rounded-lg outline-none focus:border-[#0D8C7C] resize-none" placeholder="What are they struggling with?"></textarea>
+                      <label htmlFor="icp-pains" className="block text-sm font-medium text-[#10201C] mb-1">Pains & Value Prop</label>
+                      <textarea id="icp-pains" className="w-full h-20 p-2.5 border border-gray-200 rounded-lg outline-none focus:border-[#0D8C7C] resize-none" placeholder="What are they struggling with?"></textarea>
                     </div>
 
                     <div className="flex justify-end gap-3 mt-4 pt-4 border-t border-gray-100">

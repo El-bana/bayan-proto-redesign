@@ -54,14 +54,14 @@ export const useAppStore = create<AppState>((set) => ({
     { id: '2', name: 'SaaS Founders', leadIds: [] },
   ],
   addIcp: (icp) => set((state) => ({
-    icps: [...state.icps, { ...icp, id: Math.random().toString(36).substring(2, 9) }]
+    icps: [...state.icps, { ...icp, id: crypto.randomUUID() }]
   })),
   deleteIcp: (id) => set((state) => ({
     icps: state.icps.filter((icp) => icp.id !== id)
   })),
   setLeads: (leads) => set({ leads }),
   addList: (name, leadIds) => set((state) => ({
-    lists: [...state.lists, { id: Math.random().toString(36).substring(2, 9), name, leadIds }]
+    lists: [...state.lists, { id: crypto.randomUUID(), name, leadIds }]
   })),
   addToList: (listId, leadIds) => set((state) => ({
     lists: state.lists.map((list) => 

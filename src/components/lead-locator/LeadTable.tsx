@@ -1,6 +1,6 @@
 'use client';
 import { useAppStore, Lead } from '@/lib/store';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { SaveToListModal } from './SaveToListModal';
 import { Plus, Check } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -13,6 +13,13 @@ export function LeadTable() {
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [detailModalLead, setDetailModalLead] = useState<Lead | null>(null);
+  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (toastTimer.current) clearTimeout(toastTimer.current);
+    };
+  }, []);
 
   const toggleAll = () => {
     if (selectedIds.size === leads.length) setSelectedIds(new Set());
@@ -29,7 +36,8 @@ export function LeadTable() {
   const handleSaveSuccess = () => {
     setSelectedIds(new Set());
     setShowToast(true);
-    setTimeout(() => setShowToast(false), 3000);
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+    toastTimer.current = setTimeout(() => setShowToast(false), 3000);
   };
 
   return (
@@ -63,6 +71,12 @@ export function LeadTable() {
       </div>
 
       <div className="overflow-y-auto flex-1">
+        {leads.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-full p-12 text-center">
+            <p className="text-[#10201C] font-medium mb-1">No leads found</p>
+            <p className="text-sm text-[#7C8C87]">Try a different search prompt or adjust your filters.</p>
+          </div>
+        ) : (
         <table className="w-full text-left border-collapse">
           <thead className="sticky top-0 bg-[#F6F8F7] shadow-[0_1px_0_#D3DEDB] z-10">
             <tr>
@@ -70,6 +84,7 @@ export function LeadTable() {
                 <input 
                   type="checkbox" 
                   className="w-4 h-4 rounded border-gray-300 text-[#0D8C7C] focus:ring-[#0D8C7C]"
+                  aria-label="Select all leads"
                   checked={selectedIds.size === leads.length && leads.length > 0}
                   onChange={toggleAll}
                 />
@@ -89,15 +104,19 @@ export function LeadTable() {
                   <input 
                     type="checkbox" 
                     className="w-4 h-4 rounded border-gray-300 text-[#0D8C7C] focus:ring-[#0D8C7C]"
+                    aria-label={`Select ${lead.name}`}
                     checked={selectedIds.has(lead.id)}
                     onChange={() => toggleOne(lead.id)}
                   />
                 </td>
-                <td 
-                  className="py-3 px-4 text-[14px] font-bold text-[#10201C] cursor-pointer hover:underline hover:text-[#0D8C7C] transition-colors"
-                  onClick={() => setDetailModalLead(lead)}
-                >
-                  {lead.name}
+                <td className="py-3 px-4 text-[14px] font-bold text-[#10201C]">
+                  <button 
+                    type="button"
+                    onClick={() => setDetailModalLead(lead)}
+                    className="hover:underline hover:text-[#0D8C7C] transition-colors"
+                  >
+                    {lead.name}
+                  </button>
                 </td>
                 <td className="py-3 px-4 text-[14px] text-[#445751]">{lead.jobTitle}</td>
                 <td className="py-3 px-4 text-[14px] text-[#445751]">{lead.company}</td>
@@ -117,6 +136,7 @@ export function LeadTable() {
             ))}
           </tbody>
         </table>
+        )}
       </div>
 
       <SaveToListModal 
@@ -133,19 +153,21 @@ export function LeadTable() {
       />
 
       {/* Toast */}
-      {showToast && (
-        <motion.div 
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: 50 }}
-          className="fixed bottom-8 right-8 bg-[#10201C] text-white px-6 py-3 rounded-lg shadow-xl flex items-center gap-3 z-50"
-        >
-          <div className="w-6 h-6 bg-[#0D8C7C] rounded-full flex items-center justify-center">
-            <Check className="w-4 h-4 text-white" />
-          </div>
-          <span className="font-medium text-sm">Successfully saved leads to list!</span>
-        </motion.div>
-      )}
+      <AnimatePresence>
+        {showToast && (
+          <motion.div 
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 50 }}
+            className="fixed bottom-8 right-8 bg-[#10201C] text-white px-6 py-3 rounded-lg shadow-xl flex items-center gap-3 z-50"
+          >
+            <div className="w-6 h-6 bg-[#0D8C7C] rounded-full flex items-center justify-center">
+              <Check className="w-4 h-4 text-white" aria-hidden="true" />
+            </div>
+            <span className="font-medium text-sm">Successfully saved leads to list!</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }
