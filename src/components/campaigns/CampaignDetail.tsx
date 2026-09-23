@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { Send, FileText, Mail, MailOpen, CornerDownRight, CheckCircle2, XCircle, CheckSquare, Flag, Edit3, Trash2, Clock } from 'lucide-react';
+import { Send, FileText, Mail, MailOpen, CornerDownRight, CheckCircle2, XCircle, CheckSquare, Flag, Edit3, Trash2, Clock, SendHorizonal } from 'lucide-react';
 import { useAppStore } from '@/lib/store';
 
 type Tab = 'Analytics' | 'Leads' | 'Sequence';
@@ -16,7 +16,7 @@ export function CampaignDetail() {
       {/* Header */}
         <div className="mb-6 flex items-center gap-4">
           <button onClick={() => router.push('/campaigns')} className="text-[#0D8C7C] hover:text-[#14B39F] transition-colors">
-            <Send className="w-8 h-8" />
+            <SendHorizonal className="w-8 h-8" />
           </button>
           <h1 className="text-[28px] font-bold text-[#10201C]">
             Campaigns <span className="font-normal text-[#10201C]">/ Europe campaign 2026</span>

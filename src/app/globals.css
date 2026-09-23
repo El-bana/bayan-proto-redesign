@@ -3,22 +3,22 @@
 @theme {
   --font-sans: var(--font-inter);
   --font-mono: var(--font-space-mono);
-  
-  --color-brand-primary: #0D8C7C;
-  --color-brand-secondary: #14B39F;
-  --color-brand-purple: #6D5BD0;
-  
-  --color-bg-light: #F6F8F7;
-  --color-bg-mint: #ECF6F5;
-  
-  --color-border-gray: #D3DEDB;
-  
-  --color-text-dark: #10201C;
+
+  --color-brand-primary: #0d8c7c;
+  --color-brand-secondary: #14b39f;
+  --color-brand-purple: #6d5bd0;
+
+  --color-bg-light: #f6f8f7;
+  --color-bg-mint: #ecf6f5;
+
+  --color-border-gray: #d3dedb;
+
+  --color-text-dark: #10201c;
   --color-text-gray: #445751;
-  --color-text-light: #7C8C87;
-  
+  --color-text-light: #7c8c87;
+
   --color-badge-purple: rgba(111, 63, 255, 0.5);
-  --color-badge-purple-text: #8000FF;
+  --color-badge-purple-text: #8000ff;
 }
 
 body {
@@ -34,9 +34,13 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #D3DEDB;
+  background: #d3dedb;
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
   background: #445751;
+}
+
+button {
+  cursor: pointer;
 }
