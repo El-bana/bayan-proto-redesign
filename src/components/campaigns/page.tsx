@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { SendHorizontal } from "lucide-react";
 import Image from "next/image";
 import ProgressBar from "../lists/ProgressBar";
@@ -187,6 +188,7 @@ function Checkbox({ checked }: { checked: boolean }) {
 }
 
 export default function CampaignsPage() {
+  const router = useRouter();
   const [rows, setRows] = useState<Campaign[]>(initialCampaigns);
   const [selected, setSelected] = useState<Set<number>>(new Set());
   const [search, setSearch] = useState("");
@@ -327,7 +329,10 @@ export default function CampaignsPage() {
             <button className="flex items-center justify-center rounded-lg border border-[#0D8C7C] w-[42px] h-[42px] text-[#0D8C7C] hover:bg-teal-50">
               <FilterIcon />
             </button>
-            <button className="flex items-center gap-2 rounded-lg bg-[#0D8C7C] px-5 py-2 text-sm font-medium text-white hover:bg-[#14B39F] h-[42px]">
+            <button
+              onClick={() => router.push("/campaigns/new")}
+              className="flex items-center gap-2 rounded-lg bg-[#0D8C7C] px-5 py-2 text-sm font-medium text-white hover:bg-[#14B39F] h-[42px]"
+            >
               <PlusIcon />
               New Campaign
             </button>
@@ -354,7 +359,7 @@ export default function CampaignsPage() {
               </tr>
             </thead>
             <tbody className="bg-white">
-              {visible.map((c, idx) => {
+              {visible.map((c) => {
                 const isChecked = selected.has(c.id);
                 return (
                   <tr
@@ -372,9 +377,7 @@ export default function CampaignsPage() {
                     </td>
                     <td
                       className="px-4 py-4 font-medium text-slate-700 hover:text-[#0D8C7C] cursor-pointer"
-                      onClick={() =>
-                        (window.location.href = `/campaigns/${c.id}`)
-                      }
+                      onClick={() => router.push(`/campaigns/${c.id}`)}
                     >
                       {c.name}
                     </td>

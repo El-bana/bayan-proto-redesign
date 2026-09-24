@@ -1,11 +1,10 @@
 "use client";
 import { useAppStore, Lead } from "@/lib/store";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import {
   Search,
   Play,
   Filter,
-  Briefcase,
   Paperclip,
   MoreVertical,
   Clock,
@@ -20,7 +19,7 @@ import {
   SendHorizontal,
   BriefcaseBusiness,
 } from "lucide-react";
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { LeadDetailModal } from "@/components/lead-locator/LeadDetailModal";
 import { ReassignModal } from "./ReassignModal";
@@ -29,7 +28,6 @@ import ProgressBar from "./ProgressBar";
 
 export function ListDetail() {
   const params = useParams();
-  const router = useRouter();
   const { lists, leads } = useAppStore();
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [detailModalLead, setDetailModalLead] = useState<Lead | null>(null);
@@ -38,16 +36,14 @@ export function ListDetail() {
   const [isPushOpen, setIsPushOpen] = useState(false);
 
   const list = lists.find((l) => l.id === params.id);
+  const listLeads = list
+    ? leads.filter((l) => list.leadIds.includes(l.id))
+    : [];
 
   // If list not found, maybe show a 404 or redirect
   if (!list) {
     return <div className="p-8">List not found</div>;
   }
-
-  // Get leads for this list
-  const listLeads = useMemo(() => {
-    return leads.filter((l) => list.leadIds.includes(l.id));
-  }, [leads, list.leadIds]);
 
   const toggleAll = () => {
     if (selectedIds.size === listLeads.length) setSelectedIds(new Set());
@@ -333,12 +329,14 @@ export function ListDetail() {
       />
 
       <ReassignModal
+        key={isReassignOpen ? 'open' : 'closed'}
         isOpen={isReassignOpen}
         onClose={() => setIsReassignOpen(false)}
         leads={listLeads.filter((l) => selectedIds.has(l.id))}
       />
 
       <PushCampaignModal
+        key={isPushOpen ? 'open' : 'closed'}
         isOpen={isPushOpen}
         onClose={() => setIsPushOpen(false)}
         leads={listLeads.filter((l) => selectedIds.has(l.id))}

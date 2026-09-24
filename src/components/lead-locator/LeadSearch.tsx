@@ -10,10 +10,8 @@ import {
   Users,
   Building,
   MapPin,
-  Inbox,
   User
 } from 'lucide-react';
-import { useSearchParams, useRouter } from 'next/navigation';
 import { type LucideIcon } from 'lucide-react';
 
 const CUSTOM_ICP_VALUE = "custom-icp";
@@ -23,8 +21,6 @@ export function LeadSearch() {
   const { setLeads, icps } = useAppStore();
   const [selectedIcp, setSelectedIcp] = useState('no-icp');
   const [maxSearch, setMaxSearch] = useState('2000');
-  const searchParams = useSearchParams();
-  const router = useRouter();
 
   const handleAiSearch = useCallback(() => {
     const mockLeads: Lead[] = [

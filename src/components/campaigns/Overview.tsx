@@ -1,12 +1,12 @@
 'use client';
 import { useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import { Send, FileText, Mail, MailOpen, CornerDownRight, CheckCircle2, XCircle, CheckSquare, Flag, Edit3, Trash2, Clock, SendHorizonal } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { FileText, Mail, MailOpen, CornerDownRight, CheckCircle2, XCircle, CheckSquare, Flag, Edit3, Trash2, Clock, SendHorizonal } from 'lucide-react';
 import { useAppStore } from '@/lib/store';
 
 type Tab = 'Analytics' | 'Leads' | 'Sequence';
 
-export function CampaignDetail() {
+export function Overview() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<Tab>('Analytics');
   const { leads } = useAppStore();

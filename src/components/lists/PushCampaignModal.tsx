@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
 import { Lead } from '@/lib/store';
@@ -13,10 +13,6 @@ interface Props {
 export function PushCampaignModal({ isOpen, onClose, leads }: Props) {
   const [step, setStep] = useState<1 | 2>(1);
   const [selectedCampaign, setSelectedCampaign] = useState('Europe Campaign 2026');
-
-  useEffect(() => {
-    if (!isOpen) setStep(1);
-  }, [isOpen]);
 
   const handleProceed = () => {
     // In a real app, do API call here
@@ -104,7 +100,7 @@ export function PushCampaignModal({ isOpen, onClose, leads }: Props) {
                 <span className="text-white text-5xl font-bold">?</span>
               </div>
               <h2 className="text-[28px] font-bold text-[#10201C] mb-8 leading-snug">
-                Are you sure you want to<br/>Re-assign leads to "{selectedCampaign}" campaign?
+                Are you sure you want to<br/>Re-assign leads to &quot;{selectedCampaign}&quot; campaign?
               </h2>
               
               <div className="text-left w-full mb-10">

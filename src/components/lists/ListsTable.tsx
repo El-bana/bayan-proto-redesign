@@ -5,7 +5,6 @@ import {
   Filter,
   Search,
   MoreVertical,
-  Paperclip,
   Plus,
   Trash2,
   Columns3,

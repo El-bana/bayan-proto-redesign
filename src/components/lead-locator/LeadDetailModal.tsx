@@ -266,10 +266,10 @@ export function LeadDetailModal({ isOpen, onClose, lead }: Props) {
                     </div>
                     <div className="pt-0 pb-16">
                       <p className="text-[#10201C] text-base font-medium">
-                        Lead Replied: "Not interested right now"
+                        Lead Replied: &quot;Not interested right now&quot;
                       </p>
                       <p className="text-[#10201C] text-base font-medium">
-                        From Campaign: "Q1 Mass Outreach" (Step 3)
+                        From Campaign: &quot;Q1 Mass Outreach&quot; (Step 3)
                       </p>
                     </div>
                   </div>
@@ -293,7 +293,7 @@ export function LeadDetailModal({ isOpen, onClose, lead }: Props) {
                         Email Sent via sender_1@company.com
                       </p>
                       <p className="text-[#10201C] text-base font-medium">
-                        From Campaign: "AI Personalization Pitch" (Step 1)
+                        From Campaign: &quot;AI Personalization Pitch&quot; (Step 1)
                       </p>
                     </div>
                   </div>
@@ -312,7 +312,7 @@ export function LeadDetailModal({ isOpen, onClose, lead }: Props) {
                         Email Opened (Open #2)
                       </p>
                       <p className="text-[#10201C] text-base font-medium">
-                        From Campaign: "AI Personalization Pitch" (Step 1)
+                        From Campaign: &quot;AI Personalization Pitch&quot; (Step 1)
                       </p>
                     </div>
                   </div>
