@@ -432,7 +432,7 @@ export default function CampaignsPage() {
           </div>
         </div> */}
       </div>
-      <div className="sticky bottom-0 z-20 w-full">
+      <div className="w-full mt-auto">
         <ProgressBar />
       </div>
     </main>

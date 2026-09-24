@@ -26,7 +26,7 @@ export function Flow({ step }: { step: FlowStep }) {
         {step === 'schedule' && <Schedule campaign={campaign} />}
         {step === 'launch' && <Launch campaign={campaign} />}
       </div>
-      <div className="mt-6">
+      <div className="w-full mt-auto">
         <ProgressBar />
       </div>
     </div>
