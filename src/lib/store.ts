@@ -7,6 +7,7 @@ export interface ICP {
   size: string;
   region: string;
   titles: string[];
+  isArchived?: boolean;
 }
 
 export interface Lead {
@@ -31,6 +32,7 @@ interface AppState {
   lists: LeadList[];
   addIcp: (icp: Omit<ICP, "id">) => void;
   deleteIcp: (id: string) => void;
+  archiveIcp: (id: string) => void;
   setLeads: (leads: Lead[]) => void;
   addList: (name: string, leadIds: string[]) => void;
   addToList: (listId: string, leadIds: string[]) => void;
@@ -161,6 +163,10 @@ export const useAppStore = create<AppState>((set) => ({
   addIcp: (icp) =>
     set((state) => ({
       icps: [...state.icps, { ...icp, id: crypto.randomUUID() }],
+    })),
+  archiveIcp: (id) => 
+    set((state) => ({
+      icps: state.icps.map(icp => icp.id === id ? { ...icp, isArchived: !icp.isArchived } : icp)
     })),
   deleteIcp: (id) =>
     set((state) => ({

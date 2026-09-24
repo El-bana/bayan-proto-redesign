@@ -1,12 +1,20 @@
 "use client";
 import { useAppStore } from "@/lib/store";
-import { Search, Plus, Archive, Filter, Edit, Play } from "lucide-react";
+import {
+  Archive,
+  ArchiveRestore,
+  Edit,
+  Filter,
+  Play,
+  Plus,
+  Search,
+} from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { IcpCreationModal } from "./IcpCreationModal";
-import { useRouter } from "next/navigation";
 
 export function IcpTable() {
-  const { icps, deleteIcp } = useAppStore();
+  const { icps, archiveIcp } = useAppStore();
   const [query, setQuery] = useState("");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -26,12 +34,12 @@ export function IcpTable() {
   };
 
   const handleBulkArchive = () => {
-    selectedIds.forEach((id) => deleteIcp(id));
+    selectedIds.forEach((id) => archiveIcp(id));
     setSelectedIds(new Set());
   };
 
   const handleArchiveOne = (id: string) => {
-    deleteIcp(id);
+    archiveIcp(id);
     setSelectedIds((prev) => {
       const next = new Set(prev);
       next.delete(id);
@@ -138,69 +146,81 @@ export function IcpTable() {
             </tr>
           </thead>
           <tbody>
-            {filteredIcps.map((icp) => (
-              <tr
-                key={icp.id}
-                className="border-b border-[#D3DEDB] last:border-none hover:bg-black/5 transition-colors group"
-              >
-                <td className="py-4 px-6">
-                  <input
-                    type="checkbox"
-                    className="w-5 h-5 rounded border-gray-300 text-[#0D8C7C] focus:ring-[#0D8C7C]"
-                    aria-label={`Select ${icp.name}`}
-                    checked={selectedIds.has(icp.id)}
-                    onChange={() => toggleOne(icp.id)}
-                  />
-                </td>
-                <td className="py-4 px-4 text-[16px] font-medium text-[#10201C]">
-                  {icp.name}
-                </td>
-                <td className="py-4 px-4 text-[16px] font-medium text-[#10201C]">
-                  {icp.industry}
-                </td>
-                <td className="py-4 px-4 text-[16px] font-medium text-[#10201C]">
-                  {icp.size}
-                </td>
-                <td className="py-4 px-4 text-[16px] font-medium text-[#10201C]">
-                  {icp.region}
-                </td>
-                <td className="py-4 px-4">
-                  <div className="flex flex-wrap gap-2">
-                    {icp.titles.map((title, tIdx) => (
-                      <span
-                        key={tIdx}
-                        className="px-2 py-1 bg-[#6F3FFF]/10 text-[#8000FF] rounded font-mono text-[13px]"
+            {[...filteredIcps]
+              .sort((a, b) => {
+                if (a.isArchived === b.isArchived) return 0;
+                return a.isArchived ? 1 : -1;
+              })
+              .map((icp) => (
+                <tr
+                  key={icp.id}
+                  className={`border-b border-[#D3DEDB] last:border-none hover:bg-black/5 transition-colors group ${icp.isArchived ? "opacity-50 grayscale bg-gray-50/50" : ""}`}
+                >
+                  <td className="py-4 px-6">
+                    <input
+                      type="checkbox"
+                      className="w-5 h-5 rounded border-gray-300 text-[#0D8C7C] focus:ring-[#0D8C7C]"
+                      aria-label={`Select ${icp.name}`}
+                      checked={selectedIds.has(icp.id)}
+                      onChange={() => toggleOne(icp.id)}
+                    />
+                  </td>
+                  <td className="py-4 px-4 text-[16px] font-medium text-[#10201C]">
+                    {icp.name}
+                  </td>
+                  <td className="py-4 px-4 text-[16px] font-medium text-[#10201C]">
+                    {icp.industry}
+                  </td>
+                  <td className="py-4 px-4 text-[16px] font-medium text-[#10201C]">
+                    {icp.size}
+                  </td>
+                  <td className="py-4 px-4 text-[16px] font-medium text-[#10201C]">
+                    {icp.region}
+                  </td>
+                  <td className="py-4 px-4">
+                    <div className="flex flex-wrap gap-2">
+                      {icp.titles.map((title, tIdx) => (
+                        <span
+                          key={tIdx}
+                          className="px-2 py-1 bg-[#6F3FFF]/10 text-[#8000FF] rounded font-mono text-[13px]"
+                        >
+                          {title}
+                        </span>
+                      ))}
+                    </div>
+                  </td>
+                  <td className="py-4 px-6">
+                    <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button
+                        onClick={() => handleArchiveOne(icp.id)}
+                        aria-label={`Archive ${icp.name}`}
+                        className="p-1.5 hover:bg-black/10 rounded-md text-[#445751]"
                       >
-                        {title}
-                      </span>
-                    ))}
-                  </div>
-                </td>
-                <td className="py-4 px-6">
-                  <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button
-                      onClick={() => handleArchiveOne(icp.id)}
-                      aria-label={`Archive ${icp.name}`}
-                      className="p-1.5 hover:bg-black/10 rounded-md text-[#445751]"
-                    >
-                      <Archive className="w-5 h-5" aria-hidden="true" />
-                    </button>
-                    <button
-                      aria-label={`Edit ${icp.name}`}
-                      className="p-1.5 hover:bg-black/10 rounded-md text-[#445751]"
-                    >
-                      <Edit className="w-5 h-5" aria-hidden="true" />
-                    </button>
-                    <button
-                      onClick={handleRunClick}
-                      className="flex items-center gap-1.5 px-3 py-1.5 bg-[#0D8C7C] text-white rounded shadow-sm hover:bg-[#14B39F] transition-colors font-medium text-sm"
-                    >
-                      <Play className="w-4 h-4" aria-hidden="true" /> Run
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
+                        {icp.isArchived ? (
+                          <ArchiveRestore
+                            className="w-5 h-5"
+                            aria-hidden="true"
+                          />
+                        ) : (
+                          <Archive className="w-5 h-5" aria-hidden="true" />
+                        )}
+                      </button>
+                      <button
+                        aria-label={`Edit ${icp.name}`}
+                        className="p-1.5 hover:bg-black/10 rounded-md text-[#445751]"
+                      >
+                        <Edit className="w-5 h-5" aria-hidden="true" />
+                      </button>
+                      <button
+                        onClick={handleRunClick}
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-[#0D8C7C] text-white rounded shadow-sm hover:bg-[#14B39F] transition-colors font-medium text-sm"
+                      >
+                        <Play className="w-4 h-4" aria-hidden="true" /> Run
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
           </tbody>
         </table>
         {filteredIcps.length === 0 && (
