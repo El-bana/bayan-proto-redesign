@@ -41,6 +41,7 @@ body {
   background: #445751;
 }
 
-button {
+button,
+select {
   cursor: pointer;
 }

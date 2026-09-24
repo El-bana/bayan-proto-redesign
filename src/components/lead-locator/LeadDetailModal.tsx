@@ -12,6 +12,7 @@ import {
   BriefcaseBusiness,
   RotateCw,
   Earth,
+  Factory,
 } from "lucide-react";
 import { Lead } from "@/lib/store";
 
@@ -104,7 +105,7 @@ export function LeadDetailModal({ isOpen, onClose, lead }: Props) {
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Building className="w-4 h-4 text-[#10201C]" />
+                    <Factory className="w-4 h-4 text-[#10201C]" />
                     <span className="font-semibold text-sm text-[#10201C]">
                       Games
                     </span>

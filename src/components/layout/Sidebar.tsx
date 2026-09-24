@@ -2,14 +2,11 @@
 import { useState } from "react";
 import {
   LayoutDashboard,
-  Briefcase,
   Mail,
   Settings,
-  PieChart,
   ChevronsRight,
   UserSearch,
   GraduationCap,
-  Book,
   type LucideIcon,
   SendHorizonal,
   BookOpen,
