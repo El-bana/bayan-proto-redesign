@@ -64,7 +64,7 @@ export function ListDetail() {
   return (
     <div className="flex-1 p-8 bg-[#F6F8F7] flex flex-col min-h-0 overflow-y-auto">
       <div className="flex items-center gap-3 mb-6">
-        <BriefcaseBusiness className="w-8 h-8 text-[#10201C]" />
+        <BriefcaseBusiness className="w-8 h-8 text-[#0D8C7C]" />
         <h1 className="text-2xl font-bold text-[#10201C]">
           Leads List <span className="font-medium">/ {list.name}</span>
         </h1>
@@ -166,7 +166,7 @@ export function ListDetail() {
       </div>
 
       {/* Toolbar */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-3">
           {/* Search Input */}
           <div className="relative w-[280px]">
@@ -240,7 +240,7 @@ export function ListDetail() {
                       listLeads.length > 0
                     }
                     onChange={toggleAll}
-                    className="w-4 h-4 rounded border-gray-300 accent-blue-600"
+                    className="w-4 h-4 rounded border-gray-300 accent-blue-600 cursor-pointer"
                   />
                 </th>
                 <th className="p-4 font-bold text-[#0E0E0E]">Lead Name</th>
@@ -274,7 +274,7 @@ export function ListDetail() {
                         type="checkbox"
                         checked={isSelected}
                         onChange={() => toggleOne(lead.id)}
-                        className="w-4 h-4 rounded border-gray-300 accent-blue-600"
+                        className="w-4 h-4 rounded border-gray-300 accent-blue-600 cursor-pointer"
                       />
                     </td>
                     <td

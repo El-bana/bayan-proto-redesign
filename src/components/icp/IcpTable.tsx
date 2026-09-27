@@ -3,8 +3,10 @@ import { useAppStore } from "@/lib/store";
 import {
   Archive,
   ArchiveRestore,
+  Columns3,
   Edit,
   Filter,
+  GraduationCap,
   Play,
   Plus,
   Search,
@@ -12,6 +14,7 @@ import {
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { IcpCreationModal } from "./IcpCreationModal";
+import ProgressBar from "../lists/ProgressBar";
 
 export function IcpTable() {
   const { icps, archiveIcp } = useAppStore();
@@ -60,11 +63,11 @@ export function IcpTable() {
   };
 
   return (
-    <div className="flex-1 p-8 bg-[#F6F8F7] flex flex-col min-h-0 overflow-y-auto w-full">
-      <div className="flex items-center gap-4 text-[#10201C]">
+    <div className="min-h-screen relative bg-[#F6F8F7] p-8 flex flex-col">
+      <div className="flex items-center gap-3 mb-6">
+        <GraduationCap className="w-8 h-8 text-[#0D8C7C]" />
         <h1 className="text-[25px] font-bold">ICP Library</h1>
       </div>
-
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <div className="flex items-center border border-[#D3DEDB] rounded-lg px-3 py-2 bg-white w-[242px]">
@@ -81,14 +84,20 @@ export function IcpTable() {
             />
           </div>
 
+          {/* Columns Toggle Button */}
+          <button className="py-2 px-4 border border-[#0D8C7C] rounded-lg bg-white text-[#0D8C7C] hover:bg-[#0D8C7C]/5 transition-colors">
+            <Columns3 className="w-5 h-5" />
+          </button>
+
+          {/* Selected State & Delete Action */}
           {selectedIds.size > 0 && (
-            <div className="flex items-center gap-4 bg-white/50 px-4 py-1.5 rounded-lg border border-[#D3DEDB]">
-              <span className="text-[14px] font-medium text-[#10201C]">
+            <div className="flex items-center gap-3 ml-1">
+              <span className="text-[#10201C] text-sm font-medium">
                 {selectedIds.size} selected
               </span>
               <button
                 onClick={handleBulkArchive}
-                className="flex items-center gap-1.5 text-sm text-[#445751] px-3 py-1.5 rounded-md hover:bg-black/5 transition-colors"
+                className="flex items-center gap-1.5 text-sm bg-black/20 text-black/80 font-semibold px-3 py-1.5 rounded-md hover:bg-black/5 transition-colors"
               >
                 <Archive className="w-4 h-4" aria-hidden="true" /> Archive
               </button>
@@ -97,8 +106,8 @@ export function IcpTable() {
         </div>
 
         <div className="flex items-center gap-3">
-          <button className="flex items-center gap-2 px-4 py-2 bg-white border border-[#0D8C7C] text-[#0D8C7C] rounded-lg text-sm font-medium hover:bg-black/5 transition-colors">
-            <Filter className="w-4 h-4" /> Filter
+          <button className="py-2 px-4 border border-[#0D8C7C] rounded-lg bg-white text-[#0D8C7C] hover:bg-[#0D8C7C]/5 transition-colors">
+            <Filter className="w-5 h-5" />
           </button>
           <button
             onClick={() => setIsModalOpen(true)}
@@ -108,15 +117,14 @@ export function IcpTable() {
           </button>
         </div>
       </div>
-
-      <div className="bg-[#ECF6F5] border border-[#D3DEDB] rounded-lg overflow-hidden mt-4">
+      <div className="bg-[#ECF6F5] border border-[#D3DEDB] rounded-lg overflow-hidden mt-2">
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="border-b border-[#D3DEDB]">
               <th className="py-4 px-6 w-12">
                 <input
                   type="checkbox"
-                  className="w-5 h-5 rounded border-gray-300 text-[#0D8C7C] focus:ring-[#0D8C7C]"
+                  className="w-4 h-4 rounded border-gray-300 accent-blue-600 cursor-pointer"
                   aria-label="Select all ICPs"
                   checked={
                     selectedIds.size === filteredIcps.length &&
@@ -140,7 +148,7 @@ export function IcpTable() {
               <th className="py-4 px-4 text-[16px] font-bold text-[#0E0E0E]">
                 Decision Maker Title
               </th>
-              <th className="py-4 px-6 text-[16px] font-bold text-[#0E0E0E] text-right">
+              <th className="py-4 px-6 text-[16px] font-bold text-[#0E0E0E]">
                 Action
               </th>
             </tr>
@@ -159,7 +167,7 @@ export function IcpTable() {
                   <td className="py-4 px-6">
                     <input
                       type="checkbox"
-                      className="w-5 h-5 rounded border-gray-300 text-[#0D8C7C] focus:ring-[#0D8C7C]"
+                      className="w-4 h-4 rounded border-gray-300 accent-blue-600 cursor-pointer"
                       aria-label={`Select ${icp.name}`}
                       checked={selectedIds.has(icp.id)}
                       onChange={() => toggleOne(icp.id)}
@@ -182,7 +190,7 @@ export function IcpTable() {
                       {icp.titles.map((title, tIdx) => (
                         <span
                           key={tIdx}
-                          className="px-2 py-1 bg-[#6F3FFF]/10 text-[#8000FF] rounded font-mono text-[13px]"
+                          className="px-4 py-1 bg-[#6F3FFF]/50 text-[#8000FF] rounded font-mono font-semibold text-[13px]"
                         >
                           {title}
                         </span>
@@ -190,7 +198,13 @@ export function IcpTable() {
                     </div>
                   </td>
                   <td className="py-4 px-6">
-                    <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={handleRunClick}
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-[#0D8C7C] text-white rounded shadow-sm hover:bg-[#14B39F] transition-colors font-medium text-sm"
+                      >
+                        <Play className="w-4 h-4" aria-hidden="true" /> Run
+                      </button>
                       <button
                         onClick={() => handleArchiveOne(icp.id)}
                         aria-label={`Archive ${icp.name}`}
@@ -211,12 +225,6 @@ export function IcpTable() {
                       >
                         <Edit className="w-5 h-5" aria-hidden="true" />
                       </button>
-                      <button
-                        onClick={handleRunClick}
-                        className="flex items-center gap-1.5 px-3 py-1.5 bg-[#0D8C7C] text-white rounded shadow-sm hover:bg-[#14B39F] transition-colors font-medium text-sm"
-                      >
-                        <Play className="w-4 h-4" aria-hidden="true" /> Run
-                      </button>
                     </div>
                   </td>
                 </tr>
@@ -229,11 +237,13 @@ export function IcpTable() {
           </div>
         )}
       </div>
-
       <IcpCreationModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
       />
+      <div className="sticky bottom-0 z-20 w-full">
+        <ProgressBar />
+      </div>
     </div>
   );
 }
