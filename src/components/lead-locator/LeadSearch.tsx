@@ -140,7 +140,7 @@ export function LeadSearch() {
       {/* Header */}
       <div className="mb-6 flex items-center gap-2">
         <span className="text-[#0D8C7C]">
-          <UserSearch className="w-6 h-6" />
+          <UserSearch className="w-8 h-8" />
         </span>
         <h1 className="text-xl font-bold text-[#10201C]">Lead Locator</h1>
       </div>

@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { SendHorizontal } from "lucide-react";
+import { Columns3, SendHorizontal } from "lucide-react";
 import Image from "next/image";
 import ProgressBar from "../lists/ProgressBar";
+import { useColumnVisibility } from "@/lib/useColumnVisibility";
+import ColumnVisibilityModal from "../layout/ColumnVisibilityModal";
 
 type Status = "Done" | "Paused" | "Active" | "Draft";
 
@@ -224,6 +226,16 @@ export default function CampaignsPage() {
     setSelected(new Set());
   };
 
+  const columnManager = useColumnVisibility([
+    { key: "name", label: "Campaign Name", isVisible: true },
+    { key: "totalLeads", label: "Total Leads", isVisible: true },
+    { key: "sent", label: "Sent", isVisible: true },
+    { key: "openRate", label: "Open Rate", isVisible: true },
+    { key: "replyRate", label: "Reply Rate", isVisible: true },
+    { key: "deliveryRate", label: "Delivery Rate", isVisible: true },
+    { key: "status", label: "Status", isVisible: true },
+  ]);
+
   return (
     <main className="min-h-screen relative bg-[#F6F8F7] p-8 flex flex-col">
       {/* Header */}
@@ -233,10 +245,10 @@ export default function CampaignsPage() {
         </span>
         <h1 className="text-[28px] font-bold text-[#10201C]">Campaigns</h1>
       </div>
-      <div className="flex-1 w-full rounded-xl bg-white p-6 border border-[#D3DEDB] shadow-sm">
+      <div className="flex-1 w-full rounded-xl">
         {/* Toolbar */}
-        <div className="mb-6 flex flex-wrap items-center gap-4">
-          <div className="flex items-center gap-2 rounded-lg border border-[#D3DEDB] px-3 py-2 text-sm text-[#7C8C87] bg-white h-[42px]">
+        <div className="mb-2 flex flex-wrap items-center gap-4">
+          <div className="flex items-center gap-2 rounded-lg border border-border-gray px-4 h-9 text-sm text-[#7C8C87] bg-white">
             <SearchIcon />
             <input
               value={search}
@@ -246,20 +258,11 @@ export default function CampaignsPage() {
             />
           </div>
 
-          <button className="flex items-center justify-center rounded-lg border border-[#0D8C7C] w-[42px] h-[42px] text-[#0D8C7C] hover:bg-teal-50 shrink-0">
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-              <line x1="9" y1="3" x2="9" y2="21" />
-            </svg>
+          <button
+            onClick={columnManager.openModal}
+            className="flex items-center justify-center rounded-lg border border-[#0D8C7C] px-4 h-9 text-[#0D8C7C] hover:bg-teal-50 shrink-0"
+          >
+            <Columns3 />
           </button>
 
           {selectedCount > 0 && (
@@ -270,7 +273,7 @@ export default function CampaignsPage() {
 
               <button
                 onClick={() => applyStatus("Paused")}
-                className="flex items-center gap-2 rounded-lg bg-[#FF9559] px-4 py-2 text-sm font-medium text-white hover:bg-orange-500 h-[42px]"
+                className="flex items-center gap-2 rounded-lg bg-[#FF9559] text-sm font-medium text-white hover:bg-orange-500 px-4 h-9"
               >
                 <Image
                   src="/pause-icon.png"
@@ -283,7 +286,7 @@ export default function CampaignsPage() {
               </button>
               <button
                 onClick={() => applyStatus("Active")}
-                className="flex items-center gap-2 rounded-lg bg-[#00C11A] px-4 py-2 text-sm font-medium text-white hover:bg-green-600 h-[42px]"
+                className="flex items-center gap-2 rounded-lg bg-[#00C11A] text-sm font-medium text-white hover:bg-green-600 px-4 h-9"
               >
                 <Image
                   src="/resume-icon.png"
@@ -296,7 +299,7 @@ export default function CampaignsPage() {
               </button>
               <button
                 onClick={removeSelected}
-                className="flex items-center gap-2 rounded-lg bg-[#2D2D2D] px-4 py-2 text-sm font-medium text-white hover:bg-black h-[42px]"
+                className="flex items-center gap-2 rounded-lg bg-[#2D2D2D] text-sm font-medium text-white hover:bg-black px-4 h-9"
               >
                 <Image
                   src="/archive-icon.png"
@@ -309,7 +312,7 @@ export default function CampaignsPage() {
               </button>
               <button
                 onClick={removeSelected}
-                className="flex items-center gap-2 rounded-lg bg-[#E20000] px-4 py-2 text-sm font-medium text-white hover:bg-red-700 h-[42px]"
+                className="flex items-center gap-2 rounded-lg bg-[#E20000] text-sm font-medium text-white hover:bg-red-700 px-4 h-9"
               >
                 <Image
                   src="/delete-icon.png"
@@ -324,10 +327,13 @@ export default function CampaignsPage() {
           )}
 
           <div className="ml-auto flex items-center gap-3">
-            <button className="flex items-center justify-center rounded-lg border border-[#0D8C7C] w-[42px] h-[42px] text-[#0D8C7C] hover:bg-teal-50">
+            <button className="flex items-center justify-center rounded-lg border border-[#0D8C7C] px-4 h-9 text-[#0D8C7C] hover:bg-teal-50">
               <FilterIcon />
             </button>
-            <button className="flex items-center gap-2 rounded-lg bg-[#0D8C7C] px-5 py-2 text-sm font-medium text-white hover:bg-[#14B39F] h-[42px]">
+            <button
+              onClick={() => (window.location.href = "/campaigns/new")}
+              className="flex items-center gap-2 rounded-lg bg-[#0D8C7C] text-sm font-medium text-white hover:bg-[#14B39F] px-4 h-9"
+            >
               <PlusIcon />
               New Campaign
             </button>
@@ -335,31 +341,59 @@ export default function CampaignsPage() {
         </div>
 
         {/* Table */}
-        <div className="rounded-xl border border-[#D3DEDB] overflow-hidden bg-[#F6F8F7]">
-          <table className="w-full text-sm text-left">
-            <thead className="border-b border-[#D3DEDB] text-[#10201C] font-bold">
+        <div className="rounded-lg border border-border-gray overflow-hidden">
+          <table className="w-full text-left border-collapse">
+            <thead className="sticky top-0 bg-[#ECF6F5] z-10">
               <tr>
-                <th className="w-12 px-6 py-4">
+                <th className="py-3 px-6 w-12 border-b border-border-gray">
                   <button onClick={toggleAll} aria-label="Select all campaigns">
                     <Checkbox checked={allChecked} />
                   </button>
                 </th>
-                <th className="px-4 py-4">Campaign Name</th>
-                <th className="px-4 py-4">Total Leads</th>
-                <th className="px-4 py-4">Sent</th>
-                <th className="px-4 py-4">Open Rate</th>
-                <th className="px-4 py-4">Reply Rate</th>
-                <th className="px-4 py-4">Delivery Rate</th>
-                <th className="px-4 py-4">Status</th>
+                {columnManager.isVisible("name") && (
+                  <th className="px-4 py-4 border-b border-border-gray">
+                    Campaign Name
+                  </th>
+                )}
+                {columnManager.isVisible("totalLeads") && (
+                  <th className="px-4 py-4 border-b border-border-gray">
+                    Total Leads
+                  </th>
+                )}
+                {columnManager.isVisible("sent") && (
+                  <th className="px-4 py-4 border-b border-border-gray">
+                    Sent
+                  </th>
+                )}
+                {columnManager.isVisible("openRate") && (
+                  <th className="px-4 py-4 border-b border-border-gray">
+                    Open Rate
+                  </th>
+                )}
+                {columnManager.isVisible("replyRate") && (
+                  <th className="px-4 py-4 border-b border-border-gray">
+                    Reply Rate
+                  </th>
+                )}
+                {columnManager.isVisible("deliveryRate") && (
+                  <th className="px-4 py-4 border-b border-border-gray">
+                    Delivery Rate
+                  </th>
+                )}
+                {columnManager.isVisible("status") && (
+                  <th className="px-4 py-4 border-b border-border-gray">
+                    Status
+                  </th>
+                )}
               </tr>
             </thead>
-            <tbody className="bg-white">
+            <tbody>
               {visible.map((c, idx) => {
                 const isChecked = selected.has(c.id);
                 return (
                   <tr
                     key={c.id}
-                    className={`border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors`}
+                    className="border-b border-[#D3DEDB] hover:bg-black/5 transition-colors"
                   >
                     <td className="px-6 py-4">
                       <button
@@ -370,34 +404,50 @@ export default function CampaignsPage() {
                         <Checkbox checked={isChecked} />
                       </button>
                     </td>
-                    <td
-                      className="px-4 py-4 font-medium text-slate-700 hover:text-[#0D8C7C] cursor-pointer"
-                      onClick={() =>
-                        (window.location.href = `/campaigns/${c.id}`)
-                      }
-                    >
-                      {c.name}
-                    </td>
-                    <td className="px-4 py-4 text-[#10201C]">
-                      {c.totalLeads ?? ""}
-                    </td>
-                    <td className="px-4 py-4 text-[#10201C]">{c.sent ?? ""}</td>
-                    <td className="px-4 py-4 font-medium text-[#1814F3]">
-                      {c.openRate !== null ? `${c.openRate}%` : ""}
-                    </td>
-                    <td className="px-4 py-4 font-medium text-[#00B218]">
-                      {c.replyRate !== null ? `${c.replyRate}%` : ""}
-                    </td>
-                    <td className="px-4 py-4 font-medium text-[#E20000]">
-                      {c.deliveryRate !== null ? `${c.deliveryRate}%` : ""}
-                    </td>
-                    <td className="px-4 py-4">
-                      <span
-                        className={`inline-flex min-w-[76px] items-center justify-center rounded px-3 py-1 text-xs font-medium ${statusStyles[c.status]}`}
+                    {columnManager.isVisible("name") && (
+                      <td
+                        className="px-4 py-4 font-medium text-slate-700 hover:text-[#0D8C7C] cursor-pointer"
+                        onClick={() =>
+                          (window.location.href = `/campaigns/${c.id}`)
+                        }
                       >
-                        {c.status}
-                      </span>
-                    </td>
+                        {c.name}
+                      </td>
+                    )}
+                    {columnManager.isVisible("totalLeads") && (
+                      <td className="px-4 py-4 text-[#10201C]">
+                        {c.totalLeads ?? ""}
+                      </td>
+                    )}
+                    {columnManager.isVisible("sent") && (
+                      <td className="px-4 py-4 text-[#10201C]">
+                        {c.sent ?? ""}
+                      </td>
+                    )}
+                    {columnManager.isVisible("openRate") && (
+                      <td className="px-4 py-4 font-medium text-[#1814F3]">
+                        {c.openRate !== null ? `${c.openRate}%` : ""}
+                      </td>
+                    )}
+                    {columnManager.isVisible("replyRate") && (
+                      <td className="px-4 py-4 font-medium text-[#00B218]">
+                        {c.replyRate !== null ? `${c.replyRate}%` : ""}
+                      </td>
+                    )}
+                    {columnManager.isVisible("deliveryRate") && (
+                      <td className="px-4 py-4 font-medium text-[#E20000]">
+                        {c.deliveryRate !== null ? `${c.deliveryRate}%` : ""}
+                      </td>
+                    )}
+                    {columnManager.isVisible("status") && (
+                      <td className="px-4 py-4">
+                        <span
+                          className={`inline-flex min-w-[76px] items-center justify-center rounded px-3 py-1 text-xs font-medium ${statusStyles[c.status]}`}
+                        >
+                          {c.status}
+                        </span>
+                      </td>
+                    )}
                   </tr>
                 );
               })}
@@ -432,6 +482,14 @@ export default function CampaignsPage() {
       <div className="sticky bottom-0 z-20 w-full">
         <ProgressBar />
       </div>
+      <ColumnVisibilityModal
+        isOpen={columnManager.isOpen}
+        onClose={columnManager.closeModal}
+        columns={columnManager.columns}
+        onToggleColumn={columnManager.toggleColumn}
+        onShowAll={columnManager.showAll}
+        onHideAll={columnManager.hideAll}
+      />
     </main>
   );
 }
