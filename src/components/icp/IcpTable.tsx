@@ -15,6 +15,8 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { IcpCreationModal } from "./IcpCreationModal";
 import ProgressBar from "../lists/ProgressBar";
+import { useColumnVisibility } from "@/lib/useColumnVisibility";
+import ColumnVisibilityModal from "../layout/ColumnVisibilityModal";
 
 export function IcpTable() {
   const { icps, archiveIcp } = useAppStore();
@@ -62,13 +64,21 @@ export function IcpTable() {
     setSelectedIds(newSet);
   };
 
+  const columnManager = useColumnVisibility([
+    { key: "name", label: "ICP Name", isVisible: true },
+    { key: "industry", label: "Industry", isVisible: true },
+    { key: "size", label: "Size", isVisible: true },
+    { key: "region", label: "Region", isVisible: true },
+    { key: "titles", label: "Decision Maker Title", isVisible: true },
+  ]);
+
   return (
     <div className="min-h-screen relative bg-[#F6F8F7] p-8 flex flex-col">
-      <div className="flex items-center gap-3 mb-6">
+      <div className="flex items-center gap-3 mb-4">
         <GraduationCap className="w-8 h-8 text-[#0D8C7C]" />
         <h1 className="text-[25px] font-bold">ICP Library</h1>
       </div>
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between py-2">
         <div className="flex items-center gap-4">
           <div className="flex items-center border border-[#D3DEDB] rounded-lg px-3 py-2 bg-white w-[242px]">
             <Search
@@ -85,7 +95,10 @@ export function IcpTable() {
           </div>
 
           {/* Columns Toggle Button */}
-          <button className="py-2 px-4 border border-[#0D8C7C] rounded-lg bg-white text-[#0D8C7C] hover:bg-[#0D8C7C]/5 transition-colors">
+          <button
+            onClick={columnManager.openModal}
+            className="py-2 px-4 border border-[#0D8C7C] rounded-lg bg-white text-[#0D8C7C] hover:bg-[#0D8C7C]/5 transition-colors"
+          >
             <Columns3 className="w-5 h-5" />
           </button>
 
@@ -117,9 +130,9 @@ export function IcpTable() {
           </button>
         </div>
       </div>
-      <div className="bg-[#ECF6F5] border border-[#D3DEDB] rounded-lg overflow-hidden mt-2">
+      <div className="rounded-lg border border-border-gray overflow-hidden">
         <table className="w-full text-left border-collapse">
-          <thead>
+          <thead className="sticky top-0 bg-[#ECF6F5] z-10">
             <tr className="border-b border-[#D3DEDB]">
               <th className="py-4 px-6 w-12">
                 <input
@@ -133,21 +146,31 @@ export function IcpTable() {
                   onChange={toggleAll}
                 />
               </th>
-              <th className="py-4 px-4 text-[16px] font-bold text-[#0E0E0E]">
-                ICP Name
-              </th>
-              <th className="py-4 px-4 text-[16px] font-bold text-[#0E0E0E]">
-                Industry
-              </th>
-              <th className="py-4 px-4 text-[16px] font-bold text-[#0E0E0E]">
-                Size
-              </th>
-              <th className="py-4 px-4 text-[16px] font-bold text-[#0E0E0E]">
-                Region
-              </th>
-              <th className="py-4 px-4 text-[16px] font-bold text-[#0E0E0E]">
-                Decision Maker Title
-              </th>
+              {columnManager.isVisible("name") && (
+                <th className="py-4 px-4 text-[16px] font-bold text-[#0E0E0E]">
+                  ICP Name
+                </th>
+              )}
+              {columnManager.isVisible("industry") && (
+                <th className="py-4 px-4 text-[16px] font-bold text-[#0E0E0E]">
+                  Industry
+                </th>
+              )}
+              {columnManager.isVisible("size") && (
+                <th className="py-4 px-4 text-[16px] font-bold text-[#0E0E0E]">
+                  Size
+                </th>
+              )}
+              {columnManager.isVisible("region") && (
+                <th className="py-4 px-4 text-[16px] font-bold text-[#0E0E0E]">
+                  Region
+                </th>
+              )}
+              {columnManager.isVisible("titles") && (
+                <th className="py-4 px-4 text-[16px] font-bold text-[#0E0E0E]">
+                  Decision Maker Title
+                </th>
+              )}
               <th className="py-4 px-6 text-[16px] font-bold text-[#0E0E0E]">
                 Action
               </th>
@@ -173,30 +196,40 @@ export function IcpTable() {
                       onChange={() => toggleOne(icp.id)}
                     />
                   </td>
-                  <td className="py-4 px-4 text-[16px] font-medium text-[#10201C]">
-                    {icp.name}
-                  </td>
-                  <td className="py-4 px-4 text-[16px] font-medium text-[#10201C]">
-                    {icp.industry}
-                  </td>
-                  <td className="py-4 px-4 text-[16px] font-medium text-[#10201C]">
-                    {icp.size}
-                  </td>
-                  <td className="py-4 px-4 text-[16px] font-medium text-[#10201C]">
-                    {icp.region}
-                  </td>
-                  <td className="py-4 px-4">
-                    <div className="flex flex-wrap gap-2">
-                      {icp.titles.map((title, tIdx) => (
-                        <span
-                          key={tIdx}
-                          className="px-4 py-1 bg-[#6F3FFF]/50 text-[#8000FF] rounded font-mono font-semibold text-[13px]"
-                        >
-                          {title}
-                        </span>
-                      ))}
-                    </div>
-                  </td>
+                  {columnManager.isVisible("name") && (
+                    <td className="py-4 px-4 text-[16px] font-medium text-[#10201C]">
+                      {icp.name}
+                    </td>
+                  )}
+                  {columnManager.isVisible("industry") && (
+                    <td className="py-4 px-4 text-[16px] font-medium text-[#10201C]">
+                      {icp.industry}
+                    </td>
+                  )}
+                  {columnManager.isVisible("size") && (
+                    <td className="py-4 px-4 text-[16px] font-medium text-[#10201C]">
+                      {icp.size}
+                    </td>
+                  )}
+                  {columnManager.isVisible("region") && (
+                    <td className="py-4 px-4 text-[16px] font-medium text-[#10201C]">
+                      {icp.region}
+                    </td>
+                  )}
+                  {columnManager.isVisible("titles") && (
+                    <td className="py-4 px-4">
+                      <div className="flex flex-wrap gap-2">
+                        {icp.titles.map((title, tIdx) => (
+                          <span
+                            key={tIdx}
+                            className="px-4 py-1 bg-[#6F3FFF]/50 text-[#8000FF] rounded font-mono font-semibold text-[13px]"
+                          >
+                            {title}
+                          </span>
+                        ))}
+                      </div>
+                    </td>
+                  )}
                   <td className="py-4 px-6">
                     <div className="flex items-center gap-2">
                       <button
@@ -244,6 +277,14 @@ export function IcpTable() {
       <div className="sticky bottom-0 z-20 w-full">
         <ProgressBar />
       </div>
+      <ColumnVisibilityModal
+        isOpen={columnManager.isOpen}
+        onClose={columnManager.closeModal}
+        columns={columnManager.columns}
+        onToggleColumn={columnManager.toggleColumn}
+        onShowAll={columnManager.showAll}
+        onHideAll={columnManager.hideAll}
+      />
     </div>
   );
 }

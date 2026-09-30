@@ -26,6 +26,8 @@ import { LeadDetailModal } from "@/components/lead-locator/LeadDetailModal";
 import { ReassignModal } from "./ReassignModal";
 import { PushCampaignModal } from "./PushCampaignModal";
 import ProgressBar from "./ProgressBar";
+import { useColumnVisibility } from "@/lib/useColumnVisibility";
+import ColumnVisibilityModal from "../layout/ColumnVisibilityModal";
 
 export function ListDetail() {
   const params = useParams();
@@ -60,6 +62,16 @@ export function ListDetail() {
     else newSet.add(id);
     setSelectedIds(newSet);
   };
+
+  const columnManager = useColumnVisibility([
+    { key: "name", label: "Lead Name", isVisible: true },
+    { key: "jobTitle", label: "Job Title", isVisible: true },
+    { key: "company", label: "Company", isVisible: true },
+    { key: "email", label: "Email", isVisible: true },
+    { key: "health", label: "Health", isVisible: true },
+    { key: "location", label: "Location", isVisible: true },
+    { key: "fitScore", label: "Score Fit", isVisible: true },
+  ]);
 
   return (
     <div className="flex-1 p-8 bg-[#F6F8F7] flex flex-col min-h-0 overflow-y-auto">
@@ -180,7 +192,7 @@ export function ListDetail() {
 
           {/* Columns Button */}
           <button className="py-2 px-4 border border-[#0D8C7C] rounded-lg bg-white text-[#0D8C7C] hover:bg-[#0D8C7C]/5 transition-colors">
-            <Columns3 className="w-5 h-5" />
+            <Columns3 onClick={columnManager.openModal} className="w-5 h-5" />
           </button>
 
           {/* Selected Actions - Only Visible When Items Selected */}
@@ -227,65 +239,103 @@ export function ListDetail() {
       </div>
 
       {/* Table */}
-      <div className="bg-[#ECF6F5] border border-[#D3DEDB] rounded-xl flex-1 flex flex-col overflow-hidden">
-        <div className="overflow-x-auto flex-1">
-          <table className="w-full text-left">
-            <thead className="bg-[#ECF6F5] sticky top-0 z-10 border-b border-[#D3DEDB]">
-              <tr>
-                <th className="p-4 w-12">
-                  <input
-                    type="checkbox"
-                    checked={
-                      selectedIds.size === listLeads.length &&
-                      listLeads.length > 0
-                    }
-                    onChange={toggleAll}
-                    className="w-4 h-4 rounded border-gray-300 accent-blue-600 cursor-pointer"
-                  />
+      <div className="rounded-lg border border-border-gray overflow-hidden">
+        <table className="w-full text-left border-collapse">
+          <thead className="sticky top-0 bg-[#ECF6F5] z-10">
+            <tr>
+              <th className="p-4 w-12 border-b border-border-gray">
+                <input
+                  type="checkbox"
+                  checked={
+                    selectedIds.size === listLeads.length &&
+                    listLeads.length > 0
+                  }
+                  onChange={toggleAll}
+                  className="w-4 h-4 rounded border-gray-300 accent-blue-600 cursor-pointer"
+                />
+              </th>
+              {columnManager.isVisible("name") && (
+                <th className="p-4 font-bold text-[#0E0E0E] border-b border-border-gray">
+                  Lead Name
                 </th>
-                <th className="p-4 font-bold text-[#0E0E0E]">Lead Name</th>
-                <th className="p-4 font-bold text-[#0E0E0E]">Job Title</th>
-                <th className="p-4 font-bold text-[#0E0E0E]">Company</th>
-                <th className="p-4 font-bold text-[#0E0E0E]">Email</th>
-                <th className="p-4 font-bold text-[#0E0E0E]">Health</th>
-                <th className="p-4 font-bold text-[#0E0E0E]">Location</th>
-                <th className="p-4 font-bold text-[#0E0E0E]">Score Fit</th>
-                <th className="p-4 font-bold text-[#0E0E0E]">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {listLeads.map((lead) => {
-                const isSelected = selectedIds.has(lead.id);
-                // Mock health based on index for variety
-                const healthType =
-                  Number(lead.id) % 3 === 0
-                    ? "Risky"
-                    : Number(lead.id) % 5 === 0
-                      ? "Invalid"
-                      : "Verified";
+              )}
+              {columnManager.isVisible("jobTitle") && (
+                <th className="p-4 font-bold text-[#0E0E0E] border-b border-border-gray">
+                  Job Title
+                </th>
+              )}
+              {columnManager.isVisible("company") && (
+                <th className="p-4 font-bold text-[#0E0E0E] border-b border-border-gray">
+                  Company
+                </th>
+              )}
+              {columnManager.isVisible("email") && (
+                <th className="p-4 font-bold text-[#0E0E0E] border-b border-border-gray">
+                  Email
+                </th>
+              )}
+              {columnManager.isVisible("health") && (
+                <th className="p-4 font-bold text-[#0E0E0E] border-b border-border-gray">
+                  Health
+                </th>
+              )}
+              {columnManager.isVisible("location") && (
+                <th className="p-4 font-bold text-[#0E0E0E] border-b border-border-gray">
+                  Location
+                </th>
+              )}
+              {columnManager.isVisible("fitScore") && (
+                <th className="p-4 font-bold text-[#0E0E0E] border-b border-border-gray">
+                  Score Fit
+                </th>
+              )}
+              <th className="p-4 font-bold text-[#0E0E0E] border-b border-border-gray">
+                Action
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {listLeads.map((lead) => {
+              const isSelected = selectedIds.has(lead.id);
+              // Mock health based on index for variety
+              const healthType =
+                Number(lead.id) % 3 === 0
+                  ? "Risky"
+                  : Number(lead.id) % 5 === 0
+                    ? "Invalid"
+                    : "Verified";
 
-                return (
-                  <tr
-                    key={lead.id}
-                    className={`border-b border-[#D3DEDB] transition-colors ${isSelected ? "bg-[#0D8C7C]/5" : "hover:bg-black/5"}`}
-                  >
-                    <td className="p-4">
-                      <input
-                        type="checkbox"
-                        checked={isSelected}
-                        onChange={() => toggleOne(lead.id)}
-                        className="w-4 h-4 rounded border-gray-300 accent-blue-600 cursor-pointer"
-                      />
-                    </td>
+              return (
+                <tr
+                  key={lead.id}
+                  className={`border-b border-[#D3DEDB] transition-colors ${isSelected ? "bg-[#0D8C7C]/5" : "hover:bg-black/5"}`}
+                >
+                  <td className="p-4">
+                    <input
+                      type="checkbox"
+                      checked={isSelected}
+                      onChange={() => toggleOne(lead.id)}
+                      className="w-4 h-4 rounded border-gray-300 accent-blue-600 cursor-pointer"
+                    />
+                  </td>
+                  {columnManager.isVisible("name") && (
                     <td
                       className="p-4 font-medium text-[#10201C] underline cursor-pointer hover:text-[#0D8C7C]"
                       onClick={() => setDetailModalLead(lead)}
                     >
                       {lead.name}
                     </td>
+                  )}
+                  {columnManager.isVisible("jobTitle") && (
                     <td className="p-4 text-[#10201C]">{lead.jobTitle}</td>
+                  )}
+                  {columnManager.isVisible("company") && (
                     <td className="p-4 text-[#10201C]">{lead.company}</td>
+                  )}
+                  {columnManager.isVisible("email") && (
                     <td className="p-4 text-[#10201C]">{lead.email}</td>
+                  )}
+                  {columnManager.isVisible("health") && (
                     <td className="p-4">
                       <span
                         className={cn(
@@ -300,30 +350,34 @@ export function ListDetail() {
                         {healthType}
                       </span>
                     </td>
+                  )}
+                  {columnManager.isVisible("location") && (
                     <td className="p-4 text-[#10201C]">{lead.location}</td>
+                  )}
+                  {columnManager.isVisible("fitScore") && (
                     <td className="p-4 font-bold text-[#0D8C7C]">
                       {lead.fitScore}%
                     </td>
-                    <td className="p-4">
-                      <div className="flex gap-4 items-center">
-                        <Play className="w-5 h-5 text-[#10201C] cursor-pointer hover:opacity-70" />
-                        <Paperclip className="w-5 h-5 text-[#10201C] cursor-pointer hover:opacity-70" />
-                        <MoreVertical className="w-5 h-5 text-[#10201C] cursor-pointer hover:opacity-70" />
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-              {listLeads.length === 0 && (
-                <tr>
-                  <td colSpan={9} className="p-8 text-center text-[#7C8C87]">
-                    No leads found in this list.
+                  )}
+                  <td className="p-4">
+                    <div className="flex gap-4 items-center">
+                      <Play className="w-5 h-5 text-[#10201C] cursor-pointer hover:opacity-70" />
+                      <Paperclip className="w-5 h-5 text-[#10201C] cursor-pointer hover:opacity-70" />
+                      <MoreVertical className="w-5 h-5 text-[#10201C] cursor-pointer hover:opacity-70" />
+                    </div>
                   </td>
                 </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+              );
+            })}
+            {listLeads.length === 0 && (
+              <tr>
+                <td colSpan={9} className="p-8 text-center text-[#7C8C87]">
+                  No leads found in this list.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </div>
 
       <LeadDetailModal
@@ -343,6 +397,16 @@ export function ListDetail() {
         onClose={() => setIsPushOpen(false)}
         leads={listLeads.filter((l) => selectedIds.has(l.id))}
       />
+
+      <ColumnVisibilityModal
+        isOpen={columnManager.isOpen}
+        onClose={columnManager.closeModal}
+        columns={columnManager.columns}
+        onToggleColumn={columnManager.toggleColumn}
+        onShowAll={columnManager.showAll}
+        onHideAll={columnManager.hideAll}
+      />
+
       <ProgressBar />
     </div>
   );

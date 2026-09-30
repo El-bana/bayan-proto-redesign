@@ -15,6 +15,8 @@ import {
 } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { LeadDetailModal } from "./LeadDetailModal";
+import { useColumnVisibility } from "@/lib/useColumnVisibility";
+import ColumnVisibilityModal from "../layout/ColumnVisibilityModal";
 
 interface LeadTableProps {
   showIcpScores: boolean;
@@ -87,6 +89,15 @@ export function LeadTable({ showIcpScores }: LeadTableProps) {
     selectedIds.size > 0 &&
     Array.from(selectedIds).every((id) => enrichedIds.has(id));
 
+  const columnManager = useColumnVisibility([
+    { key: "name", label: "full name", isVisible: true },
+    { key: "jobTitle", label: "Job Title", isVisible: true },
+    { key: "company", label: "Company", isVisible: true },
+    { key: "email", label: "Email", isVisible: true },
+    { key: "location", label: "Location", isVisible: true },
+    { key: "fitScore", label: "Score Fit", isVisible: true },
+  ]);
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -105,7 +116,7 @@ export function LeadTable({ showIcpScores }: LeadTableProps) {
             />
           </div>
           <button className="flex items-center justify-center rounded-lg border border-[#0D8C7C] px-4 h-9 text-[#0D8C7C] bg-white hover:bg-[#0D8C7C]/5">
-            <Columns3 className="w-4 h-4" />
+            <Columns3 onClick={columnManager.openModal} className="w-4 h-4" />
           </button>
 
           <button
@@ -176,7 +187,7 @@ export function LeadTable({ showIcpScores }: LeadTableProps) {
             </p>
           </div>
         ) : (
-          <div className="rounded-xl border border-[#D3DEDB] overflow-hidden">
+          <div className="rounded-lg border border-[#D3DEDB] overflow-hidden">
             <table className="w-full text-left border-collapse">
               <thead className="sticky top-0 bg-[#ECF6F5] z-10">
                 <tr>
@@ -192,24 +203,36 @@ export function LeadTable({ showIcpScores }: LeadTableProps) {
                       style={{ accentColor: "#3476E3" }}
                     />
                   </th>
-                  <th className="py-4 px-4 text-[14px] font-bold text-[#0E0E0E] border-b border-[#D3DEDB]">
-                    full name
-                  </th>
-                  <th className="py-4 px-4 text-[14px] font-bold text-[#0E0E0E] border-b border-[#D3DEDB]">
-                    Job Title
-                  </th>
-                  <th className="py-4 px-4 text-[14px] font-bold text-[#0E0E0E] border-b border-[#D3DEDB]">
-                    Company
-                  </th>
-                  <th className="py-4 px-4 text-[14px] font-bold text-[#0E0E0E] border-b border-[#D3DEDB]">
-                    Email
-                  </th>
-                  <th className="py-4 px-4 text-[14px] font-bold text-[#0E0E0E] border-b border-[#D3DEDB]">
-                    Location
-                  </th>
-                  <th className="py-4 px-6 text-[14px] font-bold text-[#0E0E0E] text-center border-b border-[#D3DEDB]">
-                    Score Fit
-                  </th>
+                  {columnManager.isVisible("name") && (
+                    <th className="py-4 px-4 text-[14px] font-bold text-[#0E0E0E] border-b border-[#D3DEDB]">
+                      full name
+                    </th>
+                  )}
+                  {columnManager.isVisible("jobTitle") && (
+                    <th className="py-4 px-4 text-[14px] font-bold text-[#0E0E0E] border-b border-[#D3DEDB]">
+                      Job Title
+                    </th>
+                  )}
+                  {columnManager.isVisible("company") && (
+                    <th className="py-4 px-4 text-[14px] font-bold text-[#0E0E0E] border-b border-[#D3DEDB]">
+                      Company
+                    </th>
+                  )}
+                  {columnManager.isVisible("email") && (
+                    <th className="py-4 px-4 text-[14px] font-bold text-[#0E0E0E] border-b border-[#D3DEDB]">
+                      Email
+                    </th>
+                  )}
+                  {columnManager.isVisible("location") && (
+                    <th className="py-4 px-4 text-[14px] font-bold text-[#0E0E0E] border-b border-[#D3DEDB]">
+                      Location
+                    </th>
+                  )}
+                  {columnManager.isVisible("fitScore") && (
+                    <th className="py-4 px-6 text-[14px] font-bold text-[#0E0E0E] text-center border-b border-[#D3DEDB]">
+                      Score Fit
+                    </th>
+                  )}
                 </tr>
               </thead>
               <tbody>
@@ -230,43 +253,55 @@ export function LeadTable({ showIcpScores }: LeadTableProps) {
                           style={{ accentColor: "#3476E3" }}
                         />
                       </td>
-                      <td className="py-4 px-4 text-[14px] font-medium text-[#10201C]">
-                        {lead.name}
-                      </td>
-                      <td className="py-4 px-4 text-[14px] font-medium text-[#10201C]">
-                        {lead.jobTitle}
-                      </td>
-                      <td className="py-4 px-4 text-[14px] font-medium text-[#10201C]">
-                        {lead.company}
-                      </td>
-                      <td className="py-4 px-4 text-[14px] font-medium">
-                        {isEnriched ? (
-                          <span className="text-[#0D8C7C] font-medium">
-                            {lead.email}
-                          </span>
-                        ) : (
-                          <button
-                            onClick={() => handleEnrichOne(lead.id)}
-                            className="px-3 py-1.5 text-xs font-medium text-[#0D8C7C] border border-[#0D8C7C] rounded-md hover:bg-[#0D8C7C]/5 transition-colors"
-                          >
-                            Access Email
-                          </button>
-                        )}
-                      </td>
-                      <td className="py-4 px-4 text-[14px] font-medium text-[#10201C]">
-                        {lead.location}
-                      </td>
-                      <td className="py-4 px-6 text-center">
-                        {showIcpScores ? (
-                          <span className="text-[#0D8C7C] font-bold">
-                            {lead.fitScore}%
-                          </span>
-                        ) : (
-                          <span className="text-[#0D8C7C] font-bold text-center">
-                            N/A
-                          </span>
-                        )}
-                      </td>
+                      {columnManager.isVisible("name") && (
+                        <td className="py-4 px-4 text-[14px] font-medium text-[#10201C]">
+                          {lead.name}
+                        </td>
+                      )}
+                      {columnManager.isVisible("jobTitle") && (
+                        <td className="py-4 px-4 text-[14px] font-medium text-[#10201C]">
+                          {lead.jobTitle}
+                        </td>
+                      )}
+                      {columnManager.isVisible("company") && (
+                        <td className="py-4 px-4 text-[14px] font-medium text-[#10201C]">
+                          {lead.company}
+                        </td>
+                      )}
+                      {columnManager.isVisible("email") && (
+                        <td className="py-4 px-4 text-[14px] font-medium">
+                          {isEnriched ? (
+                            <span className="text-[#0D8C7C] font-medium">
+                              {lead.email}
+                            </span>
+                          ) : (
+                            <button
+                              onClick={() => handleEnrichOne(lead.id)}
+                              className="px-3 py-1.5 text-xs font-medium text-[#0D8C7C] border border-[#0D8C7C] rounded-md hover:bg-[#0D8C7C]/5 transition-colors"
+                            >
+                              Access Email
+                            </button>
+                          )}
+                        </td>
+                      )}
+                      {columnManager.isVisible("location") && (
+                        <td className="py-4 px-4 text-[14px] font-medium text-[#10201C]">
+                          {lead.location}
+                        </td>
+                      )}
+                      {columnManager.isVisible("fitScore") && (
+                        <td className="py-4 px-6 text-center">
+                          {showIcpScores ? (
+                            <span className="text-[#0D8C7C] font-bold">
+                              {lead.fitScore}%
+                            </span>
+                          ) : (
+                            <span className="text-[#0D8C7C] font-bold text-center">
+                              N/A
+                            </span>
+                          )}
+                        </td>
+                      )}
                     </tr>
                   );
                 })}
@@ -314,6 +349,14 @@ export function LeadTable({ showIcpScores }: LeadTableProps) {
           </motion.div>
         )}
       </AnimatePresence>
+      <ColumnVisibilityModal
+        isOpen={columnManager.isOpen}
+        onClose={columnManager.closeModal}
+        columns={columnManager.columns}
+        onToggleColumn={columnManager.toggleColumn}
+        onShowAll={columnManager.showAll}
+        onHideAll={columnManager.hideAll}
+      />
     </motion.div>
   );
 }
