@@ -341,47 +341,52 @@ export default function CampaignsPage() {
         </div>
 
         {/* Table */}
-        <div className="rounded-lg border border-border-gray overflow-hidden">
-          <table className="w-full text-left border-collapse">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-separate border-spacing-0">
             <thead className="sticky top-0 bg-[#ECF6F5] z-10">
-              <tr>
-                <th className="py-3 px-6 w-12 border-b border-border-gray">
-                  <button onClick={toggleAll} aria-label="Select all campaigns">
-                    <Checkbox checked={allChecked} />
-                  </button>
+              <tr className="bg-[#ECF6F5] text-sm font-semibold text-[#10201C]">
+                <th className="py-2 px-4 rounded-l-lg border-y border-l border-[#D3DEDB] w-12">
+                  <div className="flex items-center">
+                    <button
+                      onClick={toggleAll}
+                      aria-label="Select all campaigns"
+                    >
+                      <Checkbox checked={allChecked} />
+                    </button>
+                  </div>
                 </th>
                 {columnManager.isVisible("name") && (
-                  <th className="px-4 py-4 border-b border-border-gray">
+                  <th className="py-2 px-4 border-y border-border-gray">
                     Campaign Name
                   </th>
                 )}
                 {columnManager.isVisible("totalLeads") && (
-                  <th className="px-4 py-4 border-b border-border-gray">
+                  <th className="py-2 px-4 border-y border-border-gray">
                     Total Leads
                   </th>
                 )}
                 {columnManager.isVisible("sent") && (
-                  <th className="px-4 py-4 border-b border-border-gray">
+                  <th className="py-2 px-4 border-y border-border-gray">
                     Sent
                   </th>
                 )}
                 {columnManager.isVisible("openRate") && (
-                  <th className="px-4 py-4 border-b border-border-gray">
+                  <th className="py-2 px-4 border-y border-border-gray">
                     Open Rate
                   </th>
                 )}
                 {columnManager.isVisible("replyRate") && (
-                  <th className="px-4 py-4 border-b border-border-gray">
+                  <th className="py-2 px-4 border-y border-border-gray">
                     Reply Rate
                   </th>
                 )}
                 {columnManager.isVisible("deliveryRate") && (
-                  <th className="px-4 py-4 border-b border-border-gray">
+                  <th className="py-2 px-4 border-y border-border-gray">
                     Delivery Rate
                   </th>
                 )}
                 {columnManager.isVisible("status") && (
-                  <th className="px-4 py-4 border-b border-border-gray">
+                  <th className="py-2 px-4 rounded-r-lg border-y border-r border-[#D3DEDB]">
                     Status
                   </th>
                 )}
@@ -395,7 +400,7 @@ export default function CampaignsPage() {
                     key={c.id}
                     className="border-b border-[#D3DEDB] hover:bg-black/5 transition-colors"
                   >
-                    <td className="px-6 py-4">
+                    <td className="py-3 px-4 border-b border-[#D3DEDB]">
                       <button
                         onClick={() => toggleRow(c.id)}
                         aria-label={`Select ${c.name}`}
@@ -406,7 +411,7 @@ export default function CampaignsPage() {
                     </td>
                     {columnManager.isVisible("name") && (
                       <td
-                        className="px-4 py-4 font-medium text-slate-700 hover:text-[#0D8C7C] cursor-pointer"
+                        className="py-3 px-4 font-semibold border-b border-[#D3DEDB] text-slate-700 hover:text-[#0D8C7C] cursor-pointer"
                         onClick={() =>
                           (window.location.href = `/campaigns/${c.id}`)
                         }
@@ -415,32 +420,32 @@ export default function CampaignsPage() {
                       </td>
                     )}
                     {columnManager.isVisible("totalLeads") && (
-                      <td className="px-4 py-4 text-[#10201C]">
+                      <td className="py-3 px-4 border-b border-border-gray text-[#10201C]">
                         {c.totalLeads ?? ""}
                       </td>
                     )}
                     {columnManager.isVisible("sent") && (
-                      <td className="px-4 py-4 text-[#10201C]">
+                      <td className="py-3 px-4 border-b border-border-gray text-[#10201C]">
                         {c.sent ?? ""}
                       </td>
                     )}
                     {columnManager.isVisible("openRate") && (
-                      <td className="px-4 py-4 font-medium text-[#1814F3]">
+                      <td className="py-3 px-4 border-b border-border-gray font-medium text-[#1814F3]">
                         {c.openRate !== null ? `${c.openRate}%` : ""}
                       </td>
                     )}
                     {columnManager.isVisible("replyRate") && (
-                      <td className="px-4 py-4 font-medium text-[#00B218]">
+                      <td className="py-3 px-4 border-b border-border-gray font-medium text-[#00B218]">
                         {c.replyRate !== null ? `${c.replyRate}%` : ""}
                       </td>
                     )}
                     {columnManager.isVisible("deliveryRate") && (
-                      <td className="px-4 py-4 font-medium text-[#E20000]">
+                      <td className="py-3 px-4 border-b border-border-gray font-medium text-[#E20000]">
                         {c.deliveryRate !== null ? `${c.deliveryRate}%` : ""}
                       </td>
                     )}
                     {columnManager.isVisible("status") && (
-                      <td className="px-4 py-4">
+                      <td className="py-3 px-4 border-b border-border-gray">
                         <span
                           className={`inline-flex min-w-[76px] items-center justify-center rounded px-3 py-1 text-xs font-medium ${statusStyles[c.status]}`}
                         >

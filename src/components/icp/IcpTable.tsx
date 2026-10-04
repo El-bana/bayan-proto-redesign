@@ -130,53 +130,51 @@ export function IcpTable() {
           </button>
         </div>
       </div>
-      <div className="rounded-lg border border-border-gray overflow-hidden">
-        <table className="w-full text-left border-collapse">
-          <thead className="sticky top-0 bg-[#ECF6F5] z-10">
-            <tr className="border-b border-[#D3DEDB]">
-              <th className="py-4 px-6 w-12">
-                <input
-                  type="checkbox"
-                  className="w-4 h-4 rounded border-gray-300 accent-blue-600 cursor-pointer"
-                  aria-label="Select all ICPs"
-                  checked={
-                    selectedIds.size === filteredIcps.length &&
-                    filteredIcps.length > 0
-                  }
-                  onChange={toggleAll}
-                />
+      <div className="overflow-x-auto">
+        <table className="w-full text-left border-separate border-spacing-0">
+          <thead>
+            <tr className="bg-[#ECF6F5] text-sm font-semibold text-[#10201C]">
+              <th className="py-2 px-4 rounded-l-lg border-y border-l border-[#D3DEDB] w-12 align-middle">
+                <div className="flex items-center justify-center">
+                  <input
+                    type="checkbox"
+                    className="w-4 h-4 rounded border-gray-300 accent-blue-600 cursor-pointer"
+                    aria-label="Select all ICPs"
+                    checked={
+                      selectedIds.size === filteredIcps.length &&
+                      filteredIcps.length > 0
+                    }
+                    onChange={toggleAll}
+                  />
+                </div>
               </th>
               {columnManager.isVisible("name") && (
-                <th className="py-4 px-4 text-[16px] font-bold text-[#0E0E0E]">
+                <th className="py-2 px-4 border-y border-[#D3DEDB]">
                   ICP Name
                 </th>
               )}
               {columnManager.isVisible("industry") && (
-                <th className="py-4 px-4 text-[16px] font-bold text-[#0E0E0E]">
+                <th className="py-2 px-4 border-y border-[#D3DEDB]">
                   Industry
                 </th>
               )}
               {columnManager.isVisible("size") && (
-                <th className="py-4 px-4 text-[16px] font-bold text-[#0E0E0E]">
-                  Size
-                </th>
+                <th className="py-2 px-4 border-y border-[#D3DEDB]">Size</th>
               )}
               {columnManager.isVisible("region") && (
-                <th className="py-4 px-4 text-[16px] font-bold text-[#0E0E0E]">
-                  Region
-                </th>
+                <th className="py-2 px-4 border-y border-[#D3DEDB]">Region</th>
               )}
               {columnManager.isVisible("titles") && (
-                <th className="py-4 px-4 text-[16px] font-bold text-[#0E0E0E]">
+                <th className="py-2 px-4 border-y border-[#D3DEDB]">
                   Decision Maker Title
                 </th>
               )}
-              <th className="py-4 px-6 text-[16px] font-bold text-[#0E0E0E]">
+              <th className="py-2 px-4 rounded-r-lg border-y border-r border-[#D3DEDB] text-center">
                 Action
               </th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="text-sm text-[#10201C]">
             {[...filteredIcps]
               .sort((a, b) => {
                 if (a.isArchived === b.isArchived) return 0;
@@ -185,44 +183,50 @@ export function IcpTable() {
               .map((icp) => (
                 <tr
                   key={icp.id}
-                  className={`border-b border-[#D3DEDB] last:border-none hover:bg-black/5 transition-colors group ${icp.isArchived ? "opacity-50 grayscale bg-gray-50/50" : ""}`}
+                  className={`transition-colors group ${
+                    icp.isArchived
+                      ? "opacity-50 grayscale bg-gray-50/50"
+                      : "hover:bg-black/5"
+                  }`}
                 >
-                  <td className="py-4 px-6">
-                    <input
-                      type="checkbox"
-                      className="w-4 h-4 rounded border-gray-300 accent-blue-600 cursor-pointer"
-                      aria-label={`Select ${icp.name}`}
-                      checked={selectedIds.has(icp.id)}
-                      onChange={() => toggleOne(icp.id)}
-                    />
+                  <td className="py-3 px-4 border-b border-[#D3DEDB] align-middle">
+                    <div className="flex items-center justify-center">
+                      <input
+                        type="checkbox"
+                        className="w-4 h-4 rounded border-gray-300 accent-blue-600 cursor-pointer"
+                        aria-label={`Select ${icp.name}`}
+                        checked={selectedIds.has(icp.id)}
+                        onChange={() => toggleOne(icp.id)}
+                      />
+                    </div>
                   </td>
                   {columnManager.isVisible("name") && (
-                    <td className="py-4 px-4 text-[16px] font-medium text-[#10201C]">
+                    <td className="py-3 px-4 font-semibold border-b border-[#D3DEDB]">
                       {icp.name}
                     </td>
                   )}
                   {columnManager.isVisible("industry") && (
-                    <td className="py-4 px-4 text-[16px] font-medium text-[#10201C]">
+                    <td className="py-3 px-4 border-b border-[#D3DEDB] text-gray-700">
                       {icp.industry}
                     </td>
                   )}
                   {columnManager.isVisible("size") && (
-                    <td className="py-4 px-4 text-[16px] font-medium text-[#10201C]">
+                    <td className="py-3 px-4 border-b border-[#D3DEDB] text-gray-700">
                       {icp.size}
                     </td>
                   )}
                   {columnManager.isVisible("region") && (
-                    <td className="py-4 px-4 text-[16px] font-medium text-[#10201C]">
+                    <td className="py-3 px-4 border-b border-[#D3DEDB] text-gray-700">
                       {icp.region}
                     </td>
                   )}
                   {columnManager.isVisible("titles") && (
-                    <td className="py-4 px-4">
+                    <td className="py-3 px-4 border-b border-[#D3DEDB]">
                       <div className="flex flex-wrap gap-2">
                         {icp.titles.map((title, tIdx) => (
                           <span
                             key={tIdx}
-                            className="px-4 py-1 bg-[#6F3FFF]/50 text-[#8000FF] rounded font-mono font-semibold text-[13px]"
+                            className="px-3 py-1 bg-[#6F3FFF]/10 text-[#8000FF] rounded font-mono font-semibold text-xs"
                           >
                             {title}
                           </span>
@@ -230,13 +234,13 @@ export function IcpTable() {
                       </div>
                     </td>
                   )}
-                  <td className="py-4 px-6">
-                    <div className="flex items-center gap-2">
+                  <td className="py-3 px-4 border-b border-[#D3DEDB]">
+                    <div className="flex items-center justify-center gap-2">
                       <button
                         onClick={handleRunClick}
-                        className="flex items-center gap-1.5 px-3 py-1.5 bg-[#0D8C7C] text-white rounded shadow-sm hover:bg-[#14B39F] transition-colors font-medium text-sm"
+                        className="flex items-center gap-1.5 px-3 py-1 bg-[#0D8C7C] text-white rounded shadow-sm hover:bg-[#14B39F] transition-colors font-medium text-xs"
                       >
-                        <Play className="w-4 h-4" aria-hidden="true" /> Run
+                        <Play className="w-3.5 h-3.5" aria-hidden="true" /> Run
                       </button>
                       <button
                         onClick={() => handleArchiveOne(icp.id)}
@@ -245,30 +249,32 @@ export function IcpTable() {
                       >
                         {icp.isArchived ? (
                           <ArchiveRestore
-                            className="w-5 h-5"
+                            className="w-4 h-4"
                             aria-hidden="true"
                           />
                         ) : (
-                          <Archive className="w-5 h-5" aria-hidden="true" />
+                          <Archive className="w-4 h-4" aria-hidden="true" />
                         )}
                       </button>
                       <button
                         aria-label={`Edit ${icp.name}`}
                         className="p-1.5 hover:bg-black/10 rounded-md text-[#445751]"
                       >
-                        <Edit className="w-5 h-5" aria-hidden="true" />
+                        <Edit className="w-4 h-4" aria-hidden="true" />
                       </button>
                     </div>
                   </td>
                 </tr>
               ))}
+            {filteredIcps.length === 0 && (
+              <tr>
+                <td colSpan={7} className="py-8 text-center text-[#7C8C87]">
+                  No ICPs found. Create one!
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
-        {filteredIcps.length === 0 && (
-          <div className="p-8 text-center text-[#7C8C87]">
-            No ICPs found. Create one!
-          </div>
-        )}
       </div>
       <IcpCreationModal
         isOpen={isModalOpen}

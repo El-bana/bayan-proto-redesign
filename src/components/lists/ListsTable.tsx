@@ -102,118 +102,122 @@ export function ListsTable() {
           <Send className="w-4 h-4" /> USA Campaign
         </button>
       </div> */}
-      <div className="rounded-lg border border-border-gray overflow-hidden">
-        <table className="w-full text-left">
-          <thead className="sticky top-0 bg-[#ECF6F5] z-10">
-            <tr>
-              <th className="p-4 w-12  border-b border-border-gray">
-                <input
-                  type="checkbox"
-                  checked={
-                    selectedIds.size === lists.length && lists.length > 0
-                  }
-                  onChange={toggleAll}
-                  className="w-4 h-4 rounded border-gray-300 accent-blue-600 cursor-pointer"
-                />
+      <div className="overflow-x-auto">
+        <table className="w-full text-left border-separate border-spacing-0">
+          <thead>
+            <tr className="bg-[#ECF6F5] text-sm font-semibold text-[#10201C]">
+              <th className="py-2 px-4 rounded-l-lg border-y border-l border-[#D3DEDB] w-12 align-middle">
+                <div className="flex items-center justify-center">
+                  <input
+                    type="checkbox"
+                    checked={
+                      selectedIds.size === lists.length && lists.length > 0
+                    }
+                    onChange={toggleAll}
+                    className="w-4 h-4 rounded border-gray-300 accent-blue-600 cursor-pointer"
+                  />
+                </div>
               </th>
               {columnManager.isVisible("name") && (
-                <th className="p-4 font-bold text-[#0E0E0E]  border-b border-border-gray">
+                <th className="py-2 px-4 border-y border-[#D3DEDB]">
                   List Name
                 </th>
               )}
               {columnManager.isVisible("records") && (
-                <th className="p-4 font-bold text-[#0E0E0E]  border-b border-border-gray">
+                <th className="py-2 px-4 border-y border-[#D3DEDB]">
                   # Records
                 </th>
               )}
               {columnManager.isVisible("icp") && (
-                <th className="p-4 font-bold text-[#0E0E0E]  border-b border-border-gray">
+                <th className="py-2 px-4 border-y border-[#D3DEDB]">
                   Used ICP
                 </th>
               )}
               {columnManager.isVisible("avgFit") && (
-                <th className="p-4 font-bold text-[#0E0E0E]  border-b border-border-gray">
+                <th className="py-2 px-4 border-y border-[#D3DEDB]">
                   Avg. Fit
                 </th>
               )}
               {columnManager.isVisible("creator") && (
-                <th className="p-4 font-bold text-[#0E0E0E]  border-b border-border-gray">
-                  Creator
-                </th>
+                <th className="py-2 px-4 border-y border-[#D3DEDB]">Creator</th>
               )}
               {columnManager.isVisible("health") && (
-                <th className="p-4 font-bold text-[#0E0E0E]  border-b border-border-gray">
-                  Health
-                </th>
+                <th className="py-2 px-4 border-y border-[#D3DEDB]">Health</th>
               )}
               {columnManager.isVisible("dataAge") && (
-                <th className="p-4 font-bold text-[#0E0E0E]  border-b border-border-gray">
+                <th className="py-2 px-4 border-y border-[#D3DEDB]">
                   Data Age
                 </th>
               )}
-              <th className="p-4 font-bold text-[#0E0E0E]  border-b border-border-gray">
+              <th className="py-2 px-4 rounded-r-lg border-y border-r border-[#D3DEDB] text-center">
                 Action
               </th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="text-sm text-[#10201C]">
             {lists.map((list) => {
               const isSelected = selectedIds.has(list.id);
               return (
                 <tr
                   key={list.id}
-                  className={`border-b border-[#D3DEDB] transition-colors ${isSelected ? "bg-[#0D8C7C]/5" : "hover:bg-black/5"}`}
+                  className={`transition-colors ${
+                    isSelected ? "bg-[#0D8C7C]/5" : "hover:bg-black/5"
+                  }`}
                 >
-                  <td className="p-4">
-                    <input
-                      type="checkbox"
-                      checked={isSelected}
-                      onChange={() => toggleOne(list.id)}
-                      className="w-4 h-4 rounded border-gray-300 accent-blue-600 cursor-pointer"
-                    />
+                  <td className="py-3 px-4 border-b border-[#D3DEDB] align-middle">
+                    <div className="flex items-center justify-center">
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => toggleOne(list.id)}
+                        className="w-4 h-4 rounded border-gray-300 accent-blue-600 cursor-pointer"
+                      />
+                    </div>
                   </td>
                   {columnManager.isVisible("name") && (
                     <td
-                      className="p-4 font-medium text-[#10201C] cursor-pointer hover:underline underline-offset-2"
+                      className="py-3 px-4 font-semibold border-b border-[#D3DEDB] cursor-pointer hover:underline underline-offset-2"
                       onClick={() => router.push(`/lists/${list.id}`)}
                     >
                       {list.name}
                     </td>
                   )}
                   {columnManager.isVisible("records") && (
-                    <td className="p-4 text-[#10201C] font-medium">
+                    <td className="py-3 px-4 border-b border-[#D3DEDB] font-medium">
                       {list.leadIds.length}
                     </td>
                   )}
                   {columnManager.isVisible("icp") && (
-                    <td className="p-4 text-[#10201C] font-medium">
+                    <td className="py-3 px-4 border-b border-[#D3DEDB] font-medium">
                       American ICP
                     </td>
                   )}
                   {columnManager.isVisible("avgFit") && (
-                    <td className="p-4 font-bold text-[#0D8C7C]">91%</td>
+                    <td className="py-3 px-4 border-b border-[#D3DEDB] font-bold text-[#0D8C7C]">
+                      91%
+                    </td>
                   )}
                   {columnManager.isVisible("creator") && (
-                    <td className="p-4">
+                    <td className="py-3 px-4 border-b border-[#D3DEDB]">
                       <div className="w-8 h-8 rounded-full bg-[#8000FF]/50 flex items-center justify-center text-white font-bold text-xs">
                         HT
                       </div>
                     </td>
                   )}
                   {columnManager.isVisible("health") && (
-                    <td className="p-4">
+                    <td className="py-3 px-4 border-b border-[#D3DEDB]">
                       <span className="bg-[#00C11A]/20 text-[#00B218] px-2 py-1 rounded-md text-xs font-medium">
                         Fresh
                       </span>
                     </td>
                   )}
                   {columnManager.isVisible("dataAge") && (
-                    <td className="p-4 text-[#10201C] font-medium">
+                    <td className="py-3 px-4 border-b border-[#D3DEDB] font-medium">
                       3 Days ago
                     </td>
                   )}
-                  <td className="p-4">
-                    <div className="flex gap-4 items-center">
+                  <td className="py-3 px-4 border-b border-[#D3DEDB]">
+                    <div className="flex gap-4 items-center justify-center">
                       <Play className="w-5 h-5 text-[#10201C] cursor-pointer hover:opacity-70" />
                       <MoreVertical className="w-5 h-5 text-[#10201C] cursor-pointer hover:opacity-70" />
                     </div>

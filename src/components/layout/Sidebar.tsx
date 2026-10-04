@@ -30,7 +30,7 @@ const navItems: NavItem[] = [
   { icon: BriefcaseBusiness, href: "/lists", label: "Leads List" },
   { icon: SendHorizonal, href: "/campaigns", label: "Campaigns" },
   { icon: Mail, href: "/mail", label: "Mail" },
-  { icon: BookOpen, href: "/book", label: "Book" },
+  { icon: BookOpen, href: "/templates", label: "Templates" },
   { icon: Presentation, href: "/analytics", label: "Analytics" },
 ];
 
