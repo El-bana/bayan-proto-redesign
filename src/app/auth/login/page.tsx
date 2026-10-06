@@ -3,8 +3,81 @@
 import { useState } from "react";
 import Link from "next/link";
 import AuthBanner from "@/components/auth/AuthBanner";
+import { X, ArrowRight, ArrowLeft, CheckCircle2, XCircle } from "lucide-react";
 
 export default function LoginPage() {
+  // Modal Visibility State
+  const [isForgotModalOpen, setIsForgotModalOpen] = useState(false);
+
+  // Forgot/Reset Password Flow State (3 Steps)
+  const [resetStep, setResetStep] = useState<1 | 2 | 3>(1);
+  const [resetEmail, setResetEmail] = useState("");
+  const [otpCode, setOtpCode] = useState(["", "", "", "", ""]);
+  const [resetNewPw, setResetNewPw] = useState("");
+  const [resetConfirmPw, setResetConfirmPw] = useState("");
+  const [resetError, setResetError] = useState("");
+
+  // Validation rules for Reset Password Flow
+  const resetHasUpper = /[A-Z]/.test(resetNewPw);
+  const resetHasNumber = /[0-9]/.test(resetNewPw);
+  const resetHasMinLength = resetNewPw.length >= 8;
+  const isResetValid = resetHasUpper && resetHasNumber && resetHasMinLength;
+
+  const resetStrengthScore = [
+    resetHasUpper,
+    resetHasNumber,
+    resetHasMinLength,
+  ].filter(Boolean).length;
+
+  const getResetStrengthBarColor = (barIndex: number) => {
+    if (resetStrengthScore === 0) return "bg-gray-200";
+    if (resetStrengthScore === 1)
+      return barIndex === 0 ? "bg-red-500" : "bg-gray-200";
+    if (resetStrengthScore === 2)
+      return barIndex <= 1 ? "bg-[#0D8C7C]" : "bg-gray-200";
+    return "bg-[#0D8C7C]";
+  };
+
+  const handleOtpChange = (value: string, index: number) => {
+    if (value.length > 1) return;
+    const updated = [...otpCode];
+    updated[index] = value;
+    setOtpCode(updated);
+
+    if (value && index < 4) {
+      const nextInput = document.getElementById(`login-otp-${index + 1}`);
+      nextInput?.focus();
+    }
+  };
+
+  const handleResetPasswordSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setResetError("");
+
+    if (!isResetValid) {
+      setResetError("Password does not meet all security requirements.");
+      return;
+    }
+
+    if (resetNewPw !== resetConfirmPw) {
+      setResetError("Passwords do not match.");
+      return;
+    }
+
+    alert("Password successfully reset!");
+    closeForgotModal();
+  };
+
+  const closeForgotModal = () => {
+    setIsForgotModalOpen(false);
+    setResetStep(1);
+    setOtpCode(["", "", "", "", ""]);
+    setResetEmail("");
+    setResetNewPw("");
+    setResetConfirmPw("");
+    setResetError("");
+  };
+
   return (
     <div className="w-full max-w-6xl mx-auto h-full bg-[#EDF6F5] flex flex-col md:flex-row gap-6 rounded-lg text-center shadow-sm border border-border-gray">
       {/* Left Banner */}
@@ -101,12 +174,13 @@ export default function LoginPage() {
           </button>
 
           <div className="text-center">
-            <Link
-              href="#"
+            <button
+              type="button"
+              onClick={() => setIsForgotModalOpen(true)}
               className="text-xs text-text-dark font-medium hover:underline"
             >
               Forgot Password?
-            </Link>
+            </button>
           </div>
 
           <div className="text-center font-semibold text-text-dark text-sm pt-2">
@@ -120,6 +194,251 @@ export default function LoginPage() {
           </div>
         </form>
       </div>
+
+      {/* ========================================================================= */}
+      {/* FORGOT / RESET PASSWORD MODAL (3 STEPS) */}
+      {/* ========================================================================= */}
+      {isForgotModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-xs p-4">
+          <div className="bg-[#F8FAFA] border border-gray-200 rounded-xl shadow-xl w-full max-w-md p-6 relative text-left animate-in fade-in zoom-in duration-150">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-bold text-[#10201C]">
+                Forgot/Reset Password
+              </h3>
+              <button
+                onClick={closeForgotModal}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Progress Stepper Bar */}
+            <div className="grid grid-cols-3 gap-2 mb-4">
+              <div
+                className={`h-1 rounded-full transition-colors ${
+                  resetStep >= 1 ? "bg-[#0D8C7C]" : "bg-gray-200"
+                }`}
+              />
+              <div
+                className={`h-1 rounded-full transition-colors ${
+                  resetStep >= 2 ? "bg-[#0D8C7C]" : "bg-gray-200"
+                }`}
+              />
+              <div
+                className={`h-1 rounded-full transition-colors ${
+                  resetStep >= 3 ? "bg-[#0D8C7C]" : "bg-gray-200"
+                }`}
+              />
+            </div>
+
+            {/* STEP 1: Email */}
+            {resetStep === 1 && (
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  setResetStep(2);
+                }}
+                className="space-y-4"
+              >
+                <p className="text-xs text-gray-500">
+                  Enter the email associated with this account and we will send
+                  you a verification code
+                </p>
+
+                <div>
+                  <label className="text-xs font-bold text-[#10201C] block mb-1">
+                    Your Email
+                  </label>
+                  <input
+                    type="email"
+                    value={resetEmail}
+                    onChange={(e) => setResetEmail(e.target.value)}
+                    placeholder="Enter your email"
+                    className="w-full bg-white border border-gray-200 rounded-md px-3 py-2 text-xs text-gray-600 placeholder:text-gray-300 focus:outline-none focus:border-[#0D8C7C]"
+                    required
+                  />
+                </div>
+
+                <div className="flex justify-end pt-2">
+                  <button
+                    type="submit"
+                    className="flex items-center gap-1.5 bg-[#0D8C7C] hover:bg-[#0a7366] text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors"
+                  >
+                    Next <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {/* STEP 2: OTP Code */}
+            {resetStep === 2 && (
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  setResetStep(3);
+                }}
+                className="space-y-5"
+              >
+                <p className="text-xs text-gray-500">
+                  Check your email we&apos;ve sent a code to your inbox
+                </p>
+
+                <div className="flex justify-between items-center gap-2 max-w-xs mx-auto py-2">
+                  {otpCode.map((digit, idx) => (
+                    <input
+                      key={idx}
+                      id={`login-otp-${idx}`}
+                      type="text"
+                      maxLength={1}
+                      value={digit}
+                      onChange={(e) => handleOtpChange(e.target.value, idx)}
+                      className="w-12 h-14 text-center bg-white border border-[#0D8C7C] rounded-xl text-lg font-bold text-[#10201C] focus:outline-none focus:ring-2 focus:ring-[#0D8C7C]/20"
+                      required
+                    />
+                  ))}
+                </div>
+
+                <div className="flex justify-between items-center pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setResetStep(1)}
+                    className="flex items-center gap-1.5 bg-[#0D8C7C] hover:bg-[#0a7366] text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors"
+                  >
+                    <ArrowLeft className="w-3.5 h-3.5" /> Previous
+                  </button>
+                  <button
+                    type="submit"
+                    className="flex items-center gap-1.5 bg-[#0D8C7C] hover:bg-[#0a7366] text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors"
+                  >
+                    Next <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {/* STEP 3: Reset Password */}
+            {resetStep === 3 && (
+              <form onSubmit={handleResetPasswordSubmit} className="space-y-3">
+                <p className="text-xs text-gray-500 mb-2">
+                  Enter Your new password
+                </p>
+
+                {resetError && (
+                  <p className="text-xs text-red-500 font-medium">
+                    {resetError}
+                  </p>
+                )}
+
+                <div>
+                  <label className="text-xs font-bold text-[#10201C] block mb-1">
+                    New Password
+                  </label>
+                  <input
+                    type="password"
+                    value={resetNewPw}
+                    onChange={(e) => setResetNewPw(e.target.value)}
+                    placeholder="Enter your new password"
+                    className="w-full bg-white border border-gray-200 rounded-md px-3 py-2 text-xs text-gray-600 placeholder:text-gray-300 focus:outline-none focus:border-[#0D8C7C]"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-[#10201C] block mb-1">
+                    Re-Enter Password
+                  </label>
+                  <input
+                    type="password"
+                    value={resetConfirmPw}
+                    onChange={(e) => setResetConfirmPw(e.target.value)}
+                    placeholder="Re-Enter your new password"
+                    className="w-full bg-white border border-gray-200 rounded-md px-3 py-2 text-xs text-gray-600 placeholder:text-gray-300 focus:outline-none focus:border-[#0D8C7C]"
+                    required
+                  />
+                </div>
+
+                {/* Reset Password Strength Bars */}
+                <div className="grid grid-cols-3 gap-2 pt-1">
+                  <div
+                    className={`h-1 rounded-full ${getResetStrengthBarColor(0)}`}
+                  />
+                  <div
+                    className={`h-1 rounded-full ${getResetStrengthBarColor(1)}`}
+                  />
+                  <div
+                    className={`h-1 rounded-full ${getResetStrengthBarColor(2)}`}
+                  />
+                </div>
+
+                {/* Reset Password Rules Checklist */}
+                <div className="space-y-1.5 pt-1 text-[11px] font-mono">
+                  <div className="flex items-center gap-1.5">
+                    {resetHasUpper ? (
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                    ) : (
+                      <XCircle className="w-3.5 h-3.5 text-red-500 shrink-0" />
+                    )}
+                    <span
+                      className={
+                        resetHasUpper ? "text-[#10201C]" : "text-gray-600"
+                      }
+                    >
+                      At least 1 Upper Case
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    {resetHasNumber ? (
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                    ) : (
+                      <XCircle className="w-3.5 h-3.5 text-red-500 shrink-0" />
+                    )}
+                    <span
+                      className={
+                        resetHasNumber ? "text-[#10201C]" : "text-gray-600"
+                      }
+                    >
+                      At least 1 Number
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    {resetHasMinLength ? (
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                    ) : (
+                      <XCircle className="w-3.5 h-3.5 text-red-500 shrink-0" />
+                    )}
+                    <span
+                      className={
+                        resetHasMinLength ? "text-[#10201C]" : "text-gray-600"
+                      }
+                    >
+                      At least 8 Characters
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex justify-between items-center pt-4">
+                  <button
+                    type="button"
+                    onClick={() => setResetStep(2)}
+                    className="flex items-center gap-1.5 bg-[#0D8C7C] hover:bg-[#0a7366] text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors"
+                  >
+                    <ArrowLeft className="w-3.5 h-3.5" /> Previous
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={!isResetValid || resetNewPw !== resetConfirmPw}
+                    className="bg-[#0D8C7C] hover:bg-[#0a7366] disabled:opacity-50 text-white text-xs font-semibold px-5 py-2 rounded-lg transition-colors"
+                  >
+                    Save
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

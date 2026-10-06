@@ -188,83 +188,91 @@ export function CampaignDetail() {
                 <Filter className="w-4 h-4" />
               </button>
             </div>
-            <div className="rounded-lg border border-[#D3DEDB] overflow-hidden">
-              <table className="w-full text-left border-collapse">
-                <thead className="sticky top-0 bg-[#ECF6F5] z-10">
-                  <tr>
-                    <th className="w-12 px-6 py-4 border-b border-border-gray">
-                      <input
-                        type="checkbox"
-                        className="w-4 h-4 rounded border-[#D3DEDB] text-[#0D8C7C] focus:ring-[#0D8C7C]"
-                      />
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-separate border-spacing-0">
+                <thead>
+                  <tr className="bg-[#ECF6F5] text-sm font-semibold text-[#10201C]">
+                    <th className="py-2 px-4 rounded-l-lg border-y border-l border-[#D3DEDB] w-12 align-middle">
+                      <div className="flex items-center justify-center">
+                        <input
+                          type="checkbox"
+                          className="w-4 h-4 rounded border-gray-300 accent-blue-600 cursor-pointer"
+                        />
+                      </div>
                     </th>
                     {columnManager.isVisible("name") && (
-                      <th className="px-4 py-4 border-b border-border-gray">
+                      <th className="py-2 px-4 border-y border-[#D3DEDB]">
                         Lead Name
                       </th>
                     )}
                     {columnManager.isVisible("jobTitle") && (
-                      <th className="px-4 py-4 border-b border-border-gray">
+                      <th className="py-2 px-4 border-y border-[#D3DEDB]">
                         Job Title
                       </th>
                     )}
                     {columnManager.isVisible("company") && (
-                      <th className="px-4 py-4 border-b border-border-gray">
+                      <th className="py-2 px-4 border-y border-[#D3DEDB]">
                         Company
                       </th>
                     )}
                     {columnManager.isVisible("email") && (
-                      <th className="px-4 py-4 border-b border-border-gray">
+                      <th className="py-2 px-4 border-y border-[#D3DEDB]">
                         Email
                       </th>
                     )}
                     {columnManager.isVisible("location") && (
-                      <th className="px-4 py-4 border-b border-border-gray">
+                      <th className="py-2 px-4 border-y border-[#D3DEDB]">
                         Location
                       </th>
                     )}
                     {columnManager.isVisible("fitScore") && (
-                      <th className="px-4 py-4 border-b border-border-gray">
+                      <th className="py-2 px-4 rounded-r-lg border-y border-r border-[#D3DEDB]">
                         Score Fit
                       </th>
                     )}
                   </tr>
                 </thead>
-                <tbody className="bg-white">
+                <tbody className="text-sm text-[#10201C]">
                   {leads.slice(0, 5).map((l) => (
                     <tr
                       key={l.id}
-                      className="border-b border-[#D3DEDB] hover:bg-black/5 transition-colors"
+                      className="hover:bg-black/5 transition-colors"
                     >
-                      <td className="px-6 py-4">
-                        <input
-                          type="checkbox"
-                          className="w-4 h-4 rounded border-[#D3DEDB] text-[#0D8C7C] focus:ring-[#0D8C7C]"
-                        />
+                      <td className="py-3 px-4 border-b border-[#D3DEDB] align-middle">
+                        <div className="flex items-center justify-center">
+                          <input
+                            type="checkbox"
+                            className="w-4 h-4 rounded border-gray-300 accent-blue-600 cursor-pointer"
+                          />
+                        </div>
                       </td>
                       {columnManager.isVisible("name") && (
-                        <td className="px-4 py-4 text-[#10201C]">{l.name}</td>
+                        <td className="py-3 px-4 font-semibold border-b border-[#D3DEDB]">
+                          {l.name}
+                        </td>
                       )}
                       {columnManager.isVisible("jobTitle") && (
-                        <td className="px-4 py-4 text-[#10201C]">
+                        <td className="py-3 px-4 border-b border-[#D3DEDB] text-gray-700">
                           {l.jobTitle}
                         </td>
                       )}
                       {columnManager.isVisible("company") && (
-                        <td className="px-4 py-4 text-[#10201C]">
+                        <td className="py-3 px-4 border-b border-[#D3DEDB] text-gray-700">
                           {l.company}
                         </td>
                       )}
                       {columnManager.isVisible("email") && (
-                        <td className="px-4 py-4 text-[#10201C]">{l.email}</td>
+                        <td className="py-3 px-4 border-b border-[#D3DEDB] text-gray-600 font-mono text-xs">
+                          {l.email}
+                        </td>
                       )}
                       {columnManager.isVisible("location") && (
-                        <td className="px-4 py-4 text-[#10201C]">
+                        <td className="py-3 px-4 border-b border-[#D3DEDB] text-gray-700">
                           {l.location}
                         </td>
                       )}
                       {columnManager.isVisible("fitScore") && (
-                        <td className="px-4 py-4 font-medium text-[#0D8C7C]">
+                        <td className="py-3 px-4 border-b border-[#D3DEDB] font-semibold text-[#0D8C7C]">
                           {l.fitScore}%
                         </td>
                       )}

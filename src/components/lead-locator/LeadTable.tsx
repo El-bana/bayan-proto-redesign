@@ -187,97 +187,104 @@ export function LeadTable({ showIcpScores }: LeadTableProps) {
             </p>
           </div>
         ) : (
-          <div className="rounded-lg border border-[#D3DEDB] overflow-hidden">
-            <table className="w-full text-left border-collapse">
-              <thead className="sticky top-0 bg-[#ECF6F5] z-10">
-                <tr>
-                  <th className="py-3 px-6 w-12 border-b border-[#D3DEDB]">
-                    <input
-                      type="checkbox"
-                      className="w-4 h-4 rounded border-[#D3DEDB] text-[#3476E3] bg-[#3476E3] focus:ring-[#3476E3] cursor-pointer"
-                      aria-label="Select all leads"
-                      checked={
-                        selectedIds.size === leads.length && leads.length > 0
-                      }
-                      onChange={toggleAll}
-                      style={{ accentColor: "#3476E3" }}
-                    />
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-separate border-spacing-0">
+              <thead>
+                <tr className="bg-[#ECF6F5] text-sm font-semibold text-[#10201C]">
+                  <th className="py-2 px-4 rounded-l-lg border-y border-l border-[#D3DEDB] w-12 align-middle">
+                    <div className="flex items-center justify-center">
+                      <input
+                        type="checkbox"
+                        className="w-4 h-4 rounded border-[#D3DEDB] text-[#3476E3] bg-[#3476E3] focus:ring-[#3476E3] cursor-pointer"
+                        aria-label="Select all leads"
+                        checked={
+                          selectedIds.size === leads.length && leads.length > 0
+                        }
+                        onChange={toggleAll}
+                        style={{ accentColor: "#3476E3" }}
+                      />
+                    </div>
                   </th>
                   {columnManager.isVisible("name") && (
-                    <th className="py-4 px-4 text-[14px] font-bold text-[#0E0E0E] border-b border-[#D3DEDB]">
+                    <th className="py-2 px-4 border-y border-[#D3DEDB]">
                       full name
                     </th>
                   )}
                   {columnManager.isVisible("jobTitle") && (
-                    <th className="py-4 px-4 text-[14px] font-bold text-[#0E0E0E] border-b border-[#D3DEDB]">
+                    <th className="py-2 px-4 border-y border-[#D3DEDB]">
                       Job Title
                     </th>
                   )}
                   {columnManager.isVisible("company") && (
-                    <th className="py-4 px-4 text-[14px] font-bold text-[#0E0E0E] border-b border-[#D3DEDB]">
+                    <th className="py-2 px-4 border-y border-[#D3DEDB]">
                       Company
                     </th>
                   )}
                   {columnManager.isVisible("email") && (
-                    <th className="py-4 px-4 text-[14px] font-bold text-[#0E0E0E] border-b border-[#D3DEDB]">
+                    <th className="py-2 px-4 border-y border-[#D3DEDB]">
                       Email
                     </th>
                   )}
                   {columnManager.isVisible("location") && (
-                    <th className="py-4 px-4 text-[14px] font-bold text-[#0E0E0E] border-b border-[#D3DEDB]">
+                    <th className="py-2 px-4 border-y border-[#D3DEDB]">
                       Location
                     </th>
                   )}
                   {columnManager.isVisible("fitScore") && (
-                    <th className="py-4 px-6 text-[14px] font-bold text-[#0E0E0E] text-center border-b border-[#D3DEDB]">
+                    <th className="py-2 px-4 rounded-r-lg border-y border-r border-[#D3DEDB] text-center">
                       Score Fit
                     </th>
                   )}
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="text-sm text-[#10201C]">
                 {leads.map((lead) => {
                   const isEnriched = enrichedIds.has(lead.id);
+                  const isSelected = selectedIds.has(lead.id);
                   return (
                     <tr
                       key={lead.id}
-                      className="border-b border-[#D3DEDB] hover:bg-black/5 transition-colors"
+                      className={`transition-colors ${
+                        isSelected ? "bg-[#0D8C7C]/5" : "hover:bg-black/5"
+                      }`}
                     >
-                      <td className="py-4 px-6">
-                        <input
-                          type="checkbox"
-                          className="w-4 h-4 rounded border-[#D3DEDB] text-[#3476E3] bg-[#3476E3] focus:ring-[#3476E3] cursor-pointer"
-                          aria-label={`Select ${lead.name}`}
-                          checked={selectedIds.has(lead.id)}
-                          onChange={() => toggleOne(lead.id)}
-                          style={{ accentColor: "#3476E3" }}
-                        />
+                      <td className="py-3 px-4 border-b border-[#D3DEDB] align-middle">
+                        <div className="flex items-center justify-center">
+                          <input
+                            type="checkbox"
+                            className="w-4 h-4 rounded border-[#D3DEDB] text-[#3476E3] bg-[#3476E3] focus:ring-[#3476E3] cursor-pointer"
+                            aria-label={`Select ${lead.name}`}
+                            checked={isSelected}
+                            onChange={() => toggleOne(lead.id)}
+                            style={{ accentColor: "#3476E3" }}
+                          />
+                        </div>
                       </td>
                       {columnManager.isVisible("name") && (
-                        <td className="py-4 px-4 text-[14px] font-medium text-[#10201C]">
+                        <td className="py-3 px-4 font-semibold border-b border-[#D3DEDB]">
                           {lead.name}
                         </td>
                       )}
                       {columnManager.isVisible("jobTitle") && (
-                        <td className="py-4 px-4 text-[14px] font-medium text-[#10201C]">
+                        <td className="py-3 px-4 border-b border-[#D3DEDB] text-gray-700">
                           {lead.jobTitle}
                         </td>
                       )}
                       {columnManager.isVisible("company") && (
-                        <td className="py-4 px-4 text-[14px] font-medium text-[#10201C]">
+                        <td className="py-3 px-4 border-b border-[#D3DEDB] text-gray-700">
                           {lead.company}
                         </td>
                       )}
                       {columnManager.isVisible("email") && (
-                        <td className="py-4 px-4 text-[14px] font-medium">
+                        <td className="py-3 px-4 border-b border-[#D3DEDB]">
                           {isEnriched ? (
-                            <span className="text-[#0D8C7C] font-medium">
+                            <span className="text-[#0D8C7C] font-semibold font-mono text-xs">
                               {lead.email}
                             </span>
                           ) : (
                             <button
                               onClick={() => handleEnrichOne(lead.id)}
-                              className="px-3 py-1.5 text-xs font-medium text-[#0D8C7C] border border-[#0D8C7C] rounded-md hover:bg-[#0D8C7C]/5 transition-colors"
+                              className="px-3 py-1 text-xs font-medium text-[#0D8C7C] border border-[#0D8C7C] rounded-md hover:bg-[#0D8C7C]/5 transition-colors"
                             >
                               Access Email
                             </button>
@@ -285,18 +292,18 @@ export function LeadTable({ showIcpScores }: LeadTableProps) {
                         </td>
                       )}
                       {columnManager.isVisible("location") && (
-                        <td className="py-4 px-4 text-[14px] font-medium text-[#10201C]">
+                        <td className="py-3 px-4 border-b border-[#D3DEDB] text-gray-700">
                           {lead.location}
                         </td>
                       )}
                       {columnManager.isVisible("fitScore") && (
-                        <td className="py-4 px-6 text-center">
+                        <td className="py-3 px-4 border-b border-[#D3DEDB] text-center">
                           {showIcpScores ? (
                             <span className="text-[#0D8C7C] font-bold">
                               {lead.fitScore}%
                             </span>
                           ) : (
-                            <span className="text-[#0D8C7C] font-bold text-center">
+                            <span className="text-[#0D8C7C] font-bold">
                               N/A
                             </span>
                           )}
