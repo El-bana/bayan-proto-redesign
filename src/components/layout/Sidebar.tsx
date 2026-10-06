@@ -12,6 +12,7 @@ import {
   BookOpen,
   Presentation,
   BriefcaseBusiness,
+  Briefcase,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -27,7 +28,8 @@ const navItems: NavItem[] = [
   { icon: LayoutDashboard, href: "/dashboard", label: "Dashboard" },
   { icon: GraduationCap, href: "/icp-library", label: "ICP Library" },
   { icon: UserSearch, href: "/lead-locator", label: "Lead Locator" },
-  { icon: BriefcaseBusiness, href: "/lists", label: "Leads List" },
+  { icon: Briefcase, href: "/leads", label: "Leads" },
+  { icon: BriefcaseBusiness, href: "/lists", label: "Lists" },
   { icon: SendHorizonal, href: "/campaigns", label: "Campaigns" },
   { icon: Mail, href: "/mail", label: "Mail" },
   { icon: BookOpen, href: "/book", label: "Book" },

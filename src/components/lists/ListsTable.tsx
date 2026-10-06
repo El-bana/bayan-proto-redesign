@@ -48,7 +48,7 @@ export function ListsTable() {
     <div className="flex-1 p-8 bg-[#F6F8F7] flex flex-col min-h-0">
       <div className="flex items-center gap-3 mb-6">
         <BriefcaseBusiness className="w-8 h-8 text-[#0D8C7C]" />
-        <h1 className="text-2xl font-bold text-[#10201C]">Leads List</h1>
+        <h1 className="text-2xl font-bold text-[#10201C]">Lists</h1>
       </div>
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-3">
