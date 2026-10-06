@@ -78,7 +78,7 @@ export function ListDetail() {
       <div className="flex items-center gap-3 mb-6">
         <BriefcaseBusiness className="w-8 h-8 text-[#0D8C7C]" />
         <h1 className="text-2xl font-bold text-[#10201C]">
-          Leads List <span className="font-medium">/ {list.name}</span>
+          Lists <span className="font-medium">/ {list.name}</span>
         </h1>
       </div>
 
