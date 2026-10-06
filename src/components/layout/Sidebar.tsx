@@ -1,7 +1,6 @@
 "use client";
 import { useState } from "react";
 import {
-  LayoutDashboard,
   Mail,
   Settings,
   ChevronsRight,
@@ -12,6 +11,7 @@ import {
   BookOpen,
   Presentation,
   BriefcaseBusiness,
+  LayoutGrid,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -24,14 +24,14 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { icon: LayoutDashboard, href: "/dashboard", label: "Dashboard" },
+  { icon: LayoutGrid, href: "/dashboard", label: "Dashboard" },
   { icon: GraduationCap, href: "/icp-library", label: "ICP Library" },
   { icon: UserSearch, href: "/lead-locator", label: "Lead Locator" },
   { icon: BriefcaseBusiness, href: "/lists", label: "Leads List" },
   { icon: SendHorizonal, href: "/campaigns", label: "Campaigns" },
   { icon: Mail, href: "/mail", label: "Mail" },
   { icon: BookOpen, href: "/templates", label: "Templates" },
-  { icon: Presentation, href: "/analytics", label: "Analytics" },
+  { icon: Presentation, href: "/reports", label: "Analytics" },
 ];
 
 function isActivePath(pathname: string, href: string) {
