@@ -6,6 +6,7 @@ import Image from "next/image";
 import ProgressBar from "../lists/ProgressBar";
 import { useColumnVisibility } from "@/lib/useColumnVisibility";
 import ColumnVisibilityModal from "../layout/ColumnVisibilityModal";
+import { TablePagination, usePagination } from "../layout/TablePagination";
 
 type Status = "Done" | "Paused" | "Active" | "Draft";
 
@@ -197,6 +198,7 @@ export default function CampaignsPage() {
   const visible = trimmedQuery
     ? rows.filter((c) => c.name.toLowerCase().includes(trimmedQuery))
     : rows;
+  const pg = usePagination(visible, search);
 
   const toggleRow = (id: number) => {
     setSelected((prev) => {
@@ -237,7 +239,7 @@ export default function CampaignsPage() {
   ]);
 
   return (
-    <main className="min-h-screen relative bg-[#F6F8F7] p-8 flex flex-col">
+    <main className="min-h-0 relative bg-[#F6F8F7] p-8 pb-0 flex flex-col">
       {/* Header */}
       <div className="mb-6 flex items-center gap-4">
         <span className="text-[#0D8C7C]">
@@ -339,151 +341,132 @@ export default function CampaignsPage() {
             </button>
           </div>
         </div>
-
-        {/* Table */}
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-separate border-spacing-0">
-            <thead className="sticky top-0 bg-[#ECF6F5] z-10">
-              <tr className="bg-[#ECF6F5] text-sm font-semibold text-[#10201C]">
-                <th className="py-2 px-4 rounded-l-lg border-y border-l border-[#D3DEDB] w-12">
-                  <div className="flex items-center">
-                    <button
-                      onClick={toggleAll}
-                      aria-label="Select all campaigns"
-                    >
-                      <Checkbox checked={allChecked} />
-                    </button>
-                  </div>
-                </th>
-                {columnManager.isVisible("name") && (
-                  <th className="py-2 px-4 border-y border-border-gray">
-                    Campaign Name
-                  </th>
-                )}
-                {columnManager.isVisible("totalLeads") && (
-                  <th className="py-2 px-4 border-y border-border-gray">
-                    Total Leads
-                  </th>
-                )}
-                {columnManager.isVisible("sent") && (
-                  <th className="py-2 px-4 border-y border-border-gray">
-                    Sent
-                  </th>
-                )}
-                {columnManager.isVisible("openRate") && (
-                  <th className="py-2 px-4 border-y border-border-gray">
-                    Open Rate
-                  </th>
-                )}
-                {columnManager.isVisible("replyRate") && (
-                  <th className="py-2 px-4 border-y border-border-gray">
-                    Reply Rate
-                  </th>
-                )}
-                {columnManager.isVisible("deliveryRate") && (
-                  <th className="py-2 px-4 border-y border-border-gray">
-                    Delivery Rate
-                  </th>
-                )}
-                {columnManager.isVisible("status") && (
-                  <th className="py-2 px-4 rounded-r-lg border-y border-r border-[#D3DEDB]">
-                    Status
-                  </th>
-                )}
-              </tr>
-            </thead>
-            <tbody>
-              {visible.map((c, idx) => {
-                const isChecked = selected.has(c.id);
-                return (
-                  <tr
-                    key={c.id}
-                    className="border-b border-[#D3DEDB] hover:bg-black/5 transition-colors"
-                  >
-                    <td className="py-3 px-4 border-b border-[#D3DEDB]">
-                      <button
-                        onClick={() => toggleRow(c.id)}
-                        aria-label={`Select ${c.name}`}
-                        className="flex"
-                      >
-                        <Checkbox checked={isChecked} />
-                      </button>
-                    </td>
-                    {columnManager.isVisible("name") && (
-                      <td
-                        className="py-3 px-4 font-semibold border-b border-[#D3DEDB] text-slate-700 hover:text-[#0D8C7C] cursor-pointer"
-                        onClick={() =>
-                          (window.location.href = `/campaigns/${c.id}`)
-                        }
-                      >
-                        {c.name}
-                      </td>
-                    )}
-                    {columnManager.isVisible("totalLeads") && (
-                      <td className="py-3 px-4 border-b border-border-gray text-[#10201C]">
-                        {c.totalLeads ?? ""}
-                      </td>
-                    )}
-                    {columnManager.isVisible("sent") && (
-                      <td className="py-3 px-4 border-b border-border-gray text-[#10201C]">
-                        {c.sent ?? ""}
-                      </td>
-                    )}
-                    {columnManager.isVisible("openRate") && (
-                      <td className="py-3 px-4 border-b border-border-gray font-medium text-[#1814F3]">
-                        {c.openRate !== null ? `${c.openRate}%` : ""}
-                      </td>
-                    )}
-                    {columnManager.isVisible("replyRate") && (
-                      <td className="py-3 px-4 border-b border-border-gray font-medium text-[#00B218]">
-                        {c.replyRate !== null ? `${c.replyRate}%` : ""}
-                      </td>
-                    )}
-                    {columnManager.isVisible("deliveryRate") && (
-                      <td className="py-3 px-4 border-b border-border-gray font-medium text-[#E20000]">
-                        {c.deliveryRate !== null ? `${c.deliveryRate}%` : ""}
-                      </td>
-                    )}
-                    {columnManager.isVisible("status") && (
-                      <td className="py-3 px-4 border-b border-border-gray">
-                        <span
-                          className={`inline-flex min-w-[76px] items-center justify-center rounded px-3 py-1 text-xs font-medium ${statusStyles[c.status]}`}
-                        >
-                          {c.status}
-                        </span>
-                      </td>
-                    )}
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-          {visible.length === 0 && (
-            <div className="p-6 text-center text-sm text-gray-400">
-              No campaigns match your search.
-            </div>
-          )}
-        </div>
-
-        {/* Legend */}
-        {/* <div className="mt-5 flex flex-wrap items-center gap-6 border-t border-gray-100 pt-4 text-xs text-slate-500">
-          <div className="flex items-center gap-2">
-            <Send className="w-3 h-3 text-blue-500" />
-            <span>Euro Campaign</span>
-            <span className="h-px w-8 bg-blue-400" />
-          </div>
-          <div className="flex items-center gap-2">
-            <Send className="w-3 h-3 text-orange-500" />
-            <span>KSA Campaign</span>
-            <span className="h-px w-8 bg-orange-400" />
-          </div>
-          <div className="flex items-center gap-2">
-            <Send className="w-3 h-3 text-emerald-500" />
-            <span>USA Campaign</span>
-            <span className="h-px w-8 bg-emerald-500" />
-          </div>
-        </div> */}
       </div>
+      {/* Table */}
+      <div className="overflow-x-auto">
+        <table className="w-full text-left border-separate border-spacing-0">
+          <thead className="sticky top-0 bg-[#ECF6F5] z-10">
+            <tr className="bg-[#ECF6F5] text-sm font-semibold text-[#10201C]">
+              <th className="py-2 px-4 rounded-l-lg border-y border-l border-[#D3DEDB] w-12">
+                <div className="flex items-center">
+                  <button onClick={toggleAll} aria-label="Select all campaigns">
+                    <Checkbox checked={allChecked} />
+                  </button>
+                </div>
+              </th>
+              {columnManager.isVisible("name") && (
+                <th className="py-2 px-4 border-y border-border-gray">
+                  Campaign Name
+                </th>
+              )}
+              {columnManager.isVisible("totalLeads") && (
+                <th className="py-2 px-4 border-y border-border-gray">
+                  Total Leads
+                </th>
+              )}
+              {columnManager.isVisible("sent") && (
+                <th className="py-2 px-4 border-y border-border-gray">Sent</th>
+              )}
+              {columnManager.isVisible("openRate") && (
+                <th className="py-2 px-4 border-y border-border-gray">
+                  Open Rate
+                </th>
+              )}
+              {columnManager.isVisible("replyRate") && (
+                <th className="py-2 px-4 border-y border-border-gray">
+                  Reply Rate
+                </th>
+              )}
+              {columnManager.isVisible("deliveryRate") && (
+                <th className="py-2 px-4 border-y border-border-gray">
+                  Delivery Rate
+                </th>
+              )}
+              {columnManager.isVisible("status") && (
+                <th className="py-2 px-4 rounded-r-lg border-y border-r border-[#D3DEDB]">
+                  Status
+                </th>
+              )}
+            </tr>
+          </thead>
+          <tbody>
+            {pg.pageItems.map((c, idx) => {
+              const isChecked = selected.has(c.id);
+              return (
+                <tr
+                  key={c.id}
+                  className="border-b border-[#D3DEDB] hover:bg-black/5 transition-colors"
+                >
+                  <td className="py-3 px-4 border-b border-[#D3DEDB]">
+                    <button
+                      onClick={() => toggleRow(c.id)}
+                      aria-label={`Select ${c.name}`}
+                      className="flex"
+                    >
+                      <Checkbox checked={isChecked} />
+                    </button>
+                  </td>
+                  {columnManager.isVisible("name") && (
+                    <td
+                      className="py-3 px-4 font-semibold border-b border-[#D3DEDB] text-slate-700 hover:text-[#0D8C7C] cursor-pointer"
+                      onClick={() =>
+                        (window.location.href = `/campaigns/${c.id}`)
+                      }
+                    >
+                      {c.name}
+                    </td>
+                  )}
+                  {columnManager.isVisible("totalLeads") && (
+                    <td className="py-3 px-4 border-b border-border-gray text-[#10201C]">
+                      {c.totalLeads ?? ""}
+                    </td>
+                  )}
+                  {columnManager.isVisible("sent") && (
+                    <td className="py-3 px-4 border-b border-border-gray text-[#10201C]">
+                      {c.sent ?? ""}
+                    </td>
+                  )}
+                  {columnManager.isVisible("openRate") && (
+                    <td className="py-3 px-4 border-b border-border-gray font-medium text-[#1814F3]">
+                      {c.openRate !== null ? `${c.openRate}%` : ""}
+                    </td>
+                  )}
+                  {columnManager.isVisible("replyRate") && (
+                    <td className="py-3 px-4 border-b border-border-gray font-medium text-[#00B218]">
+                      {c.replyRate !== null ? `${c.replyRate}%` : ""}
+                    </td>
+                  )}
+                  {columnManager.isVisible("deliveryRate") && (
+                    <td className="py-3 px-4 border-b border-border-gray font-medium text-[#E20000]">
+                      {c.deliveryRate !== null ? `${c.deliveryRate}%` : ""}
+                    </td>
+                  )}
+                  {columnManager.isVisible("status") && (
+                    <td className="py-3 px-4 border-b border-border-gray">
+                      <span
+                        className={`inline-flex min-w-[76px] items-center justify-center rounded px-3 py-1 text-xs font-medium ${statusStyles[c.status]}`}
+                      >
+                        {c.status}
+                      </span>
+                    </td>
+                  )}
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+        {visible.length === 0 && (
+          <div className="p-6 text-center text-sm text-gray-400">
+            No campaigns match your search.
+          </div>
+        )}
+      </div>
+      <TablePagination
+        page={pg.page}
+        totalPages={pg.totalPages}
+        onPageChange={pg.setPage}
+      />
+
       <div className="sticky bottom-0 z-20 w-full">
         <ProgressBar />
       </div>

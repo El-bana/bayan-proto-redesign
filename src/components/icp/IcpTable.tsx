@@ -18,6 +18,7 @@ import { IcpCreationModal } from "./IcpCreationModal";
 import ProgressBar from "../lists/ProgressBar";
 import { useColumnVisibility } from "@/lib/useColumnVisibility";
 import ColumnVisibilityModal from "../layout/ColumnVisibilityModal";
+import { TablePagination, usePagination } from "../layout/TablePagination";
 import { IcpIcon } from "../layout/CustomIcons";
 
 /* ------------------------------------------------------------------ */
@@ -199,6 +200,13 @@ export function IcpTable() {
     return true;
   });
 
+  // archived ICPs go last, then paginate
+  const sortedIcps = [...filteredIcps].sort((a, b) => {
+    if (a.isArchived === b.isArchived) return 0;
+    return a.isArchived ? 1 : -1;
+  });
+  const pg = usePagination(sortedIcps, JSON.stringify([query, filters]));
+
   const activeFilterCount = Object.values(filters).filter(Boolean).length;
   const setFilter = (key: keyof Filters, value: string) =>
     setFilters((f) => ({ ...f, [key]: value }));
@@ -251,7 +259,7 @@ export function IcpTable() {
     2; // checkbox + action
 
   return (
-    <div className="min-h-screen relative bg-[#F6F8F7] p-8 flex flex-col">
+    <div className="min-h-0 relative bg-[#F6F8F7] p-8 pb-0 flex flex-col">
       <div className="flex items-center gap-3 mb-4">
         <IcpIcon className="w-8 h-8 text-[#0D8C7C]" />
         <h1 className="text-2xl font-bold">ICP Library</h1>
@@ -476,136 +484,131 @@ export function IcpTable() {
             </tr>
           </thead>
           <tbody className="text-sm text-[#10201C]">
-            {[...filteredIcps]
-              .sort((a, b) => {
-                if (a.isArchived === b.isArchived) return 0;
-                return a.isArchived ? 1 : -1;
-              })
-              .map((icp) => {
-                const meta = getIcpMeta(icp);
-                return (
-                  <tr
-                    key={icp.id}
-                    className={`transition-colors group ${
-                      icp.isArchived
-                        ? "opacity-50 grayscale bg-gray-50/50"
-                        : "hover:bg-black/5"
-                    }`}
-                  >
-                    <td className="py-3 px-4 border-b border-[#D3DEDB] align-middle">
-                      <div className="flex items-center justify-center">
-                        <input
-                          type="checkbox"
-                          className="w-4 h-4 rounded border-gray-300 accent-blue-600 cursor-pointer"
-                          aria-label={`Select ${icp.name}`}
-                          checked={selectedIds.has(icp.id)}
-                          onChange={() => toggleOne(icp.id)}
-                        />
+            {pg.pageItems.map((icp) => {
+              const meta = getIcpMeta(icp);
+              return (
+                <tr
+                  key={icp.id}
+                  className={`transition-colors group ${
+                    icp.isArchived
+                      ? "opacity-50 grayscale bg-gray-50/50"
+                      : "hover:bg-black/5"
+                  }`}
+                >
+                  <td className="py-3 px-4 border-b border-[#D3DEDB] align-middle">
+                    <div className="flex items-center justify-center">
+                      <input
+                        type="checkbox"
+                        className="w-4 h-4 rounded border-gray-300 accent-blue-600 cursor-pointer"
+                        aria-label={`Select ${icp.name}`}
+                        checked={selectedIds.has(icp.id)}
+                        onChange={() => toggleOne(icp.id)}
+                      />
+                    </div>
+                  </td>
+                  {columnManager.isVisible("name") && (
+                    <td className="py-3 px-4 font-semibold border-b border-[#D3DEDB]">
+                      {icp.name}
+                    </td>
+                  )}
+                  {columnManager.isVisible("industry") && (
+                    <td className="py-3 px-4 border-b border-[#D3DEDB] text-gray-700">
+                      {icp.industry}
+                    </td>
+                  )}
+                  {columnManager.isVisible("size") && (
+                    <td className="py-3 px-4 border-b border-[#D3DEDB] text-gray-700">
+                      {icp.size}
+                    </td>
+                  )}
+                  {columnManager.isVisible("region") && (
+                    <td className="py-3 px-4 border-b border-[#D3DEDB] text-gray-700">
+                      {icp.region}
+                    </td>
+                  )}
+                  {columnManager.isVisible("titles") && (
+                    <td className="py-3 px-4 border-b border-[#D3DEDB]">
+                      <TitlesCell titles={icp.titles} />
+                    </td>
+                  )}
+                  {columnManager.isVisible("status") && (
+                    <td className="py-3 px-4 border-b border-[#D3DEDB]">
+                      <span
+                        className={cn(
+                          "inline-flex min-w-[76px] items-center justify-center rounded px-3 py-1 text-xs font-medium",
+                          icp.isArchived
+                            ? "bg-[#C4C4C4] text-white"
+                            : "bg-[#00C11A]/20 text-[#00B218]",
+                        )}
+                      >
+                        {meta.status}
+                      </span>
+                    </td>
+                  )}
+                  {columnManager.isVisible("creator") && (
+                    <td className="py-3 px-4 border-b border-[#D3DEDB]">
+                      <div
+                        title={meta.createdBy}
+                        aria-label={`Created by ${meta.createdBy}`}
+                        className="w-8 h-8 rounded-full bg-[#8000FF]/50 flex items-center justify-center text-white font-bold text-xs"
+                      >
+                        {initials(meta.createdBy)}
                       </div>
                     </td>
-                    {columnManager.isVisible("name") && (
-                      <td className="py-3 px-4 font-semibold border-b border-[#D3DEDB]">
-                        {icp.name}
-                      </td>
-                    )}
-                    {columnManager.isVisible("industry") && (
-                      <td className="py-3 px-4 border-b border-[#D3DEDB] text-gray-700">
-                        {icp.industry}
-                      </td>
-                    )}
-                    {columnManager.isVisible("size") && (
-                      <td className="py-3 px-4 border-b border-[#D3DEDB] text-gray-700">
-                        {icp.size}
-                      </td>
-                    )}
-                    {columnManager.isVisible("region") && (
-                      <td className="py-3 px-4 border-b border-[#D3DEDB] text-gray-700">
-                        {icp.region}
-                      </td>
-                    )}
-                    {columnManager.isVisible("titles") && (
-                      <td className="py-3 px-4 border-b border-[#D3DEDB]">
-                        <TitlesCell titles={icp.titles} />
-                      </td>
-                    )}
-                    {columnManager.isVisible("status") && (
-                      <td className="py-3 px-4 border-b border-[#D3DEDB]">
-                        <span
-                          className={cn(
-                            "inline-flex min-w-[76px] items-center justify-center rounded px-3 py-1 text-xs font-medium",
-                            icp.isArchived
-                              ? "bg-[#C4C4C4] text-white"
-                              : "bg-[#00C11A]/20 text-[#00B218]",
-                          )}
-                        >
-                          {meta.status}
-                        </span>
-                      </td>
-                    )}
-                    {columnManager.isVisible("creator") && (
-                      <td className="py-3 px-4 border-b border-[#D3DEDB]">
-                        <div
-                          title={meta.createdBy}
-                          aria-label={`Created by ${meta.createdBy}`}
-                          className="w-8 h-8 rounded-full bg-[#8000FF]/50 flex items-center justify-center text-white font-bold text-xs"
-                        >
-                          {initials(meta.createdBy)}
-                        </div>
-                      </td>
-                    )}
-                    {columnManager.isVisible("lastUsed") && (
-                      <td className="py-3 px-4 border-b border-[#D3DEDB] font-medium">
-                        {formatLastUsed(meta.lastUsedDays)}
-                      </td>
-                    )}
-                    {columnManager.isVisible("leadsFound") && (
-                      <td className="py-3 px-4 border-b border-[#D3DEDB] font-mono font-medium">
-                        {meta.leadsFound}
-                      </td>
-                    )}
-                    <td className="py-3 px-4 border-b border-[#D3DEDB]">
-                      <div className="flex items-center justify-center gap-2">
-                        {icp.isArchived ? (
-                          <button
-                            onClick={() => handleArchiveOne(icp.id)}
-                            className="px-3 py-1 bg-[#C4C4C4] text-[#10201C] rounded shadow-sm hover:bg-[#B0B0B0] transition-colors font-medium text-xs"
-                          >
-                            Restore
-                          </button>
-                        ) : (
-                          <button
-                            onClick={handleRunClick}
-                            className="flex items-center gap-1.5 px-3 py-1 bg-[#0D8C7C] text-white rounded shadow-sm hover:bg-[#14B39F] transition-colors font-medium text-xs"
-                          >
-                            Find leads
-                          </button>
-                        )}
+                  )}
+                  {columnManager.isVisible("lastUsed") && (
+                    <td className="py-3 px-4 border-b border-[#D3DEDB] font-medium">
+                      {formatLastUsed(meta.lastUsedDays)}
+                    </td>
+                  )}
+                  {columnManager.isVisible("leadsFound") && (
+                    <td className="py-3 px-4 border-b border-[#D3DEDB] font-mono font-medium">
+                      {meta.leadsFound}
+                    </td>
+                  )}
+                  <td className="py-3 px-4 border-b border-[#D3DEDB]">
+                    <div className="flex items-center justify-center gap-2">
+                      {icp.isArchived ? (
                         <button
                           onClick={() => handleArchiveOne(icp.id)}
-                          aria-label={`${icp.isArchived ? "Restore" : "Archive"} ${icp.name}`}
-                          className="p-1.5 hover:bg-black/10 rounded-md text-[#445751]"
+                          className="px-3 py-1 bg-[#C4C4C4] text-[#10201C] rounded shadow-sm hover:bg-[#B0B0B0] transition-colors font-medium text-xs"
                         >
-                          {icp.isArchived ? (
-                            <ArchiveRestore
-                              className="w-4 h-4"
-                              aria-hidden="true"
-                            />
-                          ) : (
-                            <Archive className="w-4 h-4" aria-hidden="true" />
-                          )}
+                          Restore
                         </button>
+                      ) : (
                         <button
-                          aria-label={`Edit ${icp.name}`}
-                          className="p-1.5 hover:bg-black/10 rounded-md text-[#445751]"
-                          onClick={() => setIsModalOpen(true)}
+                          onClick={handleRunClick}
+                          className="flex items-center gap-1.5 px-3 py-1 bg-[#0D8C7C] text-white rounded shadow-sm hover:bg-[#14B39F] transition-colors font-medium text-xs"
                         >
-                          <Edit className="w-4 h-4" aria-hidden="true" />
+                          Find leads
                         </button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
+                      )}
+                      <button
+                        onClick={() => handleArchiveOne(icp.id)}
+                        aria-label={`${icp.isArchived ? "Restore" : "Archive"} ${icp.name}`}
+                        className="p-1.5 hover:bg-black/10 rounded-md text-[#445751]"
+                      >
+                        {icp.isArchived ? (
+                          <ArchiveRestore
+                            className="w-4 h-4"
+                            aria-hidden="true"
+                          />
+                        ) : (
+                          <Archive className="w-4 h-4" aria-hidden="true" />
+                        )}
+                      </button>
+                      <button
+                        aria-label={`Edit ${icp.name}`}
+                        className="p-1.5 hover:bg-black/10 rounded-md text-[#445751]"
+                        onClick={() => setIsModalOpen(true)}
+                      >
+                        <Edit className="w-4 h-4" aria-hidden="true" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
             {filteredIcps.length === 0 && (
               <tr>
                 <td
@@ -621,6 +624,12 @@ export function IcpTable() {
           </tbody>
         </table>
       </div>
+      <TablePagination
+        page={pg.page}
+        totalPages={pg.totalPages}
+        onPageChange={pg.setPage}
+      />
+
       <IcpCreationModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}

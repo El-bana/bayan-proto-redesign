@@ -191,7 +191,7 @@ export default function ReportsPage() {
       {/* Metric Cards Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
         {/* Emails Sent */}
-        <div className="rounded-lg border-l-6 border-badge-purple-text bg-[#6F3FFF]/50 p-4 shadow-sm flex flex-col justify-between">
+        <div className="rounded-lg border-l-6 border-badge-purple-text bg-[#6F3FFF]/20 p-4 shadow-sm flex flex-col justify-between">
           <div className="flex items-center gap-4">
             <Mail className="w-10 h-10 text-badge-purple-text" />
             <div className="flex flex-col gap-1">
@@ -209,7 +209,7 @@ export default function ReportsPage() {
         </div>
 
         {/* Opened */}
-        <div className="rounded-lg border-l-6 border-[#1814F3] bg-[#1814F3]/50 p-4 shadow-sm flex flex-col justify-between">
+        <div className="rounded-lg border-l-6 border-[#1814F3] bg-[#1814F3]/20 p-4 shadow-sm flex flex-col justify-between">
           <div className="flex items-center gap-4">
             <MailOpen className="w-10 h-10 text-[#1814F3]" />
             <div className="flex flex-col gap-1">
@@ -223,7 +223,7 @@ export default function ReportsPage() {
         </div>
 
         {/* Replied */}
-        <div className="rounded-lg border-l-6 border-[#FF823A] bg-[#FF823A]/50 p-4 shadow-sm flex flex-col justify-between">
+        <div className="rounded-lg border-l-6 border-[#FF823A] bg-[#FF823A]/20 p-4 shadow-sm flex flex-col justify-between">
           <div className="flex items-center gap-4">
             <MailReply className="w-10 h-10 text-[#FF823A]" />
             <div className="flex flex-col gap-1">
@@ -237,7 +237,7 @@ export default function ReportsPage() {
         </div>
 
         {/* Positive Reply */}
-        <div className="rounded-lg border-l-6 border-[#00B218] bg-[#00C11A]/50 p-4 shadow-sm flex flex-col justify-between">
+        <div className="rounded-lg border-l-6 border-[#00B218] bg-[#00C11A]/20 p-4 shadow-sm flex flex-col justify-between">
           <div className="flex items-center gap-4">
             <MailPlusBadge className="w-10 h-10 text-[#00B218]" />
             <div className="flex flex-col gap-1">
@@ -251,7 +251,7 @@ export default function ReportsPage() {
         </div>
 
         {/* Bounced */}
-        <div className="rounded-lg border-l-6 border-[#E20000] bg-[#E20000]/50 p-4 shadow-sm flex flex-col justify-between">
+        <div className="rounded-lg border-l-6 border-[#E20000] bg-[#E20000]/20 p-4 shadow-sm flex flex-col justify-between">
           <div className="flex items-center gap-4">
             <MailAlertBadge className="w-10 h-10 text-[#E20000]" />
             <div className="flex flex-col gap-1">

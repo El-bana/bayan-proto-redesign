@@ -1,22 +1,13 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import {
-  Search,
-  Filter,
-  Columns3,
-  RotateCw,
-  Briefcase,
-  ChevronLeft,
-  ChevronRight,
-  X,
-} from "lucide-react";
+import { Search, Filter, Columns3, RotateCw, Briefcase, X } from "lucide-react";
 import { useAppStore, Lead } from "@/lib/store";
 import { MOCK_LEADS, MOCK_LISTS, MockCampaign } from "./leads.mock";
 import { cn } from "@/lib/utils";
 import { useColumnVisibility } from "@/lib/useColumnVisibility";
 import ColumnVisibilityModal from "@/components/layout/ColumnVisibilityModal";
-// Same components used in Lists (adjust the paths if they live elsewhere)
+import { TablePagination } from "@/components/layout/TablePagination";
 import { ReassignModal } from "@/components/lists/ReassignModal";
 import ProgressBar from "@/components/lists/ProgressBar";
 
@@ -364,7 +355,7 @@ export function LeadsTable() {
   const visibleColCount = shownColumns.length + (isAdmin ? 1 : 0);
 
   return (
-    <div className="flex-1 p-8 bg-[#F6F8F7] flex flex-col min-h-0">
+    <div className="flex-1 p-8 bg-[#F6F8F7] flex pb-0 flex-col min-h-0">
       {/* Title */}
       <div className="flex items-center gap-3 mb-6">
         <Briefcase className="w-8 h-8 text-[#0D8C7C]" />
@@ -647,63 +638,11 @@ export function LeadsTable() {
       </div>
 
       {/* Pagination */}
-      {filtered.length > 0 && (
-        <div className="flex items-center justify-between mt-4 text-sm text-[#10201C]">
-          <span className="font-mono text-xs text-[#7C8C87]">
-            Showing {(currentPage - 1) * PAGE_SIZE + 1}-
-            {Math.min(currentPage * PAGE_SIZE, filtered.length)} of{" "}
-            {filtered.length} leads
-          </span>
-
-          <div className="flex items-center gap-1">
-            <button
-              type="button"
-              disabled={currentPage === 1}
-              onClick={() => setPage(currentPage - 1)}
-              aria-label="Previous page"
-              className="p-1.5 border border-[#D3DEDB] rounded-lg bg-white hover:bg-gray-50 disabled:opacity-40"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </button>
-
-            {Array.from({ length: totalPages }, (_, i) => i + 1)
-              .filter(
-                (p) =>
-                  p === 1 || p === totalPages || Math.abs(p - currentPage) <= 1,
-              )
-              .map((p, i, arr) => (
-                <span key={p} className="flex items-center gap-1">
-                  {i > 0 && p - arr[i - 1] > 1 && (
-                    <span className="px-1 text-[#7C8C87]">...</span>
-                  )}
-                  <button
-                    type="button"
-                    onClick={() => setPage(p)}
-                    aria-current={p === currentPage ? "page" : undefined}
-                    className={cn(
-                      "min-w-8 px-2 py-1 rounded-lg border text-sm font-medium",
-                      p === currentPage
-                        ? "bg-[#0D8C7C] border-[#0D8C7C] text-white"
-                        : "bg-white border-[#D3DEDB] hover:bg-gray-50",
-                    )}
-                  >
-                    {p}
-                  </button>
-                </span>
-              ))}
-
-            <button
-              type="button"
-              disabled={currentPage === totalPages}
-              onClick={() => setPage(currentPage + 1)}
-              aria-label="Next page"
-              className="p-1.5 border border-[#D3DEDB] rounded-lg bg-white hover:bg-gray-50 disabled:opacity-40"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-      )}
+      <TablePagination
+        page={currentPage}
+        totalPages={totalPages}
+        onPageChange={setPage}
+      />
 
       <ReassignModal
         isOpen={isReassignOpen}
