@@ -1,4 +1,5 @@
 "use client";
+import { AnalyticsIcon } from "@/components/layout/CustomIcons";
 import {
   MailAlertBadge,
   MailPlusBadge,
@@ -149,10 +150,10 @@ const sequenceSteps = [
 
 export default function ReportsPage() {
   return (
-    <main className="min-h-screen bg-bg-light p-6 md:p-10 space-y-6">
+    <main className="min-h-screen bg-bg-light p-6 md:p-8 space-y-6">
       {/* Page Title Header */}
       <div className="flex items-center gap-3">
-        <Presentation className="w-8 h-8 text-brand-primary" />
+        <AnalyticsIcon className="w-8 h-8 text-brand-primary" />
         <h1 className="text-2xl font-bold text-text-dark">Reports</h1>
       </div>
 

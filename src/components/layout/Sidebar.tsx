@@ -17,23 +17,24 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { AnalyticsIcon, IcpIcon } from "./CustomIcons";
 
 interface NavItem {
-  icon: LucideIcon;
+  icon: LucideIcon | React.ComponentType<{ className?: string }>;
   href: string;
   label: string;
 }
 
 const navItems: NavItem[] = [
   { icon: LayoutGrid, href: "/dashboard", label: "Dashboard" },
-  { icon: GraduationCap, href: "/icp-library", label: "ICP Library" },
-  { icon: UserSearch, href: "/lead-locator", label: "Lead Locator" },
+  { icon: IcpIcon, href: "/icp-library", label: "ICP Library" },
+  { icon: UserSearch, href: "/prospect-finder", label: "Prospect Finder" },
   { icon: Briefcase, href: "/leads", label: "Leads" },
   { icon: BriefcaseBusiness, href: "/lists", label: "Lists" },
   { icon: SendHorizonal, href: "/campaigns", label: "Campaigns" },
   { icon: Mail, href: "/mail", label: "Mail" },
   { icon: BookOpen, href: "/templates", label: "Templates" },
-  { icon: Presentation, href: "/reports", label: "Analytics" },
+  { icon: AnalyticsIcon, href: "/reports", label: "Analytics" },
 ];
 
 function isActivePath(pathname: string, href: string) {

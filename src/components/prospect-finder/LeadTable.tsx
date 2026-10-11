@@ -12,6 +12,8 @@ import {
   Filter,
   ChevronDown,
   Sliders,
+  Loader2,
+  TableCellsSplit,
 } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { LeadDetailModal } from "./LeadDetailModal";
@@ -26,16 +28,15 @@ export function LeadTable({ showIcpScores }: LeadTableProps) {
   const { leads } = useAppStore();
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [enrichedIds, setEnrichedIds] = useState<Set<string>>(new Set());
+  const [isEnriching, setIsEnriching] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [detailModalLead, setDetailModalLead] = useState<Lead | null>(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Modal states
   const [isNewListOpen, setIsNewListOpen] = useState(false);
   const [isExistingListOpen, setIsExistingListOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -48,7 +49,6 @@ export function LeadTable({ showIcpScores }: LeadTableProps) {
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
-
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
       if (toastTimer.current) clearTimeout(toastTimer.current);
@@ -68,7 +68,12 @@ export function LeadTable({ showIcpScores }: LeadTableProps) {
   };
 
   const handleEnrichAll = () => {
-    setEnrichedIds(new Set(leads.map((l) => l.id)));
+    if (leads.length === 0) return;
+    setIsEnriching(true);
+    setTimeout(() => {
+      setEnrichedIds(new Set(leads.map((l) => l.id)));
+      setIsEnriching(false);
+    }, 400);
   };
 
   const handleEnrichOne = (id: string) => {
@@ -84,7 +89,8 @@ export function LeadTable({ showIcpScores }: LeadTableProps) {
     toastTimer.current = setTimeout(() => setShowToast(false), 3000);
   };
 
-  // Only enabled if selected leads exist AND at least one selected lead is enriched
+  const isAllEnriched =
+    leads.length > 0 && leads.every((l) => enrichedIds.has(l.id));
   const canAddToList =
     selectedIds.size > 0 &&
     Array.from(selectedIds).every((id) => enrichedIds.has(id));
@@ -106,29 +112,60 @@ export function LeadTable({ showIcpScores }: LeadTableProps) {
     >
       <div className="pb-2 flex items-center justify-between">
         <div className="flex items-center gap-3">
+          {/* Default View Button */}
+          <div className="flex items-center gap-2 px-3 h-9 text-sm font-semibold text-brand-primary cursor-pointer hover:bg-gray-50">
+            <TableCellsSplit className="w-4 h-4" />
+            <span>Default View</span>
+            <ChevronDown className="w-3.5 h-3.5 text-gray-400" />
+          </div>
+
           <div className="flex items-center gap-2 rounded-lg border border-[#D3DEDB] px-3 h-9 bg-white">
             <Search className="w-4 h-4 text-[#7C8C87]" />
             <input
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search for people...."
-              className="outline-none text-sm text-[#10201C] placeholder:text-[#7C8C87] w-[200px]"
+              className="outline-none text-sm text-[#10201C] placeholder:text-[#7C8C87] w-[180px]"
             />
           </div>
-          <button className="flex items-center justify-center rounded-lg border border-[#0D8C7C] px-4 h-9 text-[#0D8C7C] bg-white hover:bg-[#0D8C7C]/5">
-            <Columns3 onClick={columnManager.openModal} className="w-4 h-4" />
+          <button
+            onClick={columnManager.openModal}
+            className="flex items-center justify-center rounded-lg border border-[#0D8C7C] px-3 h-9 text-[#0D8C7C] bg-white hover:bg-[#0D8C7C]/5 cursor-pointer"
+          >
+            <Columns3 className="w-4 h-4" />
           </button>
 
+          {/* Enrich All Button */}
           <button
             onClick={handleEnrichAll}
-            className="flex items-center gap-2 px-4 h-9 rounded-lg border border-[#0D8C7C] text-[#0D8C7C] font-medium bg-white hover:bg-[#0D8C7C]/5 transition-colors"
+            disabled={isAllEnriched || isEnriching || leads.length === 0}
+            className={`flex items-center gap-2 px-4 h-9 rounded-lg border font-medium transition-colors ${
+              isAllEnriched
+                ? "border-emerald-200 bg-emerald-50 text-emerald-600 opacity-80 cursor-not-allowed"
+                : "border-[#0D8C7C] text-[#0D8C7C] bg-white hover:bg-[#0D8C7C]/5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            }`}
           >
-            <Sparkles className="w-4 h-4" /> Enrich
+            {isEnriching ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin text-[#0D8C7C]" />
+                <span>Enriching...</span>
+              </>
+            ) : isAllEnriched ? (
+              <>
+                <Check className="w-4 h-4 text-emerald-600" />
+                <span>Enriched</span>
+              </>
+            ) : (
+              <>
+                <Sparkles className="w-4 h-4" />
+                <span>Enrich</span>
+              </>
+            )}
           </button>
         </div>
 
         <div className="flex items-center gap-3">
-          <button className="flex items-center justify-center rounded-lg border border-[#0D8C7C] px-4 h-9 text-[#0D8C7C] bg-white hover:bg-[#0D8C7C]/5">
+          <button className="flex items-center justify-center rounded-lg border border-[#0D8C7C] px-3 h-9 text-[#0D8C7C] bg-white hover:bg-[#0D8C7C]/5 cursor-pointer">
             {canAddToList ? (
               <Filter className="w-4 h-4" />
             ) : (
@@ -136,20 +173,19 @@ export function LeadTable({ showIcpScores }: LeadTableProps) {
             )}
           </button>
 
-          {/* Split Dropdown Button */}
+          {/* Add to Leads List Button */}
           <div className="relative" ref={dropdownRef}>
             <button
               onClick={() => canAddToList && setIsDropdownOpen((prev) => !prev)}
               disabled={!canAddToList}
-              className={`flex items-center gap-2 px-4 h-9 bg-[#0D8C7C] text-white rounded-md text-xs font-semibold transition-colors ${
+              className={`flex items-center gap-2 px-4 h-9 bg-[#0D8C7C] text-white rounded-lg text-xs font-semibold transition-colors ${
                 !canAddToList
                   ? "opacity-50 cursor-not-allowed"
                   : "hover:bg-[#14B39F] cursor-pointer"
               }`}
             >
               <Plus className="w-4 h-4" />
-              <span>Add to list</span>
-              <ChevronDown className="w-3.5 h-3.5 ml-1" />
+              <span>Add to Leads List</span>
             </button>
 
             {isDropdownOpen && canAddToList && (
@@ -159,7 +195,7 @@ export function LeadTable({ showIcpScores }: LeadTableProps) {
                     setIsDropdownOpen(false);
                     setIsNewListOpen(true);
                   }}
-                  className="w-full text-left px-4 py-2.5 text-[#10201C] hover:bg-[#ECF8F6] hover:text-[#0D8C7C] transition-colors border-b border-[#D3DEDB]"
+                  className="w-full text-left px-4 py-2.5 text-[#10201C] hover:bg-[#ECF8F6] hover:text-[#0D8C7C] transition-colors border-b border-[#D3DEDB] cursor-pointer"
                 >
                   Add new list
                 </button>
@@ -168,7 +204,7 @@ export function LeadTable({ showIcpScores }: LeadTableProps) {
                     setIsDropdownOpen(false);
                     setIsExistingListOpen(true);
                   }}
-                  className="w-full text-left px-4 py-2.5 text-[#10201C] hover:bg-[#ECF8F6] hover:text-[#0D8C7C] transition-colors"
+                  className="w-full text-left px-4 py-2.5 text-[#10201C] hover:bg-[#ECF8F6] hover:text-[#0D8C7C] transition-colors cursor-pointer"
                 >
                   Add to existing list
                 </button>
@@ -261,7 +297,10 @@ export function LeadTable({ showIcpScores }: LeadTableProps) {
                         </div>
                       </td>
                       {columnManager.isVisible("name") && (
-                        <td className="py-3 px-4 font-semibold border-b border-[#D3DEDB]">
+                        <td
+                          className="py-3 px-4 font-semibold border-b border-[#D3DEDB] underline cursor-pointer hover:text-[#0D8C7C]"
+                          onClick={() => setDetailModalLead(lead)}
+                        >
                           {lead.name}
                         </td>
                       )}
@@ -284,7 +323,7 @@ export function LeadTable({ showIcpScores }: LeadTableProps) {
                           ) : (
                             <button
                               onClick={() => handleEnrichOne(lead.id)}
-                              className="px-3 py-1 text-xs font-medium text-[#0D8C7C] border border-[#0D8C7C] rounded-md hover:bg-[#0D8C7C]/5 transition-colors"
+                              className="px-3 py-1 text-xs font-medium text-[#0D8C7C] border border-[#0D8C7C] rounded-md hover:bg-[#0D8C7C]/5 transition-colors cursor-pointer"
                             >
                               Access Email
                             </button>
@@ -338,7 +377,6 @@ export function LeadTable({ showIcpScores }: LeadTableProps) {
         lead={detailModalLead}
       />
 
-      {/* Toast */}
       <AnimatePresence>
         {showToast && (
           <motion.div
@@ -356,6 +394,7 @@ export function LeadTable({ showIcpScores }: LeadTableProps) {
           </motion.div>
         )}
       </AnimatePresence>
+
       <ColumnVisibilityModal
         isOpen={columnManager.isOpen}
         onClose={columnManager.closeModal}

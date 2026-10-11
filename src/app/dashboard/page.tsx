@@ -52,7 +52,7 @@ const recentCampaigns: Campaign[] = [
 
 export default function DashboardPage() {
   return (
-    <main className="min-h-screen bg-bg-light p-6 md:p-10 space-y-6">
+    <main className="min-h-screen bg-bg-light p-6 md:p-8 space-y-6">
       {/* Page Title Header */}
       <div className="flex items-center gap-3 mb-6">
         <LayoutGrid className="w-8 h-8 text-brand-primary" />

@@ -1,8 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Sparkles, Pencil } from "lucide-react";
+import { X, Sparkles, Pencil, ChevronDown, Check } from "lucide-react";
 import { useAppStore } from "@/lib/store";
 import { useRouter } from "next/navigation";
 
@@ -27,21 +27,244 @@ const TECHNOLOGIES_OPTIONS = [
   "SAP",
 ];
 
+const INDUSTRY_OPTIONS = [
+  "Education",
+  "Gaming",
+  "Beauty",
+  "Marketing",
+  "Life Sciences",
+];
+
+const REGION_OPTIONS = ["United states of america", "GCC", "Middle east", "UK"];
+
+const SIZE_OPTIONS = [
+  "1 - 10",
+  "11 - 50",
+  "51 - 200",
+  "201 - 500",
+  "500 - 1000",
+  "1000+",
+];
+
+const REVENUE_OPTIONS = [
+  "Under 1M$",
+  "1M$- 10M$",
+  "10M$- 50M$",
+  "50M$- 100M$",
+  "100M$+",
+];
+
+const SENIORITY_OPTIONS = ["Entry", "Manager", "Director", "VP", "C-Level"];
+
+const JOB_TITLE_OPTIONS = [
+  "Special Education Director/Teacher",
+  "Director of Education",
+  "VP of Education",
+  "Chief Academic Officer",
+  "Head of Curriculum",
+];
+
+const MIN_TITLES = 2;
+const MAX_TITLES = 4;
+
+const fieldBase =
+  "w-full px-3 py-2.5 bg-white border border-[#D3DEDB] rounded-md outline-none focus:border-[#0D8C7C] text-xs font-mono text-[#10201C]";
+const labelBase = "block text-sm text-[#10201C] mb-1.5 font-medium";
+const hintBase = "text-[11px] font-mono text-gray-400";
+
+// --- Custom Styled Multi-Select Dropdown Component ---
+function MultiSelectDropdown({
+  label,
+  options,
+  selected,
+  onChange,
+  placeholder,
+  error,
+  hint,
+  allowCustom = false,
+  required = false,
+}: {
+  label: string;
+  options: string[];
+  selected: string[];
+  onChange: (selected: string[]) => void;
+  placeholder: string;
+  error?: string;
+  hint?: string;
+  allowCustom?: boolean;
+  required?: boolean;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [customInput, setCustomInput] = useState("");
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(e.target as Node)
+      ) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const toggleOption = (opt: string) => {
+    if (selected.includes(opt)) {
+      onChange(selected.filter((item) => item !== opt));
+    } else {
+      onChange([...selected, opt]);
+    }
+  };
+
+  const handleAddCustom = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && customInput.trim()) {
+      e.preventDefault();
+      const trimmed = customInput.trim();
+      if (!selected.includes(trimmed)) {
+        onChange([...selected, trimmed]);
+      }
+      setCustomInput("");
+    }
+  };
+
+  return (
+    <div ref={dropdownRef} className="relative">
+      <label className={labelBase}>
+        {label}
+        {required && <span className="text-red-500">*</span>}
+      </label>
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className={`${fieldBase} flex items-center justify-between cursor-pointer ${
+          error ? "border-red-400 focus:border-red-500" : ""
+        }`}
+      >
+        <span className="truncate">
+          {selected.length > 0 ? (
+            <span className="text-[#10201C]">{selected.join(", ")}</span>
+          ) : (
+            <span className="text-gray-400">{placeholder}</span>
+          )}
+        </span>
+        <div className="flex items-center gap-1">
+          {selected.length > 0 && (
+            <span className="bg-[#ECF8F6] text-[#0D8C7C] text-[10px] px-1.5 py-0.5 rounded-full font-bold">
+              {selected.length}
+            </span>
+          )}
+          <ChevronDown className="w-4 h-4 text-gray-400" />
+        </div>
+      </button>
+
+      {isOpen && (
+        <div className="absolute z-30 w-full mt-1 bg-white border border-[#D3DEDB] rounded-md shadow-lg max-h-48 overflow-y-auto p-1 font-mono text-xs">
+          {allowCustom && (
+            <div className="p-1 border-b border-[#D3DEDB] mb-1">
+              <input
+                type="text"
+                value={customInput}
+                onChange={(e) => setCustomInput(e.target.value)}
+                onKeyDown={handleAddCustom}
+                placeholder="Type and press Enter to add..."
+                className="w-full px-2 py-1 bg-[#F4F9F8] border border-[#D3DEDB] rounded text-xs outline-none focus:border-[#0D8C7C]"
+              />
+            </div>
+          )}
+          {options.map((opt) => {
+            const isSelected = selected.includes(opt);
+            return (
+              <div
+                key={opt}
+                onClick={() => toggleOption(opt)}
+                className={`flex items-center justify-between px-2.5 py-1.5 rounded cursor-pointer transition-colors ${
+                  isSelected
+                    ? "bg-[#ECF8F6] text-[#0D8C7C] font-semibold"
+                    : "hover:bg-gray-50 text-[#10201C]"
+                }`}
+              >
+                <span>{opt}</span>
+                {isSelected && <Check className="w-3.5 h-3.5 text-[#0D8C7C]" />}
+              </div>
+            );
+          })}
+        </div>
+      )}
+      {error ? (
+        <p className="mt-1 text-[11px] font-mono text-red-500">{error}</p>
+      ) : hint ? (
+        <p className={`mt-1 ${hintBase}`}>{hint}</p>
+      ) : null}
+    </div>
+  );
+}
+
+function SelectField({
+  name,
+  label,
+  options,
+  defaultValue,
+}: {
+  name: string;
+  label: string;
+  options: string[];
+  defaultValue: string;
+}) {
+  return (
+    <div>
+      <label htmlFor={name} className={labelBase}>
+        {label}
+      </label>
+      <select
+        id={name}
+        name={name}
+        defaultValue={defaultValue}
+        className={`${fieldBase} cursor-pointer`}
+      >
+        {options.map((o) => (
+          <option key={o} value={o}>
+            {o}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+}
+
 export function IcpCreationModal({ isOpen, onClose }: Props) {
   const [step, setStep] = useState<"select" | "ai" | "ai-preview" | "manual">(
     "select",
   );
   const [aiPrompt, setAiPrompt] = useState("");
+
+  // Multi-select state
+  const [selectedIndustries, setSelectedIndustries] = useState<string[]>([
+    "Education",
+  ]);
+  const [selectedRegions, setSelectedRegions] = useState<string[]>([
+    "United states of america",
+  ]);
+  const [selectedTitles, setSelectedTitles] = useState<string[]>([
+    "Special Education Director/Teacher",
+    "Director of Education",
+  ]);
+  const [selectedTechs, setSelectedTechs] = useState<string[]>(["Veeva Vault"]);
   const [selectedSignals, setSelectedSignals] = useState<string[]>([
     "Regulatory_filing",
   ]);
-  const [selectedTechs, setSelectedTechs] = useState<string[]>(["Veeva Vault"]);
+
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
   const router = useRouter();
   const { addIcp } = useAppStore();
 
   const handleClose = useCallback(() => {
     setStep("select");
     setAiPrompt("");
+    setErrors({});
     onClose();
   }, [onClose]);
 
@@ -74,33 +297,54 @@ export function IcpCreationModal({ isOpen, onClose }: Props) {
   const handleManualSave = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
+    const newErrors: Record<string, string> = {};
+
+    const name = (fd.get("name") as string).trim();
+    if (!name) newErrors.name = "ICP Name is required.";
+    if (selectedIndustries.length === 0)
+      newErrors.industry = "Select at least one Industry.";
+    if (selectedRegions.length === 0)
+      newErrors.region = "Select at least one Region/Country.";
+
+    if (
+      selectedTitles.length < MIN_TITLES ||
+      selectedTitles.length > MAX_TITLES
+    ) {
+      newErrors.titles = `Select between ${MIN_TITLES} and ${MAX_TITLES} titles (currently selected: ${selectedTitles.length}).`;
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
     addIcp({
-      name: (fd.get("name") as string) || "Custom ICP",
-      industry: (fd.get("industry") as string) || "Education",
-      size: (fd.get("size") as string) || "500 - 1000",
-      region: (fd.get("region") as string) || "United states of america",
-      titles: ((fd.get("titles") as string) || "")
-        .split(",")
-        .map((t) => t.trim())
-        .filter(Boolean),
+      name,
+      industry: selectedIndustries.join(", "),
+      size: fd.get("size") as string,
+      region: selectedRegions.join(", "),
+      titles: selectedTitles,
     });
     handleClose();
     router.push("/lead-locator");
   };
 
-  const toggleSignal = (signal: string) => {
-    setSelectedSignals((prev) =>
-      prev.includes(signal)
-        ? prev.filter((s) => s !== signal)
-        : [...prev, signal],
+  const toggleChipSelection = (
+    list: string[],
+    setList: React.Dispatch<React.SetStateAction<string[]>>,
+    value: string,
+  ) => {
+    setList(
+      list.includes(value) ? list.filter((v) => v !== value) : [...list, value],
     );
   };
 
-  const toggleTech = (tech: string) => {
-    setSelectedTechs((prev) =>
-      prev.includes(tech) ? prev.filter((t) => t !== tech) : [...prev, tech],
-    );
-  };
+  const chipClass = (isSelected: boolean) =>
+    `px-2.5 py-1 rounded border text-[11px] font-mono transition-colors cursor-pointer ${
+      isSelected
+        ? "bg-[#ECF8F6] border-[#0D8C7C] text-[#0D8C7C]"
+        : "bg-white border-[#D3DEDB] text-[#7C8C87] hover:border-[#0D8C7C]/50"
+    }`;
 
   return (
     <AnimatePresence>
@@ -210,184 +454,168 @@ export function IcpCreationModal({ isOpen, onClose }: Props) {
               {step === "manual" && (
                 <form
                   onSubmit={handleManualSave}
-                  className="space-y-4 max-h-[70vh] overflow-y-auto pr-1 text-xs font-mono"
+                  className="space-y-4 max-h-[70vh] overflow-y-auto pr-1"
                 >
                   <div>
-                    <label className="block text-[#10201C] font-semibold mb-1">
+                    <label htmlFor="name" className={labelBase}>
                       ICP Name<span className="text-red-500">*</span>
                     </label>
                     <input
+                      id="name"
                       name="name"
+                      placeholder="Teachers in USA"
+                      className={`${fieldBase} ${errors.name ? "border-red-400" : ""}`}
+                    />
+                    {errors.name && (
+                      <p className="mt-1 text-[11px] font-mono text-red-500">
+                        {errors.name}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <MultiSelectDropdown
+                      label="Industry"
                       required
-                      defaultValue="American ICP"
-                      className="w-full p-2.5 bg-white border border-[#D3DEDB] rounded-md outline-none focus:border-[#0D8C7C] text-xs"
+                      options={INDUSTRY_OPTIONS}
+                      selected={selectedIndustries}
+                      onChange={setSelectedIndustries}
+                      placeholder="Select industries..."
+                      error={errors.industry}
+                    />
+                    <MultiSelectDropdown
+                      label="Region"
+                      required
+                      options={REGION_OPTIONS}
+                      selected={selectedRegions}
+                      onChange={setSelectedRegions}
+                      placeholder="Select regions..."
+                      error={errors.region}
                     />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-[#50635D] mb-1">
-                        Industry
-                      </label>
-                      <select
-                        name="industry"
-                        defaultValue="Education"
-                        className="w-full p-2.5 bg-white border border-[#D3DEDB] rounded-md outline-none focus:border-[#0D8C7C] text-xs"
-                      >
-                        <option value="Education">Education</option>
-                        <option value="Gaming">Gaming</option>
-                        <option value="Beauty">Beauty</option>
-                        <option value="Marketing">Marketing</option>
-                        <option value="Life Sciences">Life Sciences</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-[#50635D] mb-1">
-                        Region
-                      </label>
-                      <select
-                        name="region"
-                        defaultValue="United states of america"
-                        className="w-full p-2.5 bg-white border border-[#D3DEDB] rounded-md outline-none focus:border-[#0D8C7C] text-xs"
-                      >
-                        <option value="United states of america">
-                          United states of america
-                        </option>
-                        <option value="GCC">GCC</option>
-                        <option value="Middle east">Middle east</option>
-                        <option value="UK">UK</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-3 gap-3">
-                    <div>
-                      <label className="block text-[#50635D] mb-1">
-                        Company Size
-                      </label>
-                      <input
-                        name="size"
-                        defaultValue="500 - 1000"
-                        className="w-full p-2.5 bg-white border border-[#D3DEDB] rounded-md outline-none focus:border-[#0D8C7C] text-xs"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[#50635D] mb-1">
-                        Revenue
-                      </label>
-                      <input
-                        name="revenue"
-                        defaultValue="50M$- 100M$"
-                        className="w-full p-2.5 bg-white border border-[#D3DEDB] rounded-md outline-none focus:border-[#0D8C7C] text-xs"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[#50635D] mb-1">
-                        Maximum Seniority
-                      </label>
-                      <input
-                        name="seniority"
-                        defaultValue="Manager"
-                        className="w-full p-2.5 bg-white border border-[#D3DEDB] rounded-md outline-none focus:border-[#0D8C7C] text-xs"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-[#50635D] mb-1">
-                      Decision-maker titles (comma separated)
-                    </label>
-                    <input
-                      name="titles"
-                      defaultValue="Special Education Director/Teacher ,Director of Education and Lead Teac"
-                      className="w-full p-2.5 bg-white border border-[#D3DEDB] rounded-md outline-none focus:border-[#0D8C7C] text-xs"
+                  <div className="grid grid-cols-3 gap-4">
+                    <SelectField
+                      name="size"
+                      label="Company Size"
+                      options={SIZE_OPTIONS}
+                      defaultValue="500 - 1000"
+                    />
+                    <SelectField
+                      name="revenue"
+                      label="Revenue"
+                      options={REVENUE_OPTIONS}
+                      defaultValue="50M$- 100M$"
+                    />
+                    <SelectField
+                      name="seniority"
+                      label="Maximum Seniority"
+                      options={SENIORITY_OPTIONS}
+                      defaultValue="Manager"
                     />
                   </div>
 
+                  {/* Decision-maker titles (Multi-select dropdown with custom input & min 2, max 4 validation) */}
+                  <MultiSelectDropdown
+                    label="Decision-maker titles"
+                    required
+                    allowCustom
+                    options={JOB_TITLE_OPTIONS}
+                    selected={selectedTitles}
+                    onChange={setSelectedTitles}
+                    placeholder="Select or type titles..."
+                    error={errors.titles}
+                    hint="Minimum 2, maximum 4 job titles required."
+                  />
+
+                  {/* Buying Signals (Chips) */}
                   <div>
-                    <label className="block text-[#50635D] mb-1.5">
-                      Buying Signals
-                    </label>
+                    <span className={labelBase}>Buying Signals</span>
                     <div className="flex flex-wrap gap-2">
-                      {BUYING_SIGNALS_OPTIONS.map((sig) => {
-                        const isSelected = selectedSignals.includes(sig);
-                        return (
-                          <button
-                            type="button"
-                            key={sig}
-                            onClick={() => toggleSignal(sig)}
-                            className={`px-2.5 py-1 rounded border text-[11px] transition-colors ${
-                              isSelected
-                                ? "bg-[#ECF8F6] border-[#0D8C7C] text-[#0D8C7C]"
-                                : "bg-white border-[#D3DEDB] text-[#7C8C87]"
-                            }`}
-                          >
-                            {sig}
-                          </button>
-                        );
-                      })}
+                      {BUYING_SIGNALS_OPTIONS.map((sig) => (
+                        <button
+                          type="button"
+                          key={sig}
+                          aria-pressed={selectedSignals.includes(sig)}
+                          onClick={() =>
+                            toggleChipSelection(
+                              selectedSignals,
+                              setSelectedSignals,
+                              sig,
+                            )
+                          }
+                          className={chipClass(selectedSignals.includes(sig))}
+                        >
+                          {sig}
+                        </button>
+                      ))}
                     </div>
                   </div>
 
+                  {/* Technologies (Chips) */}
                   <div>
-                    <label className="block text-[#50635D] mb-1.5">
-                      Technologies
-                    </label>
+                    <span className={labelBase}>Technologies</span>
                     <div className="flex flex-wrap gap-2">
-                      {TECHNOLOGIES_OPTIONS.map((tech) => {
-                        const isSelected = selectedTechs.includes(tech);
-                        return (
-                          <button
-                            type="button"
-                            key={tech}
-                            onClick={() => toggleTech(tech)}
-                            className={`px-2.5 py-1 rounded border text-[11px] transition-colors ${
-                              isSelected
-                                ? "bg-[#ECF8F6] border-[#0D8C7C] text-[#0D8C7C]"
-                                : "bg-white border-[#D3DEDB] text-[#7C8C87]"
-                            }`}
-                          >
-                            {tech}
-                          </button>
-                        );
-                      })}
+                      {TECHNOLOGIES_OPTIONS.map((tech) => (
+                        <button
+                          type="button"
+                          key={tech}
+                          aria-pressed={selectedTechs.includes(tech)}
+                          onClick={() =>
+                            toggleChipSelection(
+                              selectedTechs,
+                              setSelectedTechs,
+                              tech,
+                            )
+                          }
+                          className={chipClass(selectedTechs.includes(tech))}
+                        >
+                          {tech}
+                        </button>
+                      ))}
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-[#50635D] mb-1">
-                        Pains -{" "}
-                        <span className="text-gray-400 font-normal">
+                      <label htmlFor="problems" className={labelBase}>
+                        Problems -{" "}
+                        <span className={hintBase}>
                           Used when writing email
                         </span>
                       </label>
                       <textarea
-                        placeholder="Write pains"
-                        className="w-full h-16 p-2 bg-white border border-[#D3DEDB] rounded-md outline-none focus:border-[#0D8C7C] text-xs resize-none"
+                        id="problems"
+                        name="problems"
+                        placeholder="Write problems"
+                        className={`${fieldBase} h-20 resize-none`}
                       />
                     </div>
                     <div>
-                      <label className="block text-[#50635D] mb-1">
-                        Value propositions
+                      <label htmlFor="whyWeWin" className={labelBase}>
+                        Why We Win
                       </label>
                       <textarea
-                        placeholder="write value propositions"
-                        className="w-full h-16 p-2 bg-white border border-[#D3DEDB] rounded-md outline-none focus:border-[#0D8C7C] text-xs resize-none"
+                        id="whyWeWin"
+                        name="whyWeWin"
+                        placeholder="Write why we win"
+                        className={`${fieldBase} h-20 resize-none`}
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-[#50635D] mb-1">
+                    <label htmlFor="disqualifiers" className={labelBase}>
                       Disqualifiers -{" "}
-                      <span className="text-gray-400 font-normal">
+                      <span className={hintBase}>
                         a hit caps the score at 25
                       </span>
                     </label>
                     <textarea
-                      placeholder="Write pains"
-                      className="w-full h-16 p-2 bg-white border border-[#D3DEDB] rounded-md outline-none focus:border-[#0D8C7C] text-xs resize-none"
+                      id="disqualifiers"
+                      name="disqualifiers"
+                      placeholder="Write disqualifiers"
+                      className={`${fieldBase} h-20 resize-none`}
                     />
                   </div>
 
@@ -395,7 +623,7 @@ export function IcpCreationModal({ isOpen, onClose }: Props) {
                     <button
                       type="button"
                       onClick={handleClose}
-                      className="px-4 py-1.5 border border-[#FF9B9B] text-[#FF5C5C] hover:bg-red-50 rounded text-xs font-semibold"
+                      className="px-4 py-1.5 bg-white border border-[#FF9B9B] text-[#FF5C5C] hover:bg-red-50 rounded text-xs font-semibold"
                     >
                       Cancel
                     </button>

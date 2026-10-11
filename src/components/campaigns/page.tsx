@@ -243,7 +243,7 @@ export default function CampaignsPage() {
         <span className="text-[#0D8C7C]">
           <SendHorizontal className="w-8 h-8" />
         </span>
-        <h1 className="text-[28px] font-bold text-[#10201C]">Campaigns</h1>
+        <h1 className="text-2xl font-bold text-[#10201C]">Campaigns</h1>
       </div>
       <div className="flex-1 w-full rounded-xl">
         {/* Toolbar */}

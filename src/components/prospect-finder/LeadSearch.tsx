@@ -15,6 +15,7 @@ import {
   History,
   Mail,
   UserSearch,
+  X,
 } from "lucide-react";
 import { type LucideIcon } from "lucide-react";
 import { useSearchParams } from "next/navigation";
@@ -28,16 +29,72 @@ const PROMPT_PILLS = [
   "CMOs in e-commerce",
 ];
 
+// Save Search Modal
+function SaveSearchModal({
+  isOpen,
+  onClose,
+  onSave,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  onSave: (name: string) => void;
+}) {
+  const [searchName, setSearchName] = useState("Teachers in USA");
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs">
+      <div className="bg-white rounded-xl shadow-xl w-[360px] p-5 relative border border-[#D3DEDB]">
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 cursor-pointer"
+        >
+          <X className="w-4 h-4" />
+        </button>
+
+        <h3 className="text-xs font-semibold text-gray-700 mb-2">
+          Search Name
+        </h3>
+        <input
+          type="text"
+          value={searchName}
+          onChange={(e) => setSearchName(e.target.value)}
+          className="w-full border border-[#D3DEDB] rounded-md p-2.5 text-xs text-[#10201C] outline-none focus:border-brand-primary mb-5 font-mono"
+        />
+
+        <div className="flex items-center justify-end gap-2">
+          <button
+            onClick={onClose}
+            className="px-4 py-1.5 border border-red-300 text-red-500 rounded-md text-xs font-medium hover:bg-red-50 transition-colors cursor-pointer"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={() => {
+              onSave(searchName);
+              onClose();
+            }}
+            className="px-4 py-1.5 bg-[#0D8C7C] text-white rounded-md text-xs font-medium hover:bg-[#14B39F] transition-colors cursor-pointer"
+          >
+            Save
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function LeadSearch() {
   const { setLeads, icps } = useAppStore();
   const [selectedIcp, setSelectedIcp] = useState("no-icp");
   const [maxSearch, setMaxSearch] = useState("2000");
   const [aiPrompt, setAiPrompt] = useState("");
+  const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
   const searchParams = useSearchParams();
   const isRun = searchParams.get("run") === "true";
   const icpIdParam = searchParams.get("icpId");
 
-  // Automatically trigger results view if `run=true` is present
   useEffect(() => {
     if (isRun) {
       if (icpIdParam) {
@@ -45,9 +102,10 @@ export function LeadSearch() {
       } else {
         setSelectedIcp(CUSTOM_ICP_VALUE);
       }
-      handleAiSearch(); // Load/populate the table with the ICP leads automatically
+      handleAiSearch();
     }
   }, [isRun, icpIdParam]);
+
   const handleAiSearch = useCallback(() => {
     const mockLeads: Lead[] = [
       {
@@ -124,7 +182,6 @@ export function LeadSearch() {
       },
     ];
     setLeads(mockLeads);
-    // Switch filter state so table view shows up
     setSelectedIcp(CUSTOM_ICP_VALUE);
   }, [setLeads]);
 
@@ -139,10 +196,10 @@ export function LeadSearch() {
     <main className="min-h-screen bg-[#F6F8F7] p-8 flex flex-col font-sans text-[#10201C]">
       {/* Header */}
       <div className="mb-6 flex items-center gap-2">
-        <span className="text-[#0D8C7C]">
+        <span className="text-brand-primary">
           <UserSearch className="w-8 h-8" />
         </span>
-        <h1 className="text-xl font-bold text-[#10201C]">Lead Locator</h1>
+        <h1 className="text-2xl font-bold text-[#10201C]">Prospect Finder</h1>
       </div>
 
       <div className="flex-1 w-full flex overflow-hidden">
@@ -160,7 +217,7 @@ export function LeadSearch() {
             <div className="relative">
               <select
                 id="icp-select"
-                className="w-full bg-white border border-[#D6D7D7] rounded-md h-10 px-3 appearance-none outline-none text-xs text-[#10201C] font-mono truncate pr-8"
+                className="w-full bg-white border border-[#D6D7D7] rounded-md h-10 px-3 appearance-none outline-none text-xs text-[#10201C] font-mono truncate pr-8 cursor-pointer"
                 value={selectedIcp}
                 onChange={(e) => setSelectedIcp(e.target.value)}
               >
@@ -179,7 +236,7 @@ export function LeadSearch() {
             </div>
           </div>
 
-          {/* Dynamic Insights / Cost Badges (Shown when ICP is selected) */}
+          {/* Dynamic Insights / Cost Badges */}
           {showResults && (
             <div className="flex flex-col gap-2 my-1">
               <div className="bg-[#8FE39E] p-2.5 rounded-md border-l-4 border-[#22C55E]">
@@ -205,7 +262,7 @@ export function LeadSearch() {
           <div className="mt-1">
             <div className="relative">
               <select
-                className="w-full bg-white border border-[#D6D7D7] rounded-md h-10 px-3 appearance-none outline-none text-xs text-[#7C8C87] font-mono truncate pr-8"
+                className="w-full bg-white border border-[#D6D7D7] rounded-md h-10 px-3 appearance-none outline-none text-xs text-[#7C8C87] font-mono truncate pr-8 cursor-pointer"
                 value={maxSearch}
                 onChange={(e) => setMaxSearch(e.target.value)}
               >
@@ -225,34 +282,75 @@ export function LeadSearch() {
             </div>
           </div>
 
-          {/* Filter Group Dropdowns */}
+          {/* Dynamic Filters depending on whether results are shown */}
           <div>
-            <FilterDropdown icon={BriefcaseBusiness} label="Job Titles" />
+            <FilterDropdown
+              icon={BriefcaseBusiness}
+              label="Job Titles"
+              badge={showResults ? "2" : undefined}
+            />
             <FilterDropdown icon={Users2} label="People Lookalikes" />
-            <FilterDropdown icon={Building} label="Company" />
-            <FilterDropdown icon={MapPin} label="Location" />
-            <FilterDropdown icon={Factory} label="Industry" />
-            <FilterDropdown icon={Mail} label="Email Status" />
+            <FilterDropdown
+              icon={Building}
+              label="Company"
+              badge={showResults ? "3" : undefined}
+            />
+            <FilterDropdown
+              icon={MapPin}
+              label="Location"
+              badge={showResults ? "1" : undefined}
+            />
+            <FilterDropdown
+              icon={Factory}
+              label="Industry"
+              badge={showResults ? "1" : undefined}
+            />
           </div>
 
-          <div className="mt-auto pt-4 flex border-t border-[#D3DEDB] items-center justify-between text-xs font-mono">
+          {/* Bottom Action Footer */}
+          <div className="mt-auto pt-4 border-t border-[#D3DEDB]">
             {showResults ? (
-              <span className="text-[#7C8C87]">25 Filters</span>
+              /* --- STATE 2 FOOTER: When Table is visible --- */
+              <div className="flex justify-between">
+                <button
+                  onClick={() => setIsSaveModalOpen(true)}
+                  className="text-brand-primary px-3 border rounded-lg border-brand-primary py-1.5 text-xs font-semibold cursor-pointer"
+                >
+                  Save Search
+                </button>
+                <div className="flex items-center justify-end gap-2 text-xs font-mono">
+                  <button
+                    onClick={handleClear}
+                    className="text-brand-primary hover:text-[#10201C] transition-colors cursor-pointer"
+                  >
+                    Clear All{" "}
+                    <span className="text-[10px] text-text-gray">(18)</span>
+                  </button>
+                  <button
+                    onClick={handleAiSearch}
+                    className="px-5 py-1.5 bg-[#0D8C7C] text-white font-medium text-xs rounded-lg hover:bg-[#14B39F] shadow-sm transition-colors cursor-pointer"
+                  >
+                    Search
+                  </button>
+                </div>
+              </div>
             ) : (
-              <span />
+              /* --- STATE 1 FOOTER: Initial search view --- */
+              <div className="flex items-center justify-end gap-2 text-xs font-mono">
+                <button
+                  onClick={handleClear}
+                  className="px-3 py-1.5 text-brand-primary font-medium text-sm hover:bg-black/5 rounded-lg transition-colors cursor-pointer"
+                >
+                  Clear All
+                </button>
+                <button
+                  onClick={handleAiSearch}
+                  className="px-5 py-1.5 bg-[#0D8C7C] text-white font-medium text-sm rounded-lg hover:bg-[#14B39F] shadow-sm transition-colors cursor-pointer"
+                >
+                  Search
+                </button>
+              </div>
             )}
-            <div className="flex items-center gap-3">
-              <button
-                onClick={handleClear}
-                className="px-3 py-1.5 text-[#0D8C7C] font-medium text-sm hover:bg-black/5 rounded-lg transition-colors"
-              >
-                Clear All
-              </button>
-
-              <button className="px-5 py-1.5 bg-[#0D8C7C] text-white font-medium text-sm rounded-lg hover:bg-[#14B39F] shadow-sm transition-colors">
-                Save
-              </button>
-            </div>
           </div>
         </div>
 
@@ -265,10 +363,10 @@ export function LeadSearch() {
                 Hey Hager!
               </h2>
               <h3 className="bg-[linear-gradient(180deg,#0D8C7C_0%,#14B39F_25%,#6D5BD0_100%)] bg-clip-text text-transparent text-5xl font-bold leading-[120%] mb-3">
-                I'm Smart LeadLocator
+                I'm Smart Prospect Finder
               </h3>
               <p className="text-lg font-semibold text-[#10201C] mb-8">
-                Tell me about your perfect lead and i'll find it rightaway!
+                Describe your ideal customer, or start with filters
               </p>
 
               {/* AI Search Box Container */}
@@ -281,15 +379,15 @@ export function LeadSearch() {
                     className="w-full h-14 bg-transparent outline-none text-xs text-[#10201C] placeholder:text-[#A0B0AC] font-mono resize-none"
                   />
                   <div className="flex items-center justify-between pt-2">
-                    <button className="flex items-center gap-1.5 px-3 py-1 bg-white border border-[#D3DEDB] rounded-full text-xs text-[#7C8C87] font-mono hover:border-[#0D8C7C] transition-colors">
+                    <button className="flex items-center gap-1.5 px-3 py-1 bg-white border border-[#D3DEDB] rounded-full text-xs text-[#7C8C87] font-mono hover:border-brand-primary transition-colors cursor-pointer">
                       <History className="w-3.5 h-3.5" />
                       Chat History
                     </button>
                     <button
                       onClick={handleAiSearch}
-                      className="flex items-center gap-1.5 px-4 py-1.5 bg-white border border-[#0D8C7C] text-black rounded-full text-xs font-bold hover:bg-[#0D8C7C]/5 transition-colors"
+                      className="flex items-center gap-1.5 px-4 py-1.5 bg-white border border-brand-primary text-black rounded-full text-xs font-bold hover:bg-[#0D8C7C]/5 transition-colors cursor-pointer"
                     >
-                      <Sparkles className="w-3.5 h-3.5 text-[#0D8C7C]" />
+                      <Sparkles className="w-3.5 h-3.5 text-brand-primary" />
                       AI Search
                     </button>
                   </div>
@@ -305,7 +403,7 @@ export function LeadSearch() {
                       setAiPrompt(pill);
                       handleAiSearch();
                     }}
-                    className="px-4 py-1.5 bg-white border border-[#D3DEDB] rounded-full text-xs text-[#7C8C87] font-mono shadow-[0_2px_4px_rgba(124,140,135,0.4)] hover:border-[#0D8C7C] hover:text-[#0D8C7C] transition-all"
+                    className="px-4 py-1.5 bg-white border border-[#D3DEDB] rounded-full text-xs text-[#7C8C87] font-mono shadow-[0_2px_4px_rgba(124,140,135,0.4)] hover:border-brand-primary hover:text-brand-primary transition-all cursor-pointer"
                   >
                     Q {pill}
                   </button>
@@ -320,6 +418,12 @@ export function LeadSearch() {
           )}
         </div>
       </div>
+
+      <SaveSearchModal
+        isOpen={isSaveModalOpen}
+        onClose={() => setIsSaveModalOpen(false)}
+        onSave={() => setIsSaveModalOpen(false)}
+      />
     </main>
   );
 }
@@ -327,34 +431,30 @@ export function LeadSearch() {
 function FilterDropdown({
   icon: Icon,
   label,
-  hasValue,
-  value,
+  badge,
 }: {
   icon: LucideIcon;
   label: string;
-  hasValue?: boolean;
-  value?: string;
+  badge?: string;
 }) {
   return (
     <div className="border-b border-[#D6D7D7]">
-      <button className="flex flex-col w-full px-2 py-3 text-left hover:bg-black/5 rounded-md transition-colors group">
-        <div className="flex items-center justify-between w-full">
-          <div className="flex items-center gap-3">
-            <Icon
-              className="w-5 h-5 text-[#445751] opacity-70 group-hover:opacity-100"
-              aria-hidden="true"
-            />
-            <span className="font-medium text-[16px] text-[#10201C]">
-              {label}
-            </span>
-          </div>
-          <ChevronDown className="w-4 h-4 text-[#445751]" aria-hidden="true" />
-        </div>
-        {hasValue && value && (
-          <span className="text-[12px] text-[#0D8C7C] font-mono mt-1 ml-8 bg-[#0D8C7C]/10 px-2 py-0.5 rounded-md inline-block w-fit">
-            {value}
+      <button className="flex items-center justify-between w-full px-2 py-3 text-left hover:bg-black/5 rounded-md transition-colors group cursor-pointer">
+        <div className="flex items-center gap-3">
+          <Icon
+            className="w-5 h-5 text-[#445751] opacity-70 group-hover:opacity-100"
+            aria-hidden="true"
+          />
+          <span className="font-medium text-[15px] text-[#10201C]">
+            {label}
           </span>
-        )}
+          {badge && (
+            <span className="bg-[#E2E8F0] text-[#475569] text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-full">
+              +{badge}
+            </span>
+          )}
+        </div>
+        <ChevronDown className="w-4 h-4 text-[#445751]" aria-hidden="true" />
       </button>
     </div>
   );

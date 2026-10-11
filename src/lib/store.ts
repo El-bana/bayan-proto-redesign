@@ -8,6 +8,9 @@ export interface ICP {
   region: string;
   titles: string[];
   isArchived?: boolean;
+  createdBy: string; // owner / creator of the ICP
+  lastUsedDays: number | null; // days since last qualifying use, null = never used
+  leadsFound: number; // leads from this ICP that were added to Lists
 }
 
 export interface Lead {
@@ -26,11 +29,17 @@ export interface LeadList {
   leadIds: string[];
 }
 
+// Fields the store fills in itself when an ICP is created
+type NewIcp = Omit<ICP, "id" | "createdBy" | "lastUsedDays" | "leadsFound">;
+
+// TODO: replace with the logged-in user once auth is wired
+const CURRENT_USER = "Hager Torky";
+
 interface AppState {
   icps: ICP[];
   leads: Lead[];
   lists: LeadList[];
-  addIcp: (icp: Omit<ICP, "id">) => void;
+  addIcp: (icp: NewIcp) => void;
   deleteIcp: (id: string) => void;
   archiveIcp: (id: string) => void;
   setLeads: (leads: Lead[]) => void;
@@ -45,7 +54,10 @@ const initialIcps: ICP[] = [
     industry: "Education",
     size: "50-1000",
     region: "USA",
-    titles: ["Director"],
+    titles: ["Director", "VP of Sales", "Head of Growth"],
+    createdBy: "Hager Torky",
+    lastUsedDays: 3,
+    leadsFound: 42,
   },
   {
     id: "2",
@@ -53,7 +65,10 @@ const initialIcps: ICP[] = [
     industry: "Life Sciences",
     size: "50-1000",
     region: "USA",
-    titles: ["Director"],
+    titles: ["Director", "Regulatory affairs"],
+    createdBy: "Ibrahim Aly",
+    lastUsedDays: 60,
+    leadsFound: 18,
   },
   {
     id: "3",
@@ -62,6 +77,9 @@ const initialIcps: ICP[] = [
     size: "50-1000",
     region: "GCC",
     titles: ["Director"],
+    createdBy: "Hager Torky",
+    lastUsedDays: 150,
+    leadsFound: 7,
   },
   {
     id: "4",
@@ -69,7 +87,10 @@ const initialIcps: ICP[] = [
     industry: "Gaming",
     size: "50-1000",
     region: "GCC",
-    titles: ["Director"],
+    titles: ["Director", "CEO"],
+    createdBy: "Esraa Mahmoud",
+    lastUsedDays: 3,
+    leadsFound: 56,
   },
   {
     id: "5",
@@ -78,6 +99,9 @@ const initialIcps: ICP[] = [
     size: "10-50",
     region: "Middle east",
     titles: ["Regulatory affairs"],
+    createdBy: "Ibrahim Aly",
+    lastUsedDays: 150,
+    leadsFound: 0,
   },
   {
     id: "6",
@@ -85,7 +109,11 @@ const initialIcps: ICP[] = [
     industry: "Beauty",
     size: "50-100",
     region: "Middle east",
-    titles: ["Regulatory affairs"],
+    titles: ["Regulatory affairs", "Head of Marketing"],
+    createdBy: "Esraa Mahmoud",
+    lastUsedDays: 3,
+    leadsFound: 12,
+    isArchived: true,
   },
   {
     id: "7",
@@ -94,6 +122,10 @@ const initialIcps: ICP[] = [
     size: "50-1000",
     region: "UK",
     titles: ["Regulatory affairs"],
+    createdBy: "Hager Torky",
+    lastUsedDays: null,
+    leadsFound: 0,
+    isArchived: true,
   },
 ];
 
@@ -162,11 +194,22 @@ export const useAppStore = create<AppState>((set) => ({
   ],
   addIcp: (icp) =>
     set((state) => ({
-      icps: [...state.icps, { ...icp, id: crypto.randomUUID() }],
+      icps: [
+        ...state.icps,
+        {
+          ...icp,
+          id: crypto.randomUUID(),
+          createdBy: CURRENT_USER,
+          lastUsedDays: null,
+          leadsFound: 0,
+        },
+      ],
     })),
-  archiveIcp: (id) => 
+  archiveIcp: (id) =>
     set((state) => ({
-      icps: state.icps.map(icp => icp.id === id ? { ...icp, isArchived: !icp.isArchived } : icp)
+      icps: state.icps.map((icp) =>
+        icp.id === id ? { ...icp, isArchived: !icp.isArchived } : icp,
+      ),
     })),
   deleteIcp: (id) =>
     set((state) => ({
