@@ -19,6 +19,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { LeadDetailModal } from "./LeadDetailModal";
 import { useColumnVisibility } from "@/lib/useColumnVisibility";
 import ColumnVisibilityModal from "../layout/ColumnVisibilityModal";
+import { TablePagination, usePagination } from "../layout/TablePagination";
 
 interface LeadTableProps {
   showIcpScores: boolean;
@@ -26,6 +27,7 @@ interface LeadTableProps {
 
 export function LeadTable({ showIcpScores }: LeadTableProps) {
   const { leads } = useAppStore();
+  const pg = usePagination(leads);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [enrichedIds, setEnrichedIds] = useState<Set<string>>(new Set());
   const [isEnriching, setIsEnriching] = useState(false);
@@ -274,7 +276,7 @@ export function LeadTable({ showIcpScores }: LeadTableProps) {
                 </tr>
               </thead>
               <tbody className="text-sm text-[#10201C]">
-                {leads.map((lead) => {
+                {pg.pageItems.map((lead) => {
                   const isEnriched = enrichedIds.has(lead.id);
                   const isSelected = selectedIds.has(lead.id);
                   return (
@@ -356,6 +358,12 @@ export function LeadTable({ showIcpScores }: LeadTableProps) {
           </div>
         )}
       </div>
+
+      <TablePagination
+        page={pg.page}
+        totalPages={pg.totalPages}
+        onPageChange={pg.setPage}
+      />
 
       <AddNewListModal
         isOpen={isNewListOpen}

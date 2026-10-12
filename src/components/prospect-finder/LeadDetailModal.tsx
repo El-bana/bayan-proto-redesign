@@ -175,7 +175,12 @@ export function LeadDetailModal({ isOpen, onClose, lead }: Props) {
                         <span className="bg-[#00C11A]/50 text-[#00B218] text-sm font-medium px-4 py-1.5 rounded">
                           Delivered
                         </span>
-                        <Edit className="w-5 h-5 text-gray-400 cursor-pointer hover:text-gray-600" />
+                        <button
+                          disabled
+                          className="disabled:opacity-50 disabled:cursor-not-allowed!"
+                        >
+                          <Edit className="w-5 h-5 text-gray-400" />
+                        </button>
                         <Trash className="w-5 h-5 text-red-400 cursor-pointer hover:text-red-600" />
                       </div>
                     </div>

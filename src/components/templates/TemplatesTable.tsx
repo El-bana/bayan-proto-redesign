@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { useColumnVisibility } from "@/lib/useColumnVisibility";
 import ColumnVisibilityModal from "../layout/ColumnVisibilityModal";
+import { TablePagination, usePagination } from "../layout/TablePagination";
 import AddTemplateModal from "./AddTemplateModal";
 import ProgressBar from "../lists/ProgressBar";
 
@@ -99,6 +100,7 @@ export default function TemplatesTable() {
   const [templates, setTemplates] = useState<Template[]>(initialTemplates);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const pg = usePagination(templates);
 
   const columnManager = useColumnVisibility([
     { key: "name", label: "Template Name", isVisible: true },
@@ -152,7 +154,7 @@ export default function TemplatesTable() {
   };
 
   return (
-    <div className="min-h-screen relative bg-[#F6F8F7] p-8 flex flex-col">
+    <div className="min-h-0 relative bg-[#F6F8F7] p-8 pb-0 flex flex-col">
       {/* Page Title Header */}
       <div className="flex items-center gap-3 mb-6">
         <BookOpen className="w-8 h-8 text-[#0D8C7C]" />
@@ -262,7 +264,7 @@ export default function TemplatesTable() {
             </tr>
           </thead>
           <tbody className="text-sm text-[#10201C]">
-            {templates.map((tpl) => {
+            {pg.pageItems.map((tpl) => {
               const isSelected = selectedIds.has(tpl.id);
               return (
                 <tr
@@ -327,6 +329,12 @@ export default function TemplatesTable() {
           </tbody>
         </table>
       </div>
+
+      <TablePagination
+        page={pg.page}
+        totalPages={pg.totalPages}
+        onPageChange={pg.setPage}
+      />
 
       {/* Modals */}
       <ColumnVisibilityModal

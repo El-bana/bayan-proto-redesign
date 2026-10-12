@@ -16,6 +16,7 @@ import { useRouter } from "next/navigation";
 import ProgressBar from "./ProgressBar";
 import { useColumnVisibility } from "@/lib/useColumnVisibility";
 import ColumnVisibilityModal from "../layout/ColumnVisibilityModal";
+import { TablePagination, usePagination } from "../layout/TablePagination";
 import { AddListModal } from "./AddListModal";
 
 export function ListsTable() {
@@ -23,6 +24,7 @@ export function ListsTable() {
   const router = useRouter();
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isAddListOpen, setIsAddListOpen] = useState(false);
+  const pg = usePagination(lists);
 
   const toggleAll = () => {
     if (selectedIds.size === lists.length) setSelectedIds(new Set());
@@ -47,7 +49,7 @@ export function ListsTable() {
   ]);
 
   return (
-    <div className="flex-1 p-8 bg-[#F6F8F7] flex flex-col min-h-0">
+    <div className="flex-1 p-8 bg-[#F6F8F7] flex pb-0 flex-col min-h-0">
       <div className="flex items-center gap-3 mb-6">
         <BriefcaseBusiness className="w-8 h-8 text-[#0D8C7C]" />
         <h1 className="text-2xl font-bold text-[#10201C]">Lists</h1>
@@ -136,7 +138,7 @@ export function ListsTable() {
             </tr>
           </thead>
           <tbody className="text-sm text-[#10201C]">
-            {lists.map((list) => {
+            {pg.pageItems.map((list) => {
               const isSelected = selectedIds.has(list.id);
               return (
                 <tr
@@ -199,6 +201,12 @@ export function ListsTable() {
           </tbody>
         </table>
       </div>
+
+      <TablePagination
+        page={pg.page}
+        totalPages={pg.totalPages}
+        onPageChange={pg.setPage}
+      />
 
       <ColumnVisibilityModal
         isOpen={columnManager.isOpen}

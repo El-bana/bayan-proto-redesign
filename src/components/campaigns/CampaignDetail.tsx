@@ -23,6 +23,7 @@ import { useAppStore } from "@/lib/store";
 import AddStepModal from "./AddStepModal";
 import { useColumnVisibility } from "@/lib/useColumnVisibility";
 import ColumnVisibilityModal from "../layout/ColumnVisibilityModal";
+import { TablePagination, usePagination } from "../layout/TablePagination";
 
 type Tab = "Analytics" | "Leads" | "Sequence";
 
@@ -30,6 +31,7 @@ export function CampaignDetail() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<Tab>("Analytics");
   const { leads } = useAppStore();
+  const pg = usePagination(leads);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const columnManager = useColumnVisibility([
@@ -233,7 +235,7 @@ export function CampaignDetail() {
                   </tr>
                 </thead>
                 <tbody className="text-sm text-[#10201C]">
-                  {leads.slice(0, 5).map((l) => (
+                  {pg.pageItems.map((l) => (
                     <tr
                       key={l.id}
                       className="hover:bg-black/5 transition-colors"
@@ -281,6 +283,11 @@ export function CampaignDetail() {
                 </tbody>
               </table>
             </div>
+            <TablePagination
+              page={pg.page}
+              totalPages={pg.totalPages}
+              onPageChange={pg.setPage}
+            />
           </div>
         )}
 

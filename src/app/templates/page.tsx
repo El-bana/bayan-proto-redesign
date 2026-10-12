@@ -3,7 +3,7 @@ import TemplatesTable from "@/components/templates/TemplatesTable";
 
 export default function TemplatesPage() {
   return (
-    <div className="w-full h-full">
+    <div className="w-full h-full flex flex-col min-h-0">
       <TemplatesTable />
     </div>
   );

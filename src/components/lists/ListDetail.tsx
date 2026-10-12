@@ -29,6 +29,7 @@ import { PushCampaignModal } from "./PushCampaignModal";
 import ProgressBar from "./ProgressBar";
 import { useColumnVisibility } from "@/lib/useColumnVisibility";
 import ColumnVisibilityModal from "../layout/ColumnVisibilityModal";
+import { TablePagination, usePagination } from "../layout/TablePagination";
 import { RescoreModal } from "./RescoreModal";
 
 export function ListDetail() {
@@ -53,6 +54,7 @@ export function ListDetail() {
   const listLeads = useMemo(() => {
     return leads.filter((l) => list.leadIds.includes(l.id));
   }, [leads, list.leadIds]);
+  const pg = usePagination(listLeads);
 
   const toggleAll = () => {
     if (selectedIds.size === listLeads.length) setSelectedIds(new Set());
@@ -77,7 +79,7 @@ export function ListDetail() {
   ]);
 
   return (
-    <div className="flex-1 p-8 bg-[#F6F8F7] flex flex-col min-h-0 overflow-y-auto">
+    <div className="flex-1 p-8 bg-[#F6F8F7] pb-0 flex flex-col min-h-0 overflow-y-auto">
       <div className="flex items-center gap-3 mb-6">
         <BriefcaseBusiness className="w-8 h-8 text-[#0D8C7C]" />
         <h1 className="text-2xl font-bold text-[#10201C]">
@@ -298,7 +300,7 @@ export function ListDetail() {
             </tr>
           </thead>
           <tbody className="text-sm text-[#10201C]">
-            {listLeads.map((lead) => {
+            {pg.pageItems.map((lead) => {
               const isSelected = selectedIds.has(lead.id);
               const healthType =
                 Number(lead.id) % 3 === 0
@@ -392,6 +394,12 @@ export function ListDetail() {
           </tbody>
         </table>
       </div>
+
+      <TablePagination
+        page={pg.page}
+        totalPages={pg.totalPages}
+        onPageChange={pg.setPage}
+      />
 
       <LeadDetailModal
         isOpen={!!detailModalLead}

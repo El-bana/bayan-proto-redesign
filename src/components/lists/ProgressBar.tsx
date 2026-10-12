@@ -8,7 +8,7 @@ export default function ProgressBar() {
   ];
 
   return (
-    <div className="w-full shadow-[0_4px_4px_0_rgba(0,0,0,0.25)] bg-gray-50 border border-gray-300 flex items-center px-4 py-3 mt-4">
+    <div className="w-full shadow-[0_4px_4px_0_rgba(0,0,0,0.25)] bg-gray-50 border border-gray-300 flex items-center px-4 py-3">
       <div className="flex items-center">
         {campaigns.map((item, index) => (
           <div key={item.name} className="flex items-center">
