@@ -1,7 +1,18 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { Search, Filter, Columns3, RotateCw, Briefcase, X, ChevronDown, Plus } from "lucide-react";
+import { useMemo, useState, useRef, useEffect } from "react";
+import {
+  Search,
+  Filter,
+  Columns3,
+  RotateCw,
+  Briefcase,
+  X,
+  ChevronDown,
+  Plus,
+  SendHorizontal,
+  MoreVertical,
+} from "lucide-react";
 import { useAppStore, Lead } from "@/lib/store";
 import { MOCK_LEADS, MOCK_LISTS, MockCampaign } from "./leads.mock";
 import { cn } from "@/lib/utils";
@@ -11,7 +22,7 @@ import { TablePagination } from "@/components/layout/TablePagination";
 import { ReassignModal } from "@/components/lists/ReassignModal";
 import ProgressBar from "@/components/lists/ProgressBar";
 import { CompanyDetailModal } from "./CompanyDetailModal";
-import { AddToExistingListModal } from "@/components/prospect-finder/SaveToListModal";
+import { AddToListModal } from "@/components/prospect-finder/SaveToListModal";
 import { ListDetail } from "@/components/lists/ListDetail";
 
 /* ------------------------------------------------------------------ */
@@ -56,6 +67,16 @@ function getLeadMeta(lead: Lead) {
     campaign: l.campaign,
     owner: l.owner ?? MOCK_OWNERS[n % MOCK_OWNERS.length],
   };
+}
+
+function getInitials(name: string) {
+  if (!name) return "";
+  return name
+    .split(" ")
+    .map((n) => n[0])
+    .filter(Boolean)
+    .join("")
+    .toUpperCase();
 }
 
 type Filters = {
@@ -209,17 +230,48 @@ export function LeadsTable() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isReassignOpen, setIsReassignOpen] = useState(false);
   const [isAddToListOpen, setIsAddToListOpen] = useState(false);
+  const [addToListMode, setAddToListMode] = useState<"existing" | "new">("existing");
+  const [isAddToListDropdownOpen, setIsAddToListDropdownOpen] = useState(false);
+  const addToListDropdownRef = useRef<HTMLDivElement>(null);
   const [selectedListId, setSelectedListId] = useState<string>("");
   const [selectedCompany, setSelectedCompany] = useState<string | null>(null);
+  const [activeRowMenuId, setActiveRowMenuId] = useState<string | null>(null);
+  const [rowActionLead, setRowActionLead] = useState<Lead | null>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        addToListDropdownRef.current &&
+        !addToListDropdownRef.current.contains(e.target as Node)
+      ) {
+        setIsAddToListDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = () => {
+      setActiveRowMenuId(null);
+    };
+    if (activeRowMenuId) {
+      document.addEventListener("click", handleClickOutside);
+      return () => document.removeEventListener("click", handleClickOutside);
+    }
+  }, [activeRowMenuId]);
 
   const columnManager = useColumnVisibility([
     { key: "firstName", label: "First Name", isVisible: true },
     { key: "lastName", label: "Last Name", isVisible: true },
+    { key: "email", label: "Email", isVisible: true },
+    { key: "jobTitle", label: "Job Title", isVisible: true },
     { key: "company", label: "Company", isVisible: true },
-    { key: "emailStatus", label: "Email Status", isVisible: true },
-    { key: "lists", label: "Lists", isVisible: true },
-    { key: "campaigns", label: "Campaign", isVisible: true },
+    { key: "location", label: "Location", isVisible: true },
     { key: "owner", label: "Owner", isVisible: true },
+    { key: "icp", label: "ICP", isVisible: true },
+    { key: "emailStatus", label: "Validation Status", isVisible: true },
+    { key: "action", label: "Action", isVisible: true },
   ]);
 
   // lead id -> lists it belongs to (a lead appears once, with all its lists)
@@ -324,6 +376,10 @@ export function LeadsTable() {
         return <span className="font-semibold">{lead.firstName}</span>;
       case "lastName":
         return <span className="font-semibold">{lead.lastName}</span>;
+      case "email":
+        return <span className="text-[#10201C] text-sm">{lead.email}</span>;
+      case "jobTitle":
+        return <span className="text-[#10201C] text-sm">{lead.jobTitle}</span>;
       case "company":
         return (
           <button
@@ -334,17 +390,103 @@ export function LeadsTable() {
             {lead.company}
           </button>
         );
+      case "location":
+        return <span className="text-[#10201C] text-sm">{lead.location}</span>;
+      case "owner":
+        return (
+          <div
+            className="w-7 h-7 rounded-full bg-[#6F3FFF]/20 text-[#6F3FFF] flex items-center justify-center text-xs font-bold shrink-0"
+            title={meta.owner}
+          >
+            {getInitials(meta.owner)}
+          </div>
+        );
+      case "icp": {
+        let icpName = "Hellawy ICP";
+        for (const li of leadLists) {
+          const fullList = lists.find((l) => l.id === li.id);
+          if (fullList?.icpId) {
+            const matched = store.icps.find((i) => i.id === fullList.icpId);
+            if (matched) {
+              icpName = matched.name;
+              break;
+            }
+          }
+        }
+        return <span className="text-[#10201C] text-sm font-medium">{icpName}</span>;
+      }
       case "emailStatus":
         return (
           <span
             className={cn(
-              "px-2 py-1 rounded-md text-xs font-medium whitespace-nowrap",
+              "px-2.5 py-1 rounded-md text-xs font-medium whitespace-nowrap",
               statusStyle[meta.emailStatus],
             )}
           >
-            {meta.emailStatus}
+            {meta.emailStatus === "Verified" ? "Valid" : meta.emailStatus}
           </span>
         );
+      case "action": {
+        const isMenuOpen = activeRowMenuId === lead.id;
+        return (
+          <div className="flex items-center gap-3 relative">
+            <button
+              type="button"
+              title="Send"
+              className="text-[#0D8C7C] hover:opacity-75 transition-opacity cursor-pointer p-1"
+              onClick={(e) => {
+                e.stopPropagation();
+              }}
+            >
+              <SendHorizontal className="w-4 h-4" />
+            </button>
+            <div className="relative">
+              <button
+                type="button"
+                title="More options"
+                aria-expanded={isMenuOpen}
+                className="text-[#10201C] hover:opacity-75 transition-opacity cursor-pointer p-1"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setActiveRowMenuId((prev) => (prev === lead.id ? null : lead.id));
+                }}
+              >
+                <MoreVertical className="w-4 h-4" />
+              </button>
+              {isMenuOpen && (
+                <div
+                  className="absolute right-0 top-full mt-1 w-36 bg-white border border-[#D3DEDB] rounded-lg shadow-lg z-30 py-1 text-xs text-[#10201C]"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setActiveRowMenuId(null);
+                      setRowActionLead(lead);
+                      setIsReassignOpen(true);
+                    }}
+                    className="w-full text-left px-3 py-2 hover:bg-[#ECF8F6] hover:text-[#0D8C7C] transition-colors cursor-pointer"
+                  >
+                    Change owner
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setActiveRowMenuId(null);
+                      setRowActionLead(lead);
+                      setAddToListMode("existing");
+                      setIsAddToListOpen(true);
+                    }}
+                    className="w-full text-left px-3 py-2 hover:bg-[#ECF8F6] hover:text-[#0D8C7C] transition-colors cursor-pointer border-t border-[#D3DEDB]"
+                  >
+                    Add to list
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      }
       case "lists":
         return <ListsCell lists={leadLists} />;
       case "campaigns":
@@ -364,8 +506,6 @@ export function LeadsTable() {
             </span>
           </div>
         );
-      case "owner":
-        return <span className="font-medium">{meta.owner}</span>;
       default:
         return null;
     }
@@ -466,130 +606,169 @@ export function LeadsTable() {
                   <RotateCw className="w-3.5 h-3.5" /> Re-assign Owner
                 </button>
               )}
-              <button
-                type="button"
-                onClick={() => setIsAddToListOpen(true)}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-[#10201C] rounded-lg text-xs font-semibold text-[#10201C] shadow-sm hover:bg-gray-50 transition-colors cursor-pointer"
-              >
-                <Plus className="w-3.5 h-3.5" /> Add to list
-              </button>
+              <div className="relative" ref={addToListDropdownRef}>
+                <button
+                  type="button"
+                  onClick={() => setIsAddToListDropdownOpen((prev) => !prev)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-[#10201C] rounded-lg text-xs font-semibold text-[#10201C] shadow-sm hover:bg-gray-50 transition-colors cursor-pointer"
+                >
+                  <Plus className="w-3.5 h-3.5" /> Add to list <ChevronDown className="w-3.5 h-3.5 text-[#10201C]" />
+                </button>
+                {isAddToListDropdownOpen && (
+                  <div className="absolute left-0 bottom-full mb-1 w-44 bg-white border border-[#D3DEDB] rounded-md shadow-lg z-30 font-mono text-xs overflow-hidden">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setAddToListMode("existing");
+                        setIsAddToListOpen(true);
+                        setIsAddToListDropdownOpen(false);
+                      }}
+                      className="w-full text-left px-3.5 py-2 text-[#10201C] hover:bg-[#ECF8F6] hover:text-[#0D8C7C] transition-colors border-b border-[#D3DEDB] cursor-pointer"
+                    >
+                      Add to existing list
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setAddToListMode("new");
+                        setIsAddToListOpen(true);
+                        setIsAddToListDropdownOpen(false);
+                      }}
+                      className="w-full text-left px-3.5 py-2 text-[#10201C] hover:bg-[#ECF8F6] hover:text-[#0D8C7C] transition-colors cursor-pointer"
+                    >
+                      Add to new list
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </div>
 
-        {/* Filter button + panel */}
-        <div className="relative">
+        {/* Right action buttons: Filter + Add Leads */}
+        <div className="flex items-center gap-3">
+          {/* Filter button + panel */}
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setIsFilterOpen((o) => !o)}
+              aria-expanded={isFilterOpen}
+              aria-label="Filters"
+              className={cn(
+                "relative py-2 px-4 border border-[#0D8C7C] rounded-lg transition-colors",
+                isFilterOpen || activeFilterCount > 0
+                  ? "bg-[#0D8C7C] text-white"
+                  : "bg-white text-[#0D8C7C] hover:bg-[#0D8C7C]/5",
+              )}
+            >
+              <Filter className="w-5 h-5" />
+              {activeFilterCount > 0 && (
+                <span className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-[#10201C] text-white text-[11px] font-bold flex items-center justify-center">
+                  {activeFilterCount}
+                </span>
+              )}
+            </button>
+
+            {isFilterOpen && (
+              <>
+                <div
+                  className="fixed inset-0 z-20"
+                  onClick={() => setIsFilterOpen(false)}
+                />
+                <div className="absolute right-0 top-full mt-2 z-30 w-80 bg-white border border-[#D3DEDB] rounded-lg shadow-xl p-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-sm font-bold text-[#10201C]">Filters</h2>
+                    <button
+                      type="button"
+                      onClick={() => setIsFilterOpen(false)}
+                      aria-label="Close filters"
+                      className="text-gray-400 hover:text-gray-600"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+
+                  <FilterSelect
+                    label="Email Status"
+                    value={filters.emailStatus}
+                    onChange={(v) => setFilter("emailStatus", v)}
+                  >
+                    <option value="">All statuses</option>
+                    {EMAIL_STATUSES.map((s) => (
+                      <option key={s}>{s}</option>
+                    ))}
+                  </FilterSelect>
+
+                  <FilterSelect
+                    label="Owner"
+                    value={filters.owner}
+                    onChange={(v) => setFilter("owner", v)}
+                  >
+                    <option value="">All owners</option>
+                    {owners.map((o) => (
+                      <option key={o}>{o}</option>
+                    ))}
+                  </FilterSelect>
+
+                  <FilterSelect
+                    label="Company"
+                    value={filters.company}
+                    onChange={(v) => setFilter("company", v)}
+                  >
+                    <option value="">All companies</option>
+                    {companies.map((c) => (
+                      <option key={c}>{c}</option>
+                    ))}
+                  </FilterSelect>
+
+                  <FilterSelect
+                    label="Campaign"
+                    value={filters.campaign}
+                    onChange={(v) => setFilter("campaign", v)}
+                  >
+                    <option value="">All campaigns</option>
+                    {CAMPAIGN_FILTERS.map((c) => (
+                      <option key={c}>{c}</option>
+                    ))}
+                  </FilterSelect>
+
+                  <div className="flex items-center justify-end gap-2 pt-1">
+                    <button
+                      type="button"
+                      disabled={activeFilterCount === 0}
+                      onClick={() => {
+                        setFilters(EMPTY_FILTERS);
+                        setPage(1);
+                      }}
+                      className="bg-white border border-red-400 text-red-500 hover:bg-red-50 disabled:opacity-50 text-xs font-semibold px-4 py-1.5 rounded-md transition-colors"
+                    >
+                      Clear all
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setIsFilterOpen(false)}
+                      className="bg-[#0D8C7C] hover:bg-[#0a7366] text-white text-xs font-semibold px-4 py-1.5 rounded-md transition-colors"
+                    >
+                      Done
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* Add Leads static button */}
           <button
             type="button"
-            onClick={() => setIsFilterOpen((o) => !o)}
-            aria-expanded={isFilterOpen}
-            aria-label="Filters"
-            className={cn(
-              "relative py-2 px-4 border border-[#0D8C7C] rounded-lg transition-colors",
-              isFilterOpen || activeFilterCount > 0
-                ? "bg-[#0D8C7C] text-white"
-                : "bg-white text-[#0D8C7C] hover:bg-[#0D8C7C]/5",
-            )}
+            className="flex items-center gap-1.5 px-4 h-9 bg-[#0D8C7C] text-white rounded-lg text-sm font-medium hover:bg-[#14B39F] shadow-sm transition-colors cursor-pointer shrink-0"
           >
-            <Filter className="w-5 h-5" />
-            {activeFilterCount > 0 && (
-              <span className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-[#10201C] text-white text-[11px] font-bold flex items-center justify-center">
-                {activeFilterCount}
-              </span>
-            )}
+            <Plus className="w-4 h-4" /> Add Leads
           </button>
-
-          {isFilterOpen && (
-            <>
-              <div
-                className="fixed inset-0 z-20"
-                onClick={() => setIsFilterOpen(false)}
-              />
-              <div className="absolute right-0 top-full mt-2 z-30 w-80 bg-white border border-[#D3DEDB] rounded-lg shadow-xl p-4 space-y-3">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-sm font-bold text-[#10201C]">Filters</h2>
-                  <button
-                    type="button"
-                    onClick={() => setIsFilterOpen(false)}
-                    aria-label="Close filters"
-                    className="text-gray-400 hover:text-gray-600"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-
-                <FilterSelect
-                  label="Email Status"
-                  value={filters.emailStatus}
-                  onChange={(v) => setFilter("emailStatus", v)}
-                >
-                  <option value="">All statuses</option>
-                  {EMAIL_STATUSES.map((s) => (
-                    <option key={s}>{s}</option>
-                  ))}
-                </FilterSelect>
-
-                <FilterSelect
-                  label="Owner"
-                  value={filters.owner}
-                  onChange={(v) => setFilter("owner", v)}
-                >
-                  <option value="">All owners</option>
-                  {owners.map((o) => (
-                    <option key={o}>{o}</option>
-                  ))}
-                </FilterSelect>
-
-                <FilterSelect
-                  label="Company"
-                  value={filters.company}
-                  onChange={(v) => setFilter("company", v)}
-                >
-                  <option value="">All companies</option>
-                  {companies.map((c) => (
-                    <option key={c}>{c}</option>
-                  ))}
-                </FilterSelect>
-
-                <FilterSelect
-                  label="Campaign"
-                  value={filters.campaign}
-                  onChange={(v) => setFilter("campaign", v)}
-                >
-                  <option value="">All campaigns</option>
-                  {CAMPAIGN_FILTERS.map((c) => (
-                    <option key={c}>{c}</option>
-                  ))}
-                </FilterSelect>
-
-                <div className="flex items-center justify-end gap-2 pt-1">
-                  <button
-                    type="button"
-                    disabled={activeFilterCount === 0}
-                    onClick={() => {
-                      setFilters(EMPTY_FILTERS);
-                      setPage(1);
-                    }}
-                    className="bg-white border border-red-400 text-red-500 hover:bg-red-50 disabled:opacity-50 text-xs font-semibold px-4 py-1.5 rounded-md transition-colors"
-                  >
-                    Clear all
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setIsFilterOpen(false)}
-                    className="bg-[#0D8C7C] hover:bg-[#0a7366] text-white text-xs font-semibold px-4 py-1.5 rounded-md transition-colors"
-                  >
-                    Done
-                  </button>
-                </div>
-              </div>
-            </>
-          )}
         </div>
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto min-h-[400px]">
         <table className="w-full text-left border-separate border-spacing-0">
           <thead>
             <tr className="bg-[#ECF6F5] text-sm font-semibold text-[#10201C]">
@@ -703,8 +882,11 @@ export function LeadsTable() {
 
       <ReassignModal
         isOpen={isReassignOpen}
-        onClose={() => setIsReassignOpen(false)}
-        leads={selectedLeads}
+        onClose={() => {
+          setIsReassignOpen(false);
+          setRowActionLead(null);
+        }}
+        leads={rowActionLead ? [rowActionLead] : selectedLeads}
       />
 
       <CompanyDetailModal
@@ -712,12 +894,19 @@ export function LeadsTable() {
         onClose={() => setSelectedCompany(null)}
       />
 
-      <AddToExistingListModal
+      <AddToListModal
         isOpen={isAddToListOpen}
-        onClose={() => setIsAddToListOpen(false)}
-        selectedIds={Array.from(selectedIds)}
+        initialMode={addToListMode}
+        onClose={() => {
+          setIsAddToListOpen(false);
+          setRowActionLead(null);
+        }}
+        selectedIds={
+          rowActionLead ? [rowActionLead.id] : Array.from(selectedIds)
+        }
         onSuccess={() => {
           setSelectedIds(new Set());
+          setRowActionLead(null);
         }}
       />
 

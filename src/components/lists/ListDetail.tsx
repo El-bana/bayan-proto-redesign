@@ -33,6 +33,36 @@ import { RescoreModal } from "./RescoreModal";
 import { CompanyDetailModal } from "@/components/leads/CompanyDetailModal";
 import { MOCK_LEADS, MOCK_LISTS } from "@/components/leads/leads.mock";
 
+const MOCK_OWNERS = ["Hager Torky", "Ibrahim Aly", "Esraa Mahmoud"];
+function getLeadMeta(lead: Lead) {
+  const n = Number(lead.id) || 0;
+  const l = lead as Lead & {
+    owner?: string;
+    emailStatus?: "Verified" | "Risky" | "Not Verified" | "Invalid";
+  };
+  return {
+    emailStatus: (l.emailStatus ?? "Not Verified") as "Verified" | "Risky" | "Not Verified" | "Invalid",
+    owner: l.owner ?? MOCK_OWNERS[n % MOCK_OWNERS.length],
+  };
+}
+
+function getInitials(name: string) {
+  if (!name) return "";
+  return name
+    .split(" ")
+    .map((n) => n[0])
+    .filter(Boolean)
+    .join("")
+    .toUpperCase();
+}
+
+const statusStyle: Record<string, string> = {
+  Verified: "bg-[#00C11A]/20 text-[#00B218]",
+  Risky: "bg-[#FF823A]/20 text-[#FF823A]",
+  "Not Verified": "bg-gray-200 text-gray-600",
+  Invalid: "bg-[#E20000]/20 text-[#E20000]",
+};
+
 export function ListDetail({
   listId,
   onSelectList,
@@ -92,14 +122,14 @@ export function ListDetail({
   const columnManager = useColumnVisibility([
     { key: "firstName", label: "First Name", isVisible: true },
     { key: "lastName", label: "Last Name", isVisible: true },
+    { key: "email", label: "Email", isVisible: true },
     { key: "jobTitle", label: "Job Title", isVisible: true },
     { key: "company", label: "Company", isVisible: true },
-    { key: "companyDescription", label: "Company Description", isVisible: true },
-    { key: "email", label: "Email", isVisible: true },
-    { key: "emailStatus", label: "Email Status", isVisible: true },
     { key: "location", label: "Location", isVisible: true },
+    { key: "owner", label: "Owner", isVisible: true },
     { key: "icp", label: "ICP", isVisible: true },
-    { key: "fitScore", label: "Fit Score", isVisible: true },
+    { key: "fitScore", label: "Score Fit", isVisible: true },
+    { key: "emailStatus", label: "Validation Status", isVisible: true },
   ]);
 
   // If list not found, maybe show a 404 or redirect
@@ -359,8 +389,8 @@ export function ListDetail({
           <button className="py-2 px-4 border border-[#0D8C7C] rounded-lg bg-white text-[#0D8C7C] hover:bg-[#0D8C7C]/5 transition-colors">
             <Filter className="w-5 h-5" />
           </button>
-          <button className="flex items-center gap-2 px-4 py-2 bg-[#0D8C7C] text-white text-sm font-medium rounded-lg shadow-sm hover:bg-[#14B39F] transition-colors">
-            <Plus className="w-4 h-4" /> New Leads
+          <button className="flex items-center gap-2 px-4 py-2 bg-[#0D8C7C] text-white text-sm font-medium rounded-lg shadow-sm hover:bg-[#14B39F] transition-colors cursor-pointer">
+            <Plus className="w-4 h-4" /> Add Leads
           </button>
         </div>
       </div>
@@ -393,6 +423,9 @@ export function ListDetail({
                   Last Name
                 </th>
               )}
+              {columnManager.isVisible("email") && (
+                <th className="py-2 px-4 border-y border-[#D3DEDB]">Email</th>
+              )}
               {columnManager.isVisible("jobTitle") && (
                 <th className="py-2 px-4 border-y border-[#D3DEDB]">
                   Job Title
@@ -401,22 +434,14 @@ export function ListDetail({
               {columnManager.isVisible("company") && (
                 <th className="py-2 px-4 border-y border-[#D3DEDB]">Company</th>
               )}
-              {columnManager.isVisible("companyDescription") && (
-                <th className="py-2 px-4 border-y border-[#D3DEDB]">
-                  Company Description
-                </th>
-              )}
-              {columnManager.isVisible("email") && (
-                <th className="py-2 px-4 border-y border-[#D3DEDB]">Email</th>
-              )}
-              {columnManager.isVisible("emailStatus") && (
-                <th className="py-2 px-4 border-y border-[#D3DEDB]">
-                  Email Status
-                </th>
-              )}
               {columnManager.isVisible("location") && (
                 <th className="py-2 px-4 border-y border-[#D3DEDB]">
                   Location
+                </th>
+              )}
+              {columnManager.isVisible("owner") && (
+                <th className="py-2 px-4 border-y border-[#D3DEDB]">
+                  Owner
                 </th>
               )}
               {columnManager.isVisible("icp") && (
@@ -426,7 +451,12 @@ export function ListDetail({
               )}
               {columnManager.isVisible("fitScore") && (
                 <th className="py-2 px-4 border-y border-[#D3DEDB]">
-                  Fit Score
+                  Score Fit
+                </th>
+              )}
+              {columnManager.isVisible("emailStatus") && (
+                <th className="py-2 px-4 border-y border-[#D3DEDB]">
+                  Validation Status
                 </th>
               )}
               <th className="py-2 px-4 rounded-r-lg border-y border-r border-[#D3DEDB] text-center">
@@ -437,14 +467,7 @@ export function ListDetail({
           <tbody className="text-sm text-[#10201C]">
             {pg.pageItems.map((lead) => {
               const isSelected = selectedIds.has(lead.id);
-              const healthType =
-                Number(lead.id) % 4 === 0
-                  ? "Not Verified"
-                  : Number(lead.id) % 3 === 0
-                    ? "Risky"
-                    : Number(lead.id) % 5 === 0
-                      ? "Invalid"
-                      : "Verified";
+              const meta = getLeadMeta(lead);
 
               return (
                 <tr
@@ -479,8 +502,13 @@ export function ListDetail({
                       {lead.lastName}
                     </td>
                   )}
+                  {columnManager.isVisible("email") && (
+                    <td className="py-3 px-4 border-b border-[#D3DEDB] text-[#10201C] text-sm">
+                      {lead.email}
+                    </td>
+                  )}
                   {columnManager.isVisible("jobTitle") && (
-                    <td className="py-3 px-4 border-b border-[#D3DEDB] text-gray-700">
+                    <td className="py-3 px-4 border-b border-[#D3DEDB] text-[#10201C] text-sm">
                       {lead.jobTitle}
                     </td>
                   )}
@@ -495,64 +523,55 @@ export function ListDetail({
                       </button>
                     </td>
                   )}
-                  {columnManager.isVisible("companyDescription") && (
-                    <td
-                      className="py-3 px-4 border-b border-[#D3DEDB] text-gray-600 max-w-[240px] truncate text-xs font-mono"
-                      title={lead.companyDescription}
-                    >
-                      {lead.companyDescription}
-                    </td>
-                  )}
-                  {columnManager.isVisible("email") && (
-                    <td className="py-3 px-4 border-b border-[#D3DEDB] text-gray-600 font-mono text-xs">
-                      {lead.email}
-                    </td>
-                  )}
-                  {columnManager.isVisible("emailStatus") && (
-                    <td className="py-3 px-4 border-b border-[#D3DEDB]">
-                      <span
-                        className={cn(
-                          "px-2 py-1 rounded-md text-[13px] font-mono",
-                          healthType === "Not Verified"
-                            ? "bg-gray-200 text-gray-600"
-                            : healthType === "Verified"
-                              ? "bg-[#00C11A]/10 text-[#00B218]"
-                              : healthType === "Risky"
-                                ? "bg-[#FF823A]/10 text-[#FF823A]"
-                                : "bg-[#E20000]/10 text-[#E20000]",
-                        )}
-                      >
-                        {healthType}
-                      </span>
-                    </td>
-                  )}
                   {columnManager.isVisible("location") && (
-                    <td className="py-3 px-4 border-b border-[#D3DEDB] text-gray-700">
+                    <td className="py-3 px-4 border-b border-[#D3DEDB] text-[#10201C] text-sm">
                       {lead.location}
+                    </td>
+                  )}
+                  {columnManager.isVisible("owner") && (
+                    <td className="py-3 px-4 border-b border-[#D3DEDB]">
+                      <div
+                        className="w-7 h-7 rounded-full bg-[#6F3FFF]/20 text-[#6F3FFF] flex items-center justify-center text-xs font-bold shrink-0"
+                        title={meta.owner}
+                      >
+                        {getInitials(meta.owner)}
+                      </div>
                     </td>
                   )}
                   {columnManager.isVisible("icp") && (
                     <td className="py-3 px-4 border-b border-[#D3DEDB]">
                       {listIcp ? (
-                        <span className="font-medium text-[#10201C]">
+                        <span className="font-medium text-[#10201C] text-sm">
                           {listIcp.name}
                         </span>
                       ) : (
-                        <span className="text-[#7C8C87]">N/A</span>
+                        <span className="text-[#7C8C87] text-sm">N/A</span>
                       )}
                     </td>
                   )}
                   {columnManager.isVisible("fitScore") && (
                     <td className="py-3 px-4 border-b border-[#D3DEDB]">
                       {listIcp ? (
-                        <span className="font-bold text-[#0D8C7C]">
+                        <span className="font-bold text-[#0D8C7C] text-sm">
                           {lead.fitScore}
                         </span>
                       ) : (
-                        <span className="text-[#7C8C87] font-normal">
+                        <span className="text-[#7C8C87] font-normal text-sm">
                           Not Scored
                         </span>
                       )}
+                    </td>
+                  )}
+                  {columnManager.isVisible("emailStatus") && (
+                    <td className="py-3 px-4 border-b border-[#D3DEDB]">
+                      <span
+                        className={cn(
+                          "px-2.5 py-1 rounded-md text-xs font-medium whitespace-nowrap",
+                          statusStyle[meta.emailStatus] ?? statusStyle["Not Verified"],
+                        )}
+                      >
+                        {meta.emailStatus === "Verified" ? "Valid" : meta.emailStatus}
+                      </span>
                     </td>
                   )}
                   <td className="py-3 px-4 border-b border-[#D3DEDB]">
