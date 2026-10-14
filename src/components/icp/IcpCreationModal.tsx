@@ -291,7 +291,7 @@ export function IcpCreationModal({ isOpen, onClose }: Props) {
       titles: ["Special Education Director/Teacher", "Director of Education"],
     });
     handleClose();
-    router.push("/lead-locator");
+    router.push("/prospect-finder");
   };
 
   const handleManualSave = (e: React.FormEvent<HTMLFormElement>) => {
@@ -326,7 +326,7 @@ export function IcpCreationModal({ isOpen, onClose }: Props) {
       titles: selectedTitles,
     });
     handleClose();
-    router.push("/lead-locator");
+    router.push("/prospect-finder");
   };
 
   const toggleChipSelection = (

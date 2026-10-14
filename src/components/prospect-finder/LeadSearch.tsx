@@ -13,7 +13,6 @@ import {
   ChevronDown,
   Sparkles,
   History,
-  Mail,
   UserSearch,
   X,
 } from "lucide-react";
@@ -87,24 +86,20 @@ function SaveSearchModal({
 
 export function LeadSearch() {
   const { setLeads, icps } = useAppStore();
-  const [selectedIcp, setSelectedIcp] = useState("no-icp");
-  const [maxSearch, setMaxSearch] = useState("2000");
-  const [aiPrompt, setAiPrompt] = useState("");
-  const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
   const searchParams = useSearchParams();
   const isRun = searchParams.get("run") === "true";
   const icpIdParam = searchParams.get("icpId");
 
-  useEffect(() => {
-    if (isRun) {
-      if (icpIdParam) {
-        setSelectedIcp(icpIdParam);
-      } else {
-        setSelectedIcp(CUSTOM_ICP_VALUE);
-      }
-      handleAiSearch();
-    }
-  }, [isRun, icpIdParam]);
+  const [selectedIcp, setSelectedIcp] = useState(() => icpIdParam || "no-icp");
+  const [prevIcpId, setPrevIcpId] = useState(icpIdParam);
+  if (icpIdParam !== prevIcpId) {
+    setPrevIcpId(icpIdParam);
+    setSelectedIcp(icpIdParam || "no-icp");
+  }
+  const [hasSearched, setHasSearched] = useState(false);
+  const [maxSearch, setMaxSearch] = useState("2000");
+  const [aiPrompt, setAiPrompt] = useState("");
+  const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
 
   const handleAiSearch = useCallback(() => {
     const mockLeads: Lead[] = [
@@ -206,15 +201,24 @@ export function LeadSearch() {
       },
     ];
     setLeads(mockLeads);
-    setSelectedIcp(CUSTOM_ICP_VALUE);
+    setHasSearched(true);
+    setSelectedIcp((prev) => (prev === "no-icp" ? CUSTOM_ICP_VALUE : prev));
   }, [setLeads]);
+
+  useEffect(() => {
+    if (isRun) {
+      handleAiSearch();
+    }
+  }, [isRun, handleAiSearch]);
 
   const handleClear = () => {
     setSelectedIcp("no-icp");
     setLeads([]);
+    setHasSearched(false);
   };
 
-  const showResults = selectedIcp !== "no-icp";
+  const hasIcpSelected = selectedIcp !== "no-icp";
+  const showLeadsTable = hasSearched && hasIcpSelected;
 
   return (
     <main className="min-h-screen bg-[#F6F8F7] p-8 flex flex-col font-sans text-[#10201C]">
@@ -243,7 +247,10 @@ export function LeadSearch() {
                 id="icp-select"
                 className="w-full bg-white border border-[#D6D7D7] rounded-md h-10 px-3 appearance-none outline-none text-xs text-[#10201C] font-mono truncate pr-8 cursor-pointer"
                 value={selectedIcp}
-                onChange={(e) => setSelectedIcp(e.target.value)}
+                onChange={(e) => {
+                  setSelectedIcp(e.target.value);
+                  setHasSearched(false);
+                }}
               >
                 <option value="no-icp">Choose ICP</option>
                 {icps.map((icp) => (
@@ -261,7 +268,7 @@ export function LeadSearch() {
           </div>
 
           {/* Dynamic Insights / Cost Badges */}
-          {showResults && (
+          {hasIcpSelected && (
             <div className="flex flex-col gap-2 my-1">
               <div className="bg-[#8FE39E] p-2.5 rounded-md border-l-4 border-[#22C55E]">
                 <p className="text-[11px] font-mono text-[#10201C]">
@@ -311,29 +318,29 @@ export function LeadSearch() {
             <FilterDropdown
               icon={BriefcaseBusiness}
               label="Job Titles"
-              badge={showResults ? "2" : undefined}
+              badge={hasIcpSelected ? "2" : undefined}
             />
             <FilterDropdown icon={Users2} label="People Lookalikes" />
             <FilterDropdown
               icon={Building}
               label="Company"
-              badge={showResults ? "3" : undefined}
+              badge={hasIcpSelected ? "3" : undefined}
             />
             <FilterDropdown
               icon={MapPin}
               label="Location"
-              badge={showResults ? "1" : undefined}
+              badge={hasIcpSelected ? "1" : undefined}
             />
             <FilterDropdown
               icon={Factory}
               label="Industry"
-              badge={showResults ? "1" : undefined}
+              badge={hasIcpSelected ? "1" : undefined}
             />
           </div>
 
           {/* Bottom Action Footer */}
           <div className="mt-auto pt-4 border-t border-[#D3DEDB]">
-            {showResults ? (
+            {hasIcpSelected ? (
               /* --- STATE 2 FOOTER: When Table is visible --- */
               <div className="flex justify-between">
                 <button
@@ -380,14 +387,14 @@ export function LeadSearch() {
 
         {/* Main Content Area */}
         <div className="flex-1 ml-4 flex flex-col">
-          {!showResults ? (
+          {!showLeadsTable ? (
             /* --- STATE 1: INITIAL AI SEARCH SCREEN --- */
             <div className="flex-1 bg-white rounded-xl border border-[#D3DEDB] flex flex-col items-center justify-center p-8 text-center">
               <h2 className="text-5xl font-bold text-[#10201C] mb-1">
                 Hey Hager!
               </h2>
               <h3 className="bg-[linear-gradient(180deg,#0D8C7C_0%,#14B39F_25%,#6D5BD0_100%)] bg-clip-text text-transparent text-5xl font-bold leading-[120%] mb-3">
-                I'm Smart Prospect Finder
+                I&apos;m Smart Prospect Finder
               </h3>
               <p className="text-lg font-semibold text-[#10201C] mb-8">
                 Describe your ideal customer, or start with filters

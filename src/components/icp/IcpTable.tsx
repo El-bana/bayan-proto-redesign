@@ -211,8 +211,8 @@ export function IcpTable() {
   const setFilter = (key: keyof Filters, value: string) =>
     setFilters((f) => ({ ...f, [key]: value }));
 
-  const handleRunClick = () => {
-    router.push("/lead-locator?run=true");
+  const handleFindLeads = (icpId: string) => {
+    router.push(`/prospect-finder?icpId=${encodeURIComponent(icpId)}`);
   };
 
   const handleBulkArchive = () => {
@@ -577,8 +577,8 @@ export function IcpTable() {
                         </button>
                       ) : (
                         <button
-                          onClick={handleRunClick}
-                          className="flex items-center gap-1.5 px-3 py-1 bg-[#0D8C7C] text-white rounded shadow-sm hover:bg-[#14B39F] transition-colors font-medium text-xs"
+                          onClick={() => handleFindLeads(icp.id)}
+                          className="flex items-center gap-1.5 px-3 py-1 bg-[#0D8C7C] text-white rounded shadow-sm hover:bg-[#14B39F] transition-colors font-medium text-xs cursor-pointer"
                         >
                           Find leads
                         </button>

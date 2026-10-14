@@ -1,22 +1,16 @@
 "use client";
-import { useState } from "react";
+import { cn } from "@/lib/utils";
 import {
-  Mail,
-  Settings,
-  ChevronsRight,
-  UserSearch,
-  GraduationCap,
-  type LucideIcon,
-  SendHorizonal,
-  BookOpen,
-  Presentation,
   Briefcase,
-  LayoutGrid,
+  ChevronsRight,
+  type LucideIcon,
+  Settings,
+  UserSearch,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { cn } from "@/lib/utils";
-import { AnalyticsIcon, IcpIcon } from "./CustomIcons";
+import { useState } from "react";
+import { IcpIcon } from "./CustomIcons";
 
 interface NavItem {
   icon: LucideIcon | React.ComponentType<{ className?: string }>;
@@ -25,14 +19,14 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { icon: LayoutGrid, href: "/dashboard", label: "Dashboard" },
+  // { icon: LayoutGrid, href: "/dashboard", label: "Dashboard" },
   { icon: IcpIcon, href: "/icp-library", label: "ICP Library" },
   { icon: UserSearch, href: "/prospect-finder", label: "Prospect Finder" },
   { icon: Briefcase, href: "/leads", label: "Leads" },
-  { icon: SendHorizonal, href: "/campaigns", label: "Campaigns" },
-  { icon: Mail, href: "/mail", label: "Mail" },
-  { icon: BookOpen, href: "/templates", label: "Templates" },
-  { icon: AnalyticsIcon, href: "/reports", label: "Analytics" },
+  // { icon: SendHorizonal, href: "/campaigns", label: "Campaigns" },
+  // { icon: Mail, href: "/mail", label: "Mail" },
+  // { icon: BookOpen, href: "/templates", label: "Templates" },
+  // { icon: AnalyticsIcon, href: "/reports", label: "Analytics" },
 ];
 
 function isActivePath(pathname: string, href: string) {
