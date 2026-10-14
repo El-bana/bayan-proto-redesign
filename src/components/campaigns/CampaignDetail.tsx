@@ -35,7 +35,8 @@ export function CampaignDetail() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const columnManager = useColumnVisibility([
-    { key: "name", label: "Lead Name", isVisible: true },
+    { key: "firstName", label: "First Name", isVisible: true },
+    { key: "lastName", label: "Last Name", isVisible: true },
     { key: "jobTitle", label: "Job Title", isVisible: true },
     { key: "company", label: "Company", isVisible: true },
     { key: "email", label: "Email", isVisible: true },
@@ -202,9 +203,14 @@ export function CampaignDetail() {
                         />
                       </div>
                     </th>
-                    {columnManager.isVisible("name") && (
+                    {columnManager.isVisible("firstName") && (
                       <th className="py-2 px-4 border-y border-[#D3DEDB]">
-                        Lead Name
+                        First Name
+                      </th>
+                    )}
+                    {columnManager.isVisible("lastName") && (
+                      <th className="py-2 px-4 border-y border-[#D3DEDB]">
+                        Last Name
                       </th>
                     )}
                     {columnManager.isVisible("jobTitle") && (
@@ -248,9 +254,14 @@ export function CampaignDetail() {
                           />
                         </div>
                       </td>
-                      {columnManager.isVisible("name") && (
+                      {columnManager.isVisible("firstName") && (
                         <td className="py-3 px-4 font-semibold border-b border-[#D3DEDB]">
-                          {l.name}
+                          {l.firstName}
+                        </td>
+                      )}
+                      {columnManager.isVisible("lastName") && (
+                        <td className="py-3 px-4 font-semibold border-b border-[#D3DEDB]">
+                          {l.lastName}
                         </td>
                       )}
                       {columnManager.isVisible("jobTitle") && (

@@ -15,9 +15,11 @@ export interface ICP {
 
 export interface Lead {
   id: string;
-  name: string;
+  firstName: string;
+  lastName: string;
   jobTitle: string;
   company: string;
+  companyDescription: string;
   email: string;
   location: string;
   fitScore: number;
@@ -27,6 +29,7 @@ export interface LeadList {
   id: string;
   name: string;
   leadIds: string[];
+  icpId?: string;
 }
 
 // Fields the store fills in itself when an ICP is created
@@ -132,45 +135,55 @@ const initialIcps: ICP[] = [
 const initialLeads: Lead[] = [
   {
     id: "1",
-    name: "John Smith",
+    firstName: "John",
+    lastName: "Smith",
     jobTitle: "VP of Sales",
     company: "Acme Technologies",
+    companyDescription: "Acme Technologies delivers enterprise cloud solutions and developer tooling.",
     email: "john.smith@acmetech.com",
     location: "New York, USA",
     fitScore: 92,
   },
   {
     id: "2",
-    name: "Sarah Johnson",
+    firstName: "Sarah",
+    lastName: "Johnson",
     jobTitle: "Director of Marketing",
     company: "TechFlow Inc.",
+    companyDescription: "TechFlow Inc. provides intelligent workflow automation for modern business teams.",
     email: "sarah.johnson@techflow.com",
     location: "San Francisco, USA",
     fitScore: 87,
   },
   {
     id: "3",
-    name: "Michael Brown",
+    firstName: "Michael",
+    lastName: "Brown",
     jobTitle: "CEO",
     company: "CloudScale",
+    companyDescription: "CloudScale specializes in scalable cloud infrastructure and DevOps consulting.",
     email: "michael.brown@cloudscale.io",
     location: "London, UK",
     fitScore: 95,
   },
   {
     id: "4",
-    name: "Emily Davis",
+    firstName: "Emily",
+    lastName: "Davis",
     jobTitle: "Head of Growth",
     company: "GrowthLabs",
+    companyDescription: "GrowthLabs is a data-driven growth marketing agency for high-growth tech startups.",
     email: "emily.davis@growthlabs.com",
     location: "Dubai, UAE",
     fitScore: 84,
   },
   {
     id: "5",
-    name: "David Wilson",
+    firstName: "David",
+    lastName: "Wilson",
     jobTitle: "Founder",
     company: "SaaS Ventures",
+    companyDescription: "SaaS Ventures invests in and accelerates early-stage B2B software companies.",
     email: "david.wilson@saasventures.com",
     location: "Austin, USA",
     fitScore: 90,
@@ -183,13 +196,40 @@ export const useAppStore = create<AppState>((set) => ({
   lists: [
     {
       id: "1",
-      name: "Q4 Enterprise Targets",
-      leadIds: ["1", "2", "3"],
+      name: "Euro Leads",
+      leadIds: ["1", "2", "3", "6", "11", "15"],
+      icpId: "1",
+    },
+    {
+      id: "l1",
+      name: "Euro Leads",
+      leadIds: ["1", "2", "3", "6", "11", "15"],
+      icpId: "1",
     },
     {
       id: "2",
-      name: "SaaS Founders",
-      leadIds: ["4", "5"],
+      name: "GCC Decision Makers",
+      leadIds: ["1", "2", "5", "10", "12", "18"],
+    },
+    {
+      id: "l2",
+      name: "GCC Decision Makers",
+      leadIds: ["1", "2", "5", "10", "12", "18"],
+    },
+    {
+      id: "l3",
+      name: "USA SaaS",
+      leadIds: ["1", "4", "5", "7", "13"],
+    },
+    {
+      id: "l4",
+      name: "Webinar Attendees",
+      leadIds: ["3", "7", "13", "18"],
+    },
+    {
+      id: "l5",
+      name: "Event Contacts",
+      leadIds: ["7", "11", "12"],
     },
   ],
   addIcp: (icp) =>

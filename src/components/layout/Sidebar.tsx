@@ -10,7 +10,6 @@ import {
   SendHorizonal,
   BookOpen,
   Presentation,
-  BriefcaseBusiness,
   Briefcase,
   LayoutGrid,
 } from "lucide-react";
@@ -30,7 +29,6 @@ const navItems: NavItem[] = [
   { icon: IcpIcon, href: "/icp-library", label: "ICP Library" },
   { icon: UserSearch, href: "/prospect-finder", label: "Prospect Finder" },
   { icon: Briefcase, href: "/leads", label: "Leads" },
-  { icon: BriefcaseBusiness, href: "/lists", label: "Lists" },
   { icon: SendHorizonal, href: "/campaigns", label: "Campaigns" },
   { icon: Mail, href: "/mail", label: "Mail" },
   { icon: BookOpen, href: "/templates", label: "Templates" },

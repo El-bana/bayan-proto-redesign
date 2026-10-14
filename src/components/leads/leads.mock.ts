@@ -20,9 +20,24 @@ const HT = "Hager Torky";
 const IA = "Ibrahim Aly";
 const EM = "Esraa Mahmoud";
 
+export const COMPANY_DESCRIPTIONS: Record<string, string> = {
+  "Nile Corp": "Nile Corp is a leading digital media and marketing conglomerate across North Africa.",
+  "Gulfline": "Gulfline provides global maritime logistics and regional supply chain operations.",
+  "Brenner GmbH": "Brenner GmbH designs precision engineering equipment and industrial manufacturing tools.",
+  "Brightpath": "Brightpath offers an all-in-one edtech platform for modern workforce skills training.",
+  "Studio Rossi": "Studio Rossi is a premier creative architecture and interior design agency in Milan.",
+  "Atlas Logistics": "Atlas Logistics manages end-to-end freight forwarding and international port cargo services.",
+  "Novak Labs": "Novak Labs is an advanced software research lab building next-generation AI workflows.",
+  "Falcon Retail": "Falcon Retail operates omnichannel consumer luxury and retail outlets across the GCC.",
+  "Lumiere SA": "Lumiere SA is a French multinational specializing in high-end brand partnerships and events.",
+  "Cobalt Systems": "Cobalt Systems engineers secure enterprise cloud architecture and data pipeline platforms.",
+  "Nordlys": "Nordlys provides renewable energy monitoring systems and green tech automation across the Nordics.",
+};
+
 const row = (
   id: string,
-  name: string,
+  firstName: string,
+  lastName: string,
   jobTitle: string,
   company: string,
   location: string,
@@ -33,10 +48,16 @@ const row = (
 ) =>
   ({
     id,
-    name,
+    firstName,
+    lastName,
     jobTitle,
     company,
-    email: `${name.toLowerCase().replace(/[^a-z]+/g, ".")}@${company
+    companyDescription:
+      COMPANY_DESCRIPTIONS[company] ??
+      `${company} is an established company specializing in innovative industry solutions.`,
+    email: `${firstName.toLowerCase().replace(/[^a-z]+/g, "")}.${lastName
+      .toLowerCase()
+      .replace(/[^a-z]+/g, "")}@${company
       .toLowerCase()
       .replace(/[^a-z]+/g, "")}.com`,
     location,
@@ -49,7 +70,8 @@ const row = (
 export const MOCK_LEADS: MockLead[] = [
   row(
     "1",
-    "Omar Hassan",
+    "Omar",
+    "Hassan",
     "Head of Marketing",
     "Nile Corp",
     "Cairo, Egypt",
@@ -60,7 +82,8 @@ export const MOCK_LEADS: MockLead[] = [
   ),
   row(
     "2",
-    "Sara Khaled",
+    "Sara",
+    "Khaled",
     "CTO",
     "Gulfline",
     "Dubai, UAE",
@@ -71,7 +94,8 @@ export const MOCK_LEADS: MockLead[] = [
   ),
   row(
     "3",
-    "Lukas Meyer",
+    "Lukas",
+    "Meyer",
     "VP Sales",
     "Brenner GmbH",
     "Berlin, Germany",
@@ -82,7 +106,8 @@ export const MOCK_LEADS: MockLead[] = [
   ),
   row(
     "4",
-    "Emily Carter",
+    "Emily",
+    "Carter",
     "Product Manager",
     "Brightpath",
     "Austin, USA",
@@ -92,7 +117,8 @@ export const MOCK_LEADS: MockLead[] = [
   ),
   row(
     "5",
-    "Youssef Adel",
+    "Youssef",
+    "Adel",
     "Operations Director",
     "Gulfline",
     "Riyadh, KSA",
@@ -103,7 +129,8 @@ export const MOCK_LEADS: MockLead[] = [
   ),
   row(
     "6",
-    "Marta Rossi",
+    "Marta",
+    "Rossi",
     "Founder",
     "Studio Rossi",
     "Milan, Italy",
@@ -114,7 +141,8 @@ export const MOCK_LEADS: MockLead[] = [
   ),
   row(
     "7",
-    "James Wilson",
+    "James",
+    "Wilson",
     "Director of Growth",
     "Brightpath",
     "New York, USA",
@@ -125,7 +153,8 @@ export const MOCK_LEADS: MockLead[] = [
   ),
   row(
     "8",
-    "Fatima Zahra",
+    "Fatima",
+    "Zahra",
     "COO",
     "Atlas Logistics",
     "Casablanca, Morocco",
@@ -136,7 +165,8 @@ export const MOCK_LEADS: MockLead[] = [
   ),
   row(
     "9",
-    "Daniel Novak",
+    "Daniel",
+    "Novak",
     "Engineering Lead",
     "Novak Labs",
     "Prague, Czechia",
@@ -146,7 +176,8 @@ export const MOCK_LEADS: MockLead[] = [
   ),
   row(
     "10",
-    "Aisha Rahman",
+    "Aisha",
+    "Rahman",
     "Marketing Manager",
     "Falcon Retail",
     "Doha, Qatar",
@@ -157,7 +188,8 @@ export const MOCK_LEADS: MockLead[] = [
   ),
   row(
     "11",
-    "Pierre Dubois",
+    "Pierre",
+    "Dubois",
     "Head of Partnerships",
     "Lumiere SA",
     "Paris, France",
@@ -168,7 +200,8 @@ export const MOCK_LEADS: MockLead[] = [
   ),
   row(
     "12",
-    "Noor Al-Din",
+    "Noor",
+    "Al-Din",
     "Procurement Lead",
     "Atlas Logistics",
     "Amman, Jordan",
@@ -178,7 +211,8 @@ export const MOCK_LEADS: MockLead[] = [
   ),
   row(
     "13",
-    "Ryan Brooks",
+    "Ryan",
+    "Brooks",
     "Sales Director",
     "Cobalt Systems",
     "Chicago, USA",
@@ -189,7 +223,8 @@ export const MOCK_LEADS: MockLead[] = [
   ),
   row(
     "14",
-    "Hana Mostafa",
+    "Hana",
+    "Mostafa",
     "CEO",
     "Nile Corp",
     "Alexandria, Egypt",
@@ -200,7 +235,8 @@ export const MOCK_LEADS: MockLead[] = [
   ),
   row(
     "15",
-    "Tomas Berg",
+    "Tomas",
+    "Berg",
     "IT Manager",
     "Nordlys",
     "Stockholm, Sweden",
@@ -211,7 +247,8 @@ export const MOCK_LEADS: MockLead[] = [
   ),
   row(
     "16",
-    "Layla Mansour",
+    "Layla",
+    "Mansour",
     "Business Developer",
     "Falcon Retail",
     "Kuwait City, Kuwait",
@@ -222,7 +259,8 @@ export const MOCK_LEADS: MockLead[] = [
   ),
   row(
     "17",
-    "Chris Evans",
+    "Chris",
+    "Evans",
     "Account Executive",
     "Cobalt Systems",
     "Denver, USA",
@@ -232,7 +270,8 @@ export const MOCK_LEADS: MockLead[] = [
   ),
   row(
     "18",
-    "Mona Samir",
+    "Mona",
+    "Samir",
     "HR Director",
     "Nile Corp",
     "Giza, Egypt",

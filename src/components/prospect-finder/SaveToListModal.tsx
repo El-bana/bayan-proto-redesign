@@ -38,7 +38,7 @@ export function AddNewListModal({ isOpen, onClose, selectedIds, onSuccess }: Mod
     addList(listName, selectedIds);
     onSuccess();
     handleClose();
-    router.push('/lists');
+    router.push('/leads');
   };
 
   return (
@@ -131,7 +131,7 @@ export function AddToExistingListModal({ isOpen, onClose, selectedIds, onSuccess
     addToList(selectedListId, selectedIds);
     onSuccess();
     handleClose();
-    router.push('/lists');
+    router.push('/leads');
   };
 
   return (

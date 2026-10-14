@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
 import { Lead } from '@/lib/store';
+import { useRouter } from 'next/navigation';
 
 interface Props {
   isOpen: boolean;
@@ -11,6 +12,7 @@ interface Props {
 }
 
 export function PushCampaignModal({ isOpen, onClose, leads }: Props) {
+  const router = useRouter();
   const [step, setStep] = useState<1 | 2>(1);
   const [selectedCampaign, setSelectedCampaign] = useState('Europe Campaign 2026');
 
@@ -56,14 +58,17 @@ export function PushCampaignModal({ isOpen, onClose, leads }: Props) {
                   {leads.map((lead, i) => {
                     const colors = ['bg-[#8000FF]', 'bg-[#FF823A]', 'bg-[#5B8DEF]', 'bg-[#E20000]', 'bg-[#0D8C7C]', 'bg-[#F2C94C]'];
                     const color = colors[i % colors.length];
-                    const initials = lead.name.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase();
+                    const initials = `${lead.firstName[0] || ""}${lead.lastName[0] || ""}`.toUpperCase();
                     return (
                       <div key={lead.id} className="flex items-center gap-4 p-3 border-b border-gray-100 last:border-0">
                         <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0 ${color}`}>
                           {initials}
                         </div>
                         <div className="flex-1 min-w-0 flex items-center justify-between">
-                          <span className="font-bold text-[#10201C] truncate mr-4">{lead.name}</span>
+                          <span className="font-bold text-[#10201C] truncate mr-4 flex items-center gap-1.5">
+                            <span>{lead.firstName}</span>
+                            <span>{lead.lastName}</span>
+                          </span>
                           <span className="text-[#10201C] truncate text-sm">{lead.email}</span>
                         </div>
                       </div>
@@ -86,9 +91,21 @@ export function PushCampaignModal({ isOpen, onClose, leads }: Props) {
                 </div>
 
                 <div className="flex justify-between items-center">
-                  <button onClick={onClose} className="px-6 py-2.5 text-[#E20000] border border-[#E20000] rounded-lg font-medium hover:bg-red-50 transition-colors">
-                    Cancel
-                  </button>
+                  <div className="flex items-center gap-3">
+                    <button onClick={onClose} className="px-6 py-2.5 text-[#E20000] border border-[#E20000] rounded-lg font-medium hover:bg-red-50 transition-colors">
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onClose();
+                        router.push('/campaigns/new');
+                      }}
+                      className="text-xs text-[#0D8C7C] hover:underline font-semibold"
+                    >
+                      + Create new
+                    </button>
+                  </div>
                   <button 
                     onClick={() => setStep(2)}
                     className="px-8 py-2.5 bg-[#0D8C7C] text-white rounded-lg font-medium hover:bg-[#14B39F] transition-colors"

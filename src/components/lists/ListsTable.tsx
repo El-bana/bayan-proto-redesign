@@ -138,7 +138,7 @@ export function ListsTable() {
             </tr>
           </thead>
           <tbody className="text-sm text-[#10201C]">
-            {pg.pageItems.map((list) => {
+            {pg.pageItems.map((list, index) => {
               const isSelected = selectedIds.has(list.id);
               return (
                 <tr
@@ -162,12 +162,22 @@ export function ListsTable() {
                   )}
                   {columnManager.isVisible("icp") && (
                     <td className="py-3 px-4 border-b border-[#D3DEDB] font-medium">
-                      American ICP
+                      {index === 0 ? (
+                        "American ICP"
+                      ) : (
+                        <span className="text-[#7C8C87]">N/A</span>
+                      )}
                     </td>
                   )}
                   {columnManager.isVisible("avgFit") && (
-                    <td className="py-3 px-4 border-b border-[#D3DEDB] font-bold text-[#0D8C7C]">
-                      91%
+                    <td className="py-3 px-4 border-b border-[#D3DEDB]">
+                      {index === 0 ? (
+                        <span className="font-bold text-[#0D8C7C]">91</span>
+                      ) : (
+                        <span className="text-[#7C8C87] font-normal">
+                          Not Scored
+                        </span>
+                      )}
                     </td>
                   )}
                   {columnManager.isVisible("creator") && (

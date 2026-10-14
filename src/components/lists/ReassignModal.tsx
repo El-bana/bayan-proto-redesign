@@ -56,14 +56,17 @@ export function ReassignModal({ isOpen, onClose, leads }: Props) {
                   {leads.map((lead, i) => {
                     const colors = ['bg-[#8000FF]', 'bg-[#FF823A]', 'bg-[#5B8DEF]', 'bg-[#E20000]', 'bg-[#0D8C7C]', 'bg-[#F2C94C]'];
                     const color = colors[i % colors.length];
-                    const initials = lead.name.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase();
+                    const initials = `${lead.firstName[0] || ""}${lead.lastName[0] || ""}`.toUpperCase();
                     return (
                       <div key={lead.id} className="flex items-center gap-4 p-3 border-b border-gray-100 last:border-0">
                         <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0 ${color}`}>
                           {initials}
                         </div>
                         <div className="flex-1 min-w-0 flex items-center justify-between">
-                          <span className="font-bold text-[#10201C] truncate mr-4">{lead.name}</span>
+                          <span className="font-bold text-[#10201C] truncate mr-4 flex items-center gap-1.5">
+                            <span>{lead.firstName}</span>
+                            <span>{lead.lastName}</span>
+                          </span>
                           <span className="text-[#10201C] truncate text-sm">{lead.email}</span>
                         </div>
                       </div>

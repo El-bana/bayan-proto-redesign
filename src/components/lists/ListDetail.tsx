@@ -24,36 +24,57 @@ import {
 import { useState, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { LeadDetailModal } from "@/components/prospect-finder/LeadDetailModal";
-import { ReassignModal } from "./ReassignModal";
 import { PushCampaignModal } from "./PushCampaignModal";
 import ProgressBar from "./ProgressBar";
 import { useColumnVisibility } from "@/lib/useColumnVisibility";
 import ColumnVisibilityModal from "../layout/ColumnVisibilityModal";
 import { TablePagination, usePagination } from "../layout/TablePagination";
 import { RescoreModal } from "./RescoreModal";
+import { CompanyDetailModal } from "@/components/leads/CompanyDetailModal";
+import { MOCK_LEADS, MOCK_LISTS } from "@/components/leads/leads.mock";
 
-export function ListDetail() {
+export function ListDetail({
+  listId,
+  onSelectList,
+}: {
+  listId?: string;
+  onSelectList?: (id: string) => void;
+} = {}) {
   const params = useParams();
   const router = useRouter();
-  const { lists, leads } = useAppStore();
+  const { lists, leads, icps } = useAppStore();
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [detailModalLead, setDetailModalLead] = useState<Lead | null>(null);
+  const [selectedCompany, setSelectedCompany] = useState<string | null>(null);
 
-  const [isReassignOpen, setIsReassignOpen] = useState(false);
   const [isPushOpen, setIsPushOpen] = useState(false);
+  const [isPushDropdownOpen, setIsPushDropdownOpen] = useState(false);
   const [isRescoreOpen, setIsRescoreOpen] = useState(false);
+  const [currentIcpId, setCurrentIcpId] = useState<string | undefined>(undefined);
 
-  const list = lists.find((l) => l.id === params.id);
+  const effectiveListId = listId ?? (params?.id as string);
+  const list =
+    lists.find((l) => l.id === effectiveListId) ??
+    MOCK_LISTS.find((l) => l.id === effectiveListId);
+  const leadIds = list?.leadIds ?? [];
 
-  // If list not found, maybe show a 404 or redirect
-  if (!list) {
-    return <div className="p-8">List not found</div>;
-  }
+  const defaultIcpId =
+    list?.icpId ??
+    (effectiveListId === "1" || effectiveListId === "l1"
+      ? icps[0]?.id
+      : undefined);
+  const activeIcpId = currentIcpId !== undefined ? currentIcpId : defaultIcpId;
+  const listIcp = icps.find((i) => i.id === activeIcpId);
 
   // Get leads for this list
   const listLeads = useMemo(() => {
-    return leads.filter((l) => list.leadIds.includes(l.id));
-  }, [leads, list.leadIds]);
+    const allLeadsMap = new Map<string, Lead>();
+    MOCK_LEADS.forEach((l) => allLeadsMap.set(l.id, l));
+    leads.forEach((l) => allLeadsMap.set(l.id, l));
+    return leadIds
+      .map((id) => allLeadsMap.get(id))
+      .filter((l): l is Lead => Boolean(l));
+  }, [leads, leadIds]);
   const pg = usePagination(listLeads);
 
   const toggleAll = () => {
@@ -69,21 +90,29 @@ export function ListDetail() {
   };
 
   const columnManager = useColumnVisibility([
-    { key: "name", label: "Lead Name", isVisible: true },
+    { key: "firstName", label: "First Name", isVisible: true },
+    { key: "lastName", label: "Last Name", isVisible: true },
     { key: "jobTitle", label: "Job Title", isVisible: true },
     { key: "company", label: "Company", isVisible: true },
+    { key: "companyDescription", label: "Company Description", isVisible: true },
     { key: "email", label: "Email", isVisible: true },
-    { key: "health", label: "Health", isVisible: true },
+    { key: "emailStatus", label: "Email Status", isVisible: true },
     { key: "location", label: "Location", isVisible: true },
-    { key: "fitScore", label: "Score Fit", isVisible: true },
+    { key: "icp", label: "ICP", isVisible: true },
+    { key: "fitScore", label: "Fit Score", isVisible: true },
   ]);
+
+  // If list not found, maybe show a 404 or redirect
+  if (!list) {
+    return <div className="p-8">List not found</div>;
+  }
 
   return (
     <div className="flex-1 p-8 bg-[#F6F8F7] pb-0 flex flex-col min-h-0 overflow-y-auto">
       <div className="flex items-center gap-3 mb-6">
-        <BriefcaseBusiness className="w-8 h-8 text-[#0D8C7C]" />
+        <Briefcase className="w-8 h-8 text-[#0D8C7C]" />
         <h1 className="text-2xl font-bold text-[#10201C]">
-          Lists <span className="font-medium">/ {list.name}</span>
+          Leads <span className="font-medium">/ {list.name}</span>
         </h1>
       </div>
 
@@ -99,7 +128,12 @@ export function ListDetail() {
               <span className="font-bold text-[#10201C] text-sm block">
                 Email Verified
               </span>
-              <span className="font-bold text-[#10201C] text-sm">71%</span>
+              <div className="flex items-center gap-1.5">
+                <span className="font-bold text-[#10201C] text-sm">71%</span>
+                <span className="text-[11px] font-mono font-medium text-[#7C8C87]">
+                  · 4 Reachable
+                </span>
+              </div>
             </div>
             <div className="w-full bg-[#E5E7EB] h-[3px] rounded-full overflow-hidden">
               <div
@@ -110,7 +144,7 @@ export function ListDetail() {
           </div>
         </div>
 
-        {/* Card 2: Score Fit */}
+        {/* Card 2: Fit Score */}
         <div className="flex bg-white border border-[#D3DEDB] rounded-xl overflow-hidden shadow-sm h-20">
           <div className="w-18 bg-[#0D8C7C] flex items-center justify-center shrink-0">
             <Check className="w-6 h-6 text-white stroke-[2.5]" />
@@ -118,12 +152,14 @@ export function ListDetail() {
           <div className="flex-1 p-3 flex flex-col justify-between">
             <div>
               <span className="font-bold text-[#10201C] text-sm block">
-                Score Fit
+                Fit Score
               </span>
-              <span className="font-bold text-[#10201C] text-sm">71%</span>
+              <span className="font-bold text-[#10201C] text-sm">
+                {listIcp ? "71" : "Not Scored"}
+              </span>
             </div>
             <p className="text-[11px] font-mono font-medium text-[#7C8C87]">
-              Strong Fit
+              {listIcp ? `Medium · ${listIcp.name}` : "Not Scored · N/A"}
             </p>
           </div>
         </div>
@@ -139,24 +175,43 @@ export function ListDetail() {
             </span>
             <div>
               <div className="w-full bg-[#E5E7EB] h-[3px] rounded-full flex overflow-hidden mb-1.5">
-                <div className="bg-[#00C11A] h-full" style={{ width: "57%" }} />
+                <div className="bg-[#00C11A] h-full" style={{ width: "43%" }} />
                 <div className="bg-[#FF823A] h-full" style={{ width: "29%" }} />
+                <div className="bg-[#FFB800] h-full" style={{ width: "14%" }} />
                 <div className="bg-[#E20000] h-full" style={{ width: "14%" }} />
               </div>
               <div className="flex gap-3">
-                <div className="flex items-center gap-1">
+                <div
+                  className="flex items-center gap-1 cursor-default"
+                  title="High"
+                >
                   <div className="w-1.5 h-1.5 rounded-full bg-[#00C11A]" />
                   <span className="text-[10px] text-[#A0AEC0] font-mono font-medium">
-                    57%
+                    43%
                   </span>
                 </div>
-                <div className="flex items-center gap-1">
+                <div
+                  className="flex items-center gap-1 cursor-default"
+                  title="Medium"
+                >
                   <div className="w-1.5 h-1.5 rounded-full bg-[#FF823A]" />
                   <span className="text-[10px] text-[#A0AEC0] font-mono font-medium">
                     29%
                   </span>
                 </div>
-                <div className="flex items-center gap-1">
+                <div
+                  className="flex items-center gap-1 cursor-default"
+                  title="Low"
+                >
+                  <div className="w-1.5 h-1.5 rounded-full bg-[#FFB800]" />
+                  <span className="text-[10px] text-[#A0AEC0] font-mono font-medium">
+                    14%
+                  </span>
+                </div>
+                <div
+                  className="flex items-center gap-1 cursor-default"
+                  title="Poor"
+                >
                   <div className="w-1.5 h-1.5 rounded-full bg-[#E20000]" />
                   <span className="text-[10px] text-[#A0AEC0] font-mono font-medium">
                     14%
@@ -189,12 +244,40 @@ export function ListDetail() {
       {/* Toolbar */}
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-3">
+          {/* Lead List dropdown */}
+          <div className="relative">
+            <select
+              value={effectiveListId}
+              onChange={(e) => {
+                const val = e.target.value;
+                if (onSelectList) {
+                  onSelectList(val);
+                } else {
+                  if (val === "") router.push("/leads");
+                  else if (val === "not-in-list") router.push("/leads?list=not-in-list");
+                  else router.push(`/lists/${val}`);
+                }
+              }}
+              aria-label="Filter by Lead List"
+              className="h-9 px-3 pr-8 bg-white border border-[#D3DEDB] rounded-lg text-sm font-semibold text-[#0D8C7C] outline-none cursor-pointer appearance-none hover:bg-gray-50 focus:border-[#0D8C7C]"
+            >
+              <option value="">All Leads</option>
+              {lists.map((li) => (
+                <option key={li.id} value={li.id}>
+                  {li.name}
+                </option>
+              ))}
+              <option value="not-in-list">No List</option>
+            </select>
+            <ChevronDown className="w-4 h-4 text-[#0D8C7C] absolute right-2.5 top-2.5 pointer-events-none" />
+          </div>
+
           {/* Search Input */}
           <div className="relative w-[280px]">
             <Search className="absolute left-3 top-2.5 w-4 h-4 text-[#7C8C87]" />
             <input
               type="text"
-              placeholder="Search for lead list...."
+              placeholder="Search leads..."
               className="w-full pl-9 pr-4 py-2 border border-[#D3DEDB] rounded-lg bg-white text-sm outline-none focus:border-[#0D8C7C] placeholder-[#7C8C87]"
             />
           </div>
@@ -211,24 +294,59 @@ export function ListDetail() {
                 {selectedIds.size} selected
               </span>
 
-              {/* Push to new campaign */}
-              <button
-                onClick={() => setIsPushOpen(true)}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-[#0D8C7C] text-white rounded-lg text-xs font-semibold shadow-sm hover:bg-[#14B39F] transition-colors"
-              >
-                <SendHorizontal className="w-3.5 h-3.5" /> Push to new campaign
-                <ChevronDown className="w-3.5 h-3.5 ml-0.5" />
-              </button>
+              {/* Push to campaign / Add to existing campaign */}
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setIsPushDropdownOpen((v) => !v)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-[#0D8C7C] text-white rounded-lg text-xs font-semibold shadow-sm hover:bg-[#14B39F] transition-colors cursor-pointer"
+                >
+                  <SendHorizontal className="w-3.5 h-3.5" /> Push to campaign
+                  <ChevronDown className="w-3.5 h-3.5 ml-0.5" />
+                </button>
+
+                {isPushDropdownOpen && (
+                  <div className="absolute left-0 mt-1 w-52 bg-white border border-[#D3DEDB] rounded-lg shadow-lg z-30 py-1 text-xs text-[#10201C]">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsPushDropdownOpen(false);
+                        setIsPushOpen(true);
+                      }}
+                      className="w-full text-left px-3 py-2 hover:bg-[#ECF8F6] hover:text-[#0D8C7C] transition-colors flex items-center gap-2 cursor-pointer"
+                    >
+                      <SendHorizontal className="w-3.5 h-3.5" />
+                      Add to existing campaign
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsPushDropdownOpen(false);
+                        router.push("/campaigns/new");
+                      }}
+                      className="w-full text-left px-3 py-2 hover:bg-[#ECF8F6] hover:text-[#0D8C7C] transition-colors flex items-center gap-2 border-t border-[#D3DEDB] cursor-pointer"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      Push to new campaign
+                    </button>
+                  </div>
+                )}
+              </div>
 
               {/* Exclude Action */}
-              <button className="px-3 py-1.5 border border-[#D3DEDB] rounded-lg bg-gray-300 text-xs font-semibold text-gray-800 hover:bg-[#DFE5E5] transition-colors shadow-sm">
+              <button
+                type="button"
+                onClick={() => setSelectedIds(new Set())}
+                className="px-3 py-1.5 border border-[#D3DEDB] rounded-lg bg-gray-300 text-xs font-semibold text-gray-800 hover:bg-[#DFE5E5] transition-colors shadow-sm cursor-pointer"
+              >
                 Exclude
               </button>
 
               {/* Re-score */}
               <button
+                type="button"
                 onClick={() => setIsRescoreOpen(true)}
-                className="flex items-center gap-1.5 px-3 py-1.5 border border-[#0D8C7C] rounded-lg text-xs font-semibold text-[#0D8C7C] hover:bg-gray-50 transition-colors shadow-sm"
+                className="flex items-center gap-1.5 px-3 py-1.5 border border-[#0D8C7C] rounded-lg text-xs font-semibold text-[#0D8C7C] hover:bg-gray-50 transition-colors shadow-sm cursor-pointer"
               >
                 <RefreshCcw className="w-3.5 h-3.5 text-[#0D8C7C]" /> Re-score
               </button>
@@ -265,9 +383,14 @@ export function ListDetail() {
                   />
                 </div>
               </th>
-              {columnManager.isVisible("name") && (
+              {columnManager.isVisible("firstName") && (
                 <th className="py-2 px-4 border-y border-[#D3DEDB]">
-                  Lead Name
+                  First Name
+                </th>
+              )}
+              {columnManager.isVisible("lastName") && (
+                <th className="py-2 px-4 border-y border-[#D3DEDB]">
+                  Last Name
                 </th>
               )}
               {columnManager.isVisible("jobTitle") && (
@@ -278,20 +401,32 @@ export function ListDetail() {
               {columnManager.isVisible("company") && (
                 <th className="py-2 px-4 border-y border-[#D3DEDB]">Company</th>
               )}
+              {columnManager.isVisible("companyDescription") && (
+                <th className="py-2 px-4 border-y border-[#D3DEDB]">
+                  Company Description
+                </th>
+              )}
               {columnManager.isVisible("email") && (
                 <th className="py-2 px-4 border-y border-[#D3DEDB]">Email</th>
               )}
-              {columnManager.isVisible("health") && (
-                <th className="py-2 px-4 border-y border-[#D3DEDB]">Health</th>
+              {columnManager.isVisible("emailStatus") && (
+                <th className="py-2 px-4 border-y border-[#D3DEDB]">
+                  Email Status
+                </th>
               )}
               {columnManager.isVisible("location") && (
                 <th className="py-2 px-4 border-y border-[#D3DEDB]">
                   Location
                 </th>
               )}
+              {columnManager.isVisible("icp") && (
+                <th className="py-2 px-4 border-y border-[#D3DEDB]">
+                  ICP
+                </th>
+              )}
               {columnManager.isVisible("fitScore") && (
                 <th className="py-2 px-4 border-y border-[#D3DEDB]">
-                  Score Fit
+                  Fit Score
                 </th>
               )}
               <th className="py-2 px-4 rounded-r-lg border-y border-r border-[#D3DEDB] text-center">
@@ -303,11 +438,13 @@ export function ListDetail() {
             {pg.pageItems.map((lead) => {
               const isSelected = selectedIds.has(lead.id);
               const healthType =
-                Number(lead.id) % 3 === 0
-                  ? "Risky"
-                  : Number(lead.id) % 5 === 0
-                    ? "Invalid"
-                    : "Verified";
+                Number(lead.id) % 4 === 0
+                  ? "Not Verified"
+                  : Number(lead.id) % 3 === 0
+                    ? "Risky"
+                    : Number(lead.id) % 5 === 0
+                      ? "Invalid"
+                      : "Verified";
 
               return (
                 <tr
@@ -326,12 +463,20 @@ export function ListDetail() {
                       />
                     </div>
                   </td>
-                  {columnManager.isVisible("name") && (
+                  {columnManager.isVisible("firstName") && (
                     <td
                       className="py-3 px-4 font-semibold border-b border-[#D3DEDB] underline cursor-pointer hover:text-[#0D8C7C]"
                       onClick={() => setDetailModalLead(lead)}
                     >
-                      {lead.name}
+                      {lead.firstName}
+                    </td>
+                  )}
+                  {columnManager.isVisible("lastName") && (
+                    <td
+                      className="py-3 px-4 font-semibold border-b border-[#D3DEDB] underline cursor-pointer hover:text-[#0D8C7C]"
+                      onClick={() => setDetailModalLead(lead)}
+                    >
+                      {lead.lastName}
                     </td>
                   )}
                   {columnManager.isVisible("jobTitle") && (
@@ -340,8 +485,22 @@ export function ListDetail() {
                     </td>
                   )}
                   {columnManager.isVisible("company") && (
-                    <td className="py-3 px-4 border-b border-[#D3DEDB] text-gray-700">
-                      {lead.company}
+                    <td className="py-3 px-4 border-b border-[#D3DEDB]">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedCompany(lead.company)}
+                        className="font-semibold underline cursor-pointer hover:text-[#0D8C7C] text-left transition-colors"
+                      >
+                        {lead.company}
+                      </button>
+                    </td>
+                  )}
+                  {columnManager.isVisible("companyDescription") && (
+                    <td
+                      className="py-3 px-4 border-b border-[#D3DEDB] text-gray-600 max-w-[240px] truncate text-xs font-mono"
+                      title={lead.companyDescription}
+                    >
+                      {lead.companyDescription}
                     </td>
                   )}
                   {columnManager.isVisible("email") && (
@@ -349,16 +508,18 @@ export function ListDetail() {
                       {lead.email}
                     </td>
                   )}
-                  {columnManager.isVisible("health") && (
+                  {columnManager.isVisible("emailStatus") && (
                     <td className="py-3 px-4 border-b border-[#D3DEDB]">
                       <span
                         className={cn(
                           "px-2 py-1 rounded-md text-[13px] font-mono",
-                          healthType === "Verified"
-                            ? "bg-[#00C11A]/10 text-[#00B218]"
-                            : healthType === "Risky"
-                              ? "bg-[#FF823A]/10 text-[#FF823A]"
-                              : "bg-[#E20000]/10 text-[#E20000]",
+                          healthType === "Not Verified"
+                            ? "bg-gray-200 text-gray-600"
+                            : healthType === "Verified"
+                              ? "bg-[#00C11A]/10 text-[#00B218]"
+                              : healthType === "Risky"
+                                ? "bg-[#FF823A]/10 text-[#FF823A]"
+                                : "bg-[#E20000]/10 text-[#E20000]",
                         )}
                       >
                         {healthType}
@@ -370,14 +531,43 @@ export function ListDetail() {
                       {lead.location}
                     </td>
                   )}
+                  {columnManager.isVisible("icp") && (
+                    <td className="py-3 px-4 border-b border-[#D3DEDB]">
+                      {listIcp ? (
+                        <span className="font-medium text-[#10201C]">
+                          {listIcp.name}
+                        </span>
+                      ) : (
+                        <span className="text-[#7C8C87]">N/A</span>
+                      )}
+                    </td>
+                  )}
                   {columnManager.isVisible("fitScore") && (
-                    <td className="py-3 px-4 border-b border-[#D3DEDB] font-bold text-[#0D8C7C]">
-                      {lead.fitScore}%
+                    <td className="py-3 px-4 border-b border-[#D3DEDB]">
+                      {listIcp ? (
+                        <span className="font-bold text-[#0D8C7C]">
+                          {lead.fitScore}
+                        </span>
+                      ) : (
+                        <span className="text-[#7C8C87] font-normal">
+                          Not Scored
+                        </span>
+                      )}
                     </td>
                   )}
                   <td className="py-3 px-4 border-b border-[#D3DEDB]">
                     <div className="flex gap-4 items-center justify-center">
-                      <SendHorizontal className="w-5 h-5 text-[#0D8C7C] cursor-pointer hover:opacity-70" />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedIds(new Set([lead.id]));
+                          setIsPushOpen(true);
+                        }}
+                        title="Add or push to campaign"
+                        className="cursor-pointer hover:opacity-70 p-0.5"
+                      >
+                        <SendHorizontal className="w-5 h-5 text-[#0D8C7C]" />
+                      </button>
                       <MoreVertical className="w-5 h-5 text-[#10201C] cursor-pointer hover:opacity-70" />
                     </div>
                   </td>
@@ -386,7 +576,14 @@ export function ListDetail() {
             })}
             {listLeads.length === 0 && (
               <tr>
-                <td colSpan={9} className="py-8 text-center text-[#7C8C87]">
+                <td
+                  colSpan={
+                    columnManager.columns.filter((c) =>
+                      columnManager.isVisible(c.key),
+                    ).length + 2
+                  }
+                  className="py-8 text-center text-[#7C8C87]"
+                >
                   No leads found in this list.
                 </td>
               </tr>
@@ -407,10 +604,9 @@ export function ListDetail() {
         lead={detailModalLead}
       />
 
-      <ReassignModal
-        isOpen={isReassignOpen}
-        onClose={() => setIsReassignOpen(false)}
-        leads={listLeads.filter((l) => selectedIds.has(l.id))}
+      <CompanyDetailModal
+        companyName={selectedCompany}
+        onClose={() => setSelectedCompany(null)}
       />
 
       <PushCampaignModal
@@ -422,7 +618,10 @@ export function ListDetail() {
       <RescoreModal
         isOpen={isRescoreOpen}
         onClose={() => setIsRescoreOpen(false)}
-        onRescore={() => setIsRescoreOpen(false)}
+        onRescore={(icpId) => {
+          if (icpId) setCurrentIcpId(icpId);
+          setIsRescoreOpen(false);
+        }}
       />
 
       <ColumnVisibilityModal

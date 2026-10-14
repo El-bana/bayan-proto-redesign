@@ -597,13 +597,15 @@ export function IcpTable() {
                           <Archive className="w-4 h-4" aria-hidden="true" />
                         )}
                       </button>
-                      <button
-                        aria-label={`Edit ${icp.name}`}
-                        className="p-1.5 hover:bg-black/10 rounded-md text-[#445751]"
-                        onClick={() => setIsModalOpen(true)}
-                      >
-                        <Edit className="w-4 h-4" aria-hidden="true" />
-                      </button>
+                      {!icp.isArchived && (
+                        <button
+                          aria-label={`Edit ${icp.name}`}
+                          className="p-1.5 hover:bg-black/10 rounded-md text-[#445751]"
+                          onClick={() => setIsModalOpen(true)}
+                        >
+                          <Edit className="w-4 h-4" aria-hidden="true" />
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>

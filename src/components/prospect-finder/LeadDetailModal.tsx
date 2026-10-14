@@ -68,16 +68,12 @@ export function LeadDetailModal({ isOpen, onClose, lead }: Props) {
               <div className="flex items-start justify-between">
                 <div className="flex gap-4">
                   <div className="w-12 h-12 rounded-full bg-[#00C11A] flex items-center justify-center text-white font-bold text-xl shrink-0">
-                    {lead.name
-                      .split(" ")
-                      .map((n) => n[0])
-                      .join("")
-                      .substring(0, 2)
-                      .toUpperCase()}
+                    {`${lead.firstName?.[0] || ""}${lead.lastName?.[0] || ""}`.toUpperCase()}
                   </div>
                   <div>
-                    <h2 className="text-2xl font-bold text-[#10201C]">
-                      {lead.name}
+                    <h2 className="text-2xl font-bold text-[#10201C] flex items-center gap-2">
+                      <span>{lead.firstName}</span>
+                      <span>{lead.lastName}</span>
                     </h2>
                     <p className="text-[#10201C] font-medium mt-1">
                       {lead.email}
@@ -344,9 +340,14 @@ export function LeadDetailModal({ isOpen, onClose, lead }: Props) {
                       <span className="font-bold text-base w-44 text-[#10201C]">
                         Score Breakdown
                       </span>
-                      <span className="font-bold text-lg text-[#0D8C7C]">
-                        91%
-                      </span>
+                      <div>
+                        <span className="font-bold text-lg text-[#0D8C7C]">
+                          91
+                        </span>
+                        <span className="text-xs text-[#7C8C87] block">
+                          Based on 4 of 5 checks.
+                        </span>
+                      </div>
                     </div>
 
                     <div className="divide-y divide-[#D3DEDB]">

@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Search, Filter, Columns3, RotateCw, Briefcase, X } from "lucide-react";
+import { Search, Filter, Columns3, RotateCw, Briefcase, X, ChevronDown, Plus } from "lucide-react";
 import { useAppStore, Lead } from "@/lib/store";
 import { MOCK_LEADS, MOCK_LISTS, MockCampaign } from "./leads.mock";
 import { cn } from "@/lib/utils";
@@ -10,6 +10,9 @@ import ColumnVisibilityModal from "@/components/layout/ColumnVisibilityModal";
 import { TablePagination } from "@/components/layout/TablePagination";
 import { ReassignModal } from "@/components/lists/ReassignModal";
 import ProgressBar from "@/components/lists/ProgressBar";
+import { CompanyDetailModal } from "./CompanyDetailModal";
+import { AddToExistingListModal } from "@/components/prospect-finder/SaveToListModal";
+import { ListDetail } from "@/components/lists/ListDetail";
 
 /* ------------------------------------------------------------------ */
 /* Types & helpers                                                     */
@@ -205,9 +208,13 @@ export function LeadsTable() {
   const [page, setPage] = useState(1);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isReassignOpen, setIsReassignOpen] = useState(false);
+  const [isAddToListOpen, setIsAddToListOpen] = useState(false);
+  const [selectedListId, setSelectedListId] = useState<string>("");
+  const [selectedCompany, setSelectedCompany] = useState<string | null>(null);
 
   const columnManager = useColumnVisibility([
-    { key: "name", label: "Name", isVisible: true },
+    { key: "firstName", label: "First Name", isVisible: true },
+    { key: "lastName", label: "Last Name", isVisible: true },
     { key: "company", label: "Company", isVisible: true },
     { key: "emailStatus", label: "Email Status", isVisible: true },
     { key: "lists", label: "Lists", isVisible: true },
@@ -245,7 +252,9 @@ export function LeadsTable() {
 
       if (
         q &&
-        !`${lead.name} ${lead.email} ${lead.company}`.toLowerCase().includes(q)
+        !`${lead.firstName} ${lead.lastName} ${lead.email} ${lead.company}`
+          .toLowerCase()
+          .includes(q)
       )
         return false;
 
@@ -311,10 +320,20 @@ export function LeadsTable() {
     const leadLists = listsByLead.get(lead.id) ?? [];
 
     switch (key) {
-      case "name":
-        return <span className="font-semibold">{lead.name}</span>;
+      case "firstName":
+        return <span className="font-semibold">{lead.firstName}</span>;
+      case "lastName":
+        return <span className="font-semibold">{lead.lastName}</span>;
       case "company":
-        return <span className="font-medium">{lead.company}</span>;
+        return (
+          <button
+            type="button"
+            onClick={() => setSelectedCompany(lead.company)}
+            className="font-medium underline hover:text-[#0D8C7C] text-left cursor-pointer transition-colors"
+          >
+            {lead.company}
+          </button>
+        );
       case "emailStatus":
         return (
           <span
@@ -354,6 +373,22 @@ export function LeadsTable() {
 
   const visibleColCount = shownColumns.length + (isAdmin ? 1 : 0);
 
+  if (
+    selectedListId &&
+    selectedListId !== NOT_IN_LIST &&
+    lists.some((l) => l.id === selectedListId)
+  ) {
+    return (
+      <ListDetail
+        listId={selectedListId}
+        onSelectList={(id) => {
+          setSelectedListId(id);
+          setFilter("list", id);
+        }}
+      />
+    );
+  }
+
   return (
     <div className="flex-1 p-8 bg-[#F6F8F7] flex pb-0 flex-col min-h-0">
       {/* Title */}
@@ -365,6 +400,33 @@ export function LeadsTable() {
       {/* Toolbar */}
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-3">
+          {/* Lead List dropdown */}
+          <div className="relative">
+            <select
+              value={selectedListId || filters.list}
+              onChange={(e) => {
+                const val = e.target.value;
+                if (val && val !== NOT_IN_LIST && lists.some((l) => l.id === val)) {
+                  setSelectedListId(val);
+                } else {
+                  setSelectedListId("");
+                  setFilter("list", val);
+                }
+              }}
+              aria-label="Filter by Lead List"
+              className="h-9 px-3 pr-8 bg-white border border-[#D3DEDB] rounded-lg text-sm font-semibold text-[#0D8C7C] outline-none cursor-pointer appearance-none hover:bg-gray-50 focus:border-[#0D8C7C]"
+            >
+              <option value="">All Leads</option>
+              {lists.map((li) => (
+                <option key={li.id} value={li.id}>
+                  {li.name}
+                </option>
+              ))}
+              <option value={NOT_IN_LIST}>No List</option>
+            </select>
+            <ChevronDown className="w-4 h-4 text-[#0D8C7C] absolute right-2.5 top-2.5 pointer-events-none" />
+          </div>
+
           <div className="relative w-[280px]">
             <Search className="absolute left-3 top-2.5 w-4 h-4 text-[#7C8C87]" />
             <input
@@ -374,7 +436,7 @@ export function LeadsTable() {
                 setSearch(e.target.value);
                 setPage(1);
               }}
-              placeholder="Search name, email or company..."
+              placeholder="Search leads..."
               aria-label="Search leads"
               className="w-full pl-9 pr-4 py-2 border border-[#D3DEDB] rounded-lg bg-white text-sm outline-none focus:border-[#0D8C7C] placeholder-[#7C8C87]"
             />
@@ -389,18 +451,27 @@ export function LeadsTable() {
             <Columns3 className="w-5 h-5" />
           </button>
 
-          {/* Only action: Reassign Owner (Admin only) */}
-          {isAdmin && selectedIds.size > 0 && (
+          {/* Actions when items selected */}
+          {selectedIds.size > 0 && (
             <div className="flex items-center gap-3 ml-1">
               <span className="text-[#10201C] text-sm font-medium">
                 {selectedIds.size} selected
               </span>
+              {isAdmin && (
+                <button
+                  type="button"
+                  onClick={() => setIsReassignOpen(true)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-[#10201C] rounded-lg text-xs font-semibold text-[#10201C] shadow-sm hover:bg-gray-50 transition-colors cursor-pointer"
+                >
+                  <RotateCw className="w-3.5 h-3.5" /> Re-assign Owner
+                </button>
+              )}
               <button
                 type="button"
-                onClick={() => setIsReassignOpen(true)}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-[#10201C] rounded-lg text-xs font-semibold text-[#10201C] shadow-sm hover:bg-gray-50 transition-colors"
+                onClick={() => setIsAddToListOpen(true)}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-[#10201C] rounded-lg text-xs font-semibold text-[#10201C] shadow-sm hover:bg-gray-50 transition-colors cursor-pointer"
               >
-                <RotateCw className="w-3.5 h-3.5" /> Re-assign Owner
+                <Plus className="w-3.5 h-3.5" /> Add to list
               </button>
             </div>
           )}
@@ -446,20 +517,6 @@ export function LeadsTable() {
                     <X className="w-4 h-4" />
                   </button>
                 </div>
-
-                <FilterSelect
-                  label="List"
-                  value={filters.list}
-                  onChange={(v) => setFilter("list", v)}
-                >
-                  <option value="">All lists</option>
-                  <option value={NOT_IN_LIST}>Not in any list</option>
-                  {lists.map((li) => (
-                    <option key={li.id} value={li.id}>
-                      {li.name}
-                    </option>
-                  ))}
-                </FilterSelect>
 
                 <FilterSelect
                   label="Email Status"
@@ -605,7 +662,7 @@ export function LeadsTable() {
                             type="checkbox"
                             checked={isSelected}
                             onChange={() => toggleOne(lead.id)}
-                            aria-label={`Select ${lead.name}`}
+                            aria-label={`Select ${lead.firstName} ${lead.lastName}`}
                             className="w-4 h-4 rounded border-gray-300 accent-blue-600 cursor-pointer"
                           />
                         </div>
@@ -648,6 +705,20 @@ export function LeadsTable() {
         isOpen={isReassignOpen}
         onClose={() => setIsReassignOpen(false)}
         leads={selectedLeads}
+      />
+
+      <CompanyDetailModal
+        companyName={selectedCompany}
+        onClose={() => setSelectedCompany(null)}
+      />
+
+      <AddToExistingListModal
+        isOpen={isAddToListOpen}
+        onClose={() => setIsAddToListOpen(false)}
+        selectedIds={Array.from(selectedIds)}
+        onSuccess={() => {
+          setSelectedIds(new Set());
+        }}
       />
 
       <ColumnVisibilityModal

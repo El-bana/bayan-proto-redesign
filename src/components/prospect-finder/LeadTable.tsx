@@ -98,7 +98,8 @@ export function LeadTable({ showIcpScores }: LeadTableProps) {
     Array.from(selectedIds).every((id) => enrichedIds.has(id));
 
   const columnManager = useColumnVisibility([
-    { key: "name", label: "full name", isVisible: true },
+    { key: "firstName", label: "First Name", isVisible: true },
+    { key: "lastName", label: "Last Name", isVisible: true },
     { key: "jobTitle", label: "Job Title", isVisible: true },
     { key: "company", label: "Company", isVisible: true },
     { key: "email", label: "Email", isVisible: true },
@@ -243,9 +244,14 @@ export function LeadTable({ showIcpScores }: LeadTableProps) {
                       />
                     </div>
                   </th>
-                  {columnManager.isVisible("name") && (
+                  {columnManager.isVisible("firstName") && (
                     <th className="py-2 px-4 border-y border-[#D3DEDB]">
-                      full name
+                      First Name
+                    </th>
+                  )}
+                  {columnManager.isVisible("lastName") && (
+                    <th className="py-2 px-4 border-y border-[#D3DEDB]">
+                      Last Name
                     </th>
                   )}
                   {columnManager.isVisible("jobTitle") && (
@@ -291,19 +297,27 @@ export function LeadTable({ showIcpScores }: LeadTableProps) {
                           <input
                             type="checkbox"
                             className="w-4 h-4 rounded border-[#D3DEDB] text-[#3476E3] bg-[#3476E3] focus:ring-[#3476E3] cursor-pointer"
-                            aria-label={`Select ${lead.name}`}
+                            aria-label={`Select ${lead.firstName} ${lead.lastName}`}
                             checked={isSelected}
                             onChange={() => toggleOne(lead.id)}
                             style={{ accentColor: "#3476E3" }}
                           />
                         </div>
                       </td>
-                      {columnManager.isVisible("name") && (
+                      {columnManager.isVisible("firstName") && (
                         <td
                           className="py-3 px-4 font-semibold border-b border-[#D3DEDB] underline cursor-pointer hover:text-[#0D8C7C]"
                           onClick={() => setDetailModalLead(lead)}
                         >
-                          {lead.name}
+                          {lead.firstName}
+                        </td>
+                      )}
+                      {columnManager.isVisible("lastName") && (
+                        <td
+                          className="py-3 px-4 font-semibold border-b border-[#D3DEDB] underline cursor-pointer hover:text-[#0D8C7C]"
+                          onClick={() => setDetailModalLead(lead)}
+                        >
+                          {lead.lastName}
                         </td>
                       )}
                       {columnManager.isVisible("jobTitle") && (
@@ -341,7 +355,7 @@ export function LeadTable({ showIcpScores }: LeadTableProps) {
                         <td className="py-3 px-4 border-b border-[#D3DEDB] text-center">
                           {showIcpScores ? (
                             <span className="text-[#0D8C7C] font-bold">
-                              {lead.fitScore}%
+                              {lead.fitScore}
                             </span>
                           ) : (
                             <span className="text-[#0D8C7C] font-bold">
